@@ -29,15 +29,6 @@
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Firebase SDKs -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-      import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-      import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-      window.FirebaseSDK = { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc };
-    </script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { 
@@ -59,36 +50,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .safe-area-pb { padding-bottom: env(safe-area-inset-bottom, 20px); }
-        
-        /* Loading Screen Style */
-        #root:empty {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: #020617;
-        }
-        #root:empty::after {
-            content: "กำลังโหลดระบบ...";
-            color: #94a3b8;
-            font-size: 14px;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-
-        .btn-google {
-            background-color: white;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
-        .btn-google:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -96,7 +57,6 @@
 
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
-        // Safe Recharts Access
         const Recharts = window.Recharts || { LineChart: () => null, Line: () => null, XAxis: () => null, YAxis: () => null, CartesianGrid: () => null, Tooltip: () => null, ResponsiveContainer: () => null };
         const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
 
@@ -147,7 +107,7 @@
         );
 
         const App = () => {
-            // --- Helper Functions (Defined inside App to ensure scope availability) ---
+            // Helpers
             const formatZeny = (num) => new Intl.NumberFormat('th-TH').format(Math.round(num || 0));
             const formatMZeny = (num) => (Number(num || 0) / 1000000).toFixed(2) + " M";
             
@@ -170,33 +130,20 @@
                 return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : isoDate;
             };
 
-            // --- Firebase Initialization ---
-            const [user, setUser] = useState(null);
-            const [records, setRecords] = useState([]);
-            const [globalPrices, setGlobalPrices] = useState({
-                purpleStonePrice: 15000,
-                gumBoxPrice: 1000000,
-                silvervineBoxPrice: 2000000,
+            // State
+            const [records, setRecords] = useState(() => {
+                const saved = localStorage.getItem('ogh_records');
+                return saved ? JSON.parse(saved) : [];
             });
-            const [isLoading, setIsLoading] = useState(true);
+            const [globalPrices, setGlobalPrices] = useState(() => {
+                const saved = localStorage.getItem('ogh_prices');
+                return saved ? JSON.parse(saved) : {
+                    purpleStonePrice: 15000,
+                    gumBoxPrice: 1000000,
+                    silvervineBoxPrice: 2000000,
+                };
+            });
 
-            // Access Firebase from window (It will be available when App renders)
-            const { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc } = window.FirebaseSDK;
-            
-            const firebaseConfig = JSON.parse(__firebase_config);
-            // Ensure app is initialized only once or reused
-            let app, auth, db;
-            try {
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-            } catch (e) {
-                // If already initialized, we might need to get existing app (handled by Firebase usually)
-                console.log("Firebase init check:", e);
-            }
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'ro-farm-app';
-
-            // UI State
             const [isAdding, setIsAdding] = useState(false);
             const [showManual, setShowManual] = useState(false);
             const [editingId, setEditingId] = useState(null);
@@ -205,13 +152,11 @@
             const [sortOrder, setSortOrder] = useState('date-desc');
             const [expandedId, setExpandedId] = useState(null);
 
-            // Timer State
             const [timeInMs, setTimeInMs] = useState(0);
             const [isTimerActive, setIsTimerActive] = useState(false);
             const [isTimerPaused, setIsTimerPaused] = useState(true);
             const timerRef = useRef(null);
 
-            // Form Data
             const [formData, setFormData] = useState({
                 date: new Date().toLocaleDateString('th-TH'),
                 gumUsed: 0,
@@ -223,76 +168,11 @@
                 otherCosts: []
             });
 
-            // --- Handlers (Defined before effects) ---
-            const handleTimerStart = () => { setIsTimerActive(true); setIsTimerPaused(false); };
-            const handleTimerPause = () => { setIsTimerPaused(true); };
-            const handleTimerStop = () => {
-                const mins = Math.ceil(timeInMs / 60000);
-                setFormData(prev => ({ ...prev, minutesUsed: mins > 0 ? mins : 1 }));
-                setIsTimerActive(false);
-                setIsTimerPaused(true);
-            };
-            const handleTimerReset = () => { setTimeInMs(0); setIsTimerActive(false); setIsTimerPaused(true); };
-            
-            const handleLogin = async () => {
-                const provider = new GoogleAuthProvider();
-                try { await signInWithPopup(auth, provider); } catch (error) { console.error("Login Error:", error); }
-            };
-            const handleLogout = () => signOut(auth);
+            // LocalStorage Effects
+            useEffect(() => { localStorage.setItem('ogh_records', JSON.stringify(records)); }, [records]);
+            useEffect(() => { localStorage.setItem('ogh_prices', JSON.stringify(globalPrices)); }, [globalPrices]);
 
-            // --- Effects ---
-            
-            // 1. Auth
-            useEffect(() => {
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        // Optional: Auto sign-in anonymously if preferred, but for Google login we wait.
-                        // For this app, let's wait for user action or check existing session.
-                    }
-                };
-                initAuth();
-                const unsubscribe = onAuthStateChanged(auth, setUser);
-                return () => unsubscribe();
-            }, []);
-
-            // 2. Data Sync
-            useEffect(() => {
-                if (!user) {
-                    setIsLoading(false);
-                    return;
-                }
-                setIsLoading(true);
-
-                const recordsRef = collection(db, 'artifacts', appId, 'users', user.uid, 'farm_records');
-                const pricesRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'prices');
-
-                const unsubRecords = onSnapshot(query(recordsRef), (snapshot) => {
-                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    setRecords(data);
-                    setIsLoading(false);
-                }, (err) => {
-                    console.error("Records Sync Error:", err);
-                    setIsLoading(false);
-                });
-
-                const fetchPrices = async () => {
-                    try {
-                        const docSnap = await getDoc(pricesRef);
-                        if (docSnap.exists()) {
-                            setGlobalPrices(docSnap.data());
-                        } else {
-                            await setDoc(pricesRef, globalPrices);
-                        }
-                    } catch(e) { console.error("Prices Sync Error:", e); }
-                };
-                fetchPrices();
-
-                return () => unsubRecords();
-            }, [user]);
-
-            // 3. Timer
+            // Timer Logic
             useEffect(() => {
                 if (isTimerActive && !isTimerPaused) {
                     timerRef.current = setInterval(() => {
@@ -310,44 +190,42 @@
                 return () => clearInterval(timerRef.current);
             }, [isTimerActive, isTimerPaused]);
 
-            // --- More Handlers ---
-            const updatePricesInCloud = async (newPrices) => {
-                if (!user) return;
-                const pricesRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'prices');
-                await setDoc(pricesRef, newPrices);
+            // Handlers
+            const handleTimerStart = () => { setIsTimerActive(true); setIsTimerPaused(false); };
+            const handleTimerPause = () => { setIsTimerPaused(true); };
+            const handleTimerStop = () => {
+                const mins = Math.ceil(timeInMs / 60000);
+                setFormData(prev => ({ ...prev, minutesUsed: mins > 0 ? mins : 1 }));
+                setIsTimerActive(false);
+                setIsTimerPaused(true);
+            };
+            const handleTimerReset = () => { setTimeInMs(0); setIsTimerActive(false); setIsTimerPaused(true); };
+
+            const handleBackup = () => {
+                const data = { records, globalPrices };
+                const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ogh_backup_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
             };
 
-            const handleSave = async (e) => {
-                e.preventDefault();
-                if (!user) return;
-
-                const dataToSave = {
-                    ...formData,
-                    timestamp: Date.now(),
-                    revenue: Number(formData.trashAmount || 0) + (formData.isSellingSpell ? (Number(formData.purpleStoneCount || 0) * globalPrices.purpleStonePrice) : 0),
-                    totalCost: (formData.gumUsed * (globalPrices.gumBoxPrice / 10)) + (2 * (globalPrices.silvervineBoxPrice / 10)) + formData.otherCosts.reduce((a, b) => a + Number(b.amount || 0), 0)
-                };
-                dataToSave.profit = dataToSave.revenue - dataToSave.totalCost;
-                dataToSave.revenuePerMinute = dataToSave.minutesUsed > 0 ? dataToSave.revenue / dataToSave.minutesUsed : 0;
-
-                try {
-                    const recordsRef = collection(db, 'artifacts', appId, 'users', user.uid, 'farm_records');
-                    if (editingId) {
-                        const recordRef = doc(db, 'artifacts', appId, 'users', user.uid, 'farm_records', editingId);
-                        await updateDoc(recordRef, dataToSave);
-                    } else {
-                        await addDoc(recordsRef, dataToSave);
+            const handleRestore = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (data.records) setRecords(data.records);
+                        if (data.globalPrices) setGlobalPrices(data.globalPrices);
+                        alert("กู้คืนข้อมูลสำเร็จ!");
+                    } catch (err) {
+                        alert("ไฟล์ไม่ถูกต้อง");
                     }
-                    setIsAdding(false);
-                    setEditingId(null);
-                    setFormData({ date: new Date().toLocaleDateString('th-TH'), gumUsed: 0, trashAmount: "", purpleStoneCount: "", isSellingSpell: false, minutesUsed: 60, notes: "", otherCosts: [] });
-                } catch (err) { console.error("Save Error:", err); }
-            };
-
-            const handleDelete = async (id) => {
-                if (!user) return;
-                const recordRef = doc(db, 'artifacts', appId, 'users', user.uid, 'farm_records', id);
-                await deleteDoc(recordRef);
+                };
+                reader.readAsText(file);
             };
 
             const addOtherCostField = () => setFormData(prev => ({ ...prev, otherCosts: [...prev.otherCosts, { name: "", amount: "" }] }));
@@ -356,6 +234,29 @@
                 const newList = [...formData.otherCosts];
                 newList[index][field] = value;
                 setFormData(prev => ({ ...prev, otherCosts: newList }));
+            };
+
+            const handleSave = (e) => {
+                e.preventDefault();
+                const newRecord = {
+                    ...formData,
+                    id: editingId || Date.now(),
+                    timestamp: Date.now(),
+                    revenue: Number(formData.trashAmount || 0) + (formData.isSellingSpell ? (Number(formData.purpleStoneCount || 0) * globalPrices.purpleStonePrice) : 0),
+                    totalCost: (formData.gumUsed * (globalPrices.gumBoxPrice / 10)) + (2 * (globalPrices.silvervineBoxPrice / 10)) + formData.otherCosts.reduce((a, b) => a + Number(b.amount || 0), 0)
+                };
+                newRecord.profit = newRecord.revenue - newRecord.totalCost;
+                newRecord.revenuePerMinute = newRecord.minutesUsed > 0 ? newRecord.revenue / newRecord.minutesUsed : 0;
+
+                if (editingId) {
+                    setRecords(records.map(r => r.id === editingId ? newRecord : r));
+                } else {
+                    setRecords([newRecord, ...records]);
+                }
+                
+                setIsAdding(false);
+                setEditingId(null);
+                setFormData({ date: new Date().toLocaleDateString('th-TH'), gumUsed: 0, trashAmount: "", purpleStoneCount: "", isSellingSpell: false, minutesUsed: 60, notes: "", otherCosts: [] });
             };
 
             const startEdit = (record) => {
@@ -373,7 +274,11 @@
                 setIsAdding(true);
             };
 
-            // --- Analytics Logic ---
+            const handleDelete = (id) => {
+                 setRecords(records.filter(r => r.id !== id));
+            };
+
+            // Analytics
             const processedData = useMemo(() => {
                 return [...records].sort((a, b) => {
                     const dateA = new Date(convertToISO(a.date));
@@ -424,33 +329,6 @@
                 };
             }, [records]);
 
-            // --- Rendering ---
-            if (isLoading && !user) {
-                return (
-                    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white flex-col gap-4">
-                        <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-purple-400 via-purple-500 to-pink-500 bg-clip-text text-transparent uppercase italic">
-                            Old Glast Heim
-                        </h1>
-                        <p className="text-slate-400 text-sm">กรุณาเข้าสู่ระบบเพื่อใช้งาน</p>
-                        <button onClick={handleLogin} className="btn-google text-sm">
-                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" className="w-5 h-5" />
-                            Sign in with Google
-                        </button>
-                    </div>
-                );
-            }
-
-            if (isLoading) {
-                 return (
-                    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
-                        <div className="text-center">
-                            <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                            <p className="font-bold tracking-widest animate-pulse">SYNCING DATA...</p>
-                        </div>
-                    </div>
-                );
-            }
-
             return (
                 <div className="min-h-screen p-4 md:p-6 lg:p-8 pb-32 max-w-7xl mx-auto safe-area-pb">
                     {/* Manual Modal */}
@@ -467,6 +345,9 @@
                                     <div className="flex gap-4">
                                         <div className="bg-green-600/20 text-green-400 w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0">2</div>
                                         <p className="text-slate-300"><span className="text-white font-bold">Android:</span> เปิดผ่าน Chrome กดจุด 3 จุด <span className="text-white font-bold">(⋮)</span> แล้วเลือก <span className="text-white font-bold">"ติดตั้งแอป"</span> หรือ <span className="text-white font-bold">"เพิ่มลงในหน้าจอหลัก"</span></p>
+                                    </div>
+                                    <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                        <p className="text-[10px] text-slate-500 italic">ระบบนี้ทำงานแบบ Offline-First ข้อมูลจะถูกเก็บในเครื่องนี้ หากต้องการย้ายเครื่อง กรุณาใช้เมนู Backup ข้อมูลครับ</p>
                                     </div>
                                 </div>
                                 <button onClick={() => setShowManual(false)} className="w-full mt-8 bg-slate-800 py-3 rounded-xl font-bold uppercase tracking-widest text-xs">ตกลง</button>
@@ -492,20 +373,15 @@
                                     </button>
                                 </div>
                             </div>
-                            <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-black mt-2">Cloud Farming Dashboard</p>
+                            <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-black mt-2">Offline Farming Analytics</p>
                         </div>
                         
-                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                             {user ? (
-                                <div className="flex items-center gap-3 bg-slate-900 p-1 pr-4 rounded-2xl border border-slate-800">
-                                    <img src={user.photoURL || "https://via.placeholder.com/32"} className="w-8 h-8 rounded-xl" />
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-white truncate max-w-[100px]">{user.displayName}</span>
-                                        <button onClick={handleLogout} className="text-[8px] font-bold text-red-500 uppercase text-left">Logout</button>
-                                    </div>
-                                </div>
-                             ) : null}
-
+                        <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+                            <button onClick={handleBackup} className="bg-slate-800 hover:bg-slate-700 p-3 rounded-2xl transition-all" title="Backup Data"><Icon name="download" size={18}/></button>
+                            <label className="bg-slate-800 hover:bg-slate-700 p-3 rounded-2xl transition-all cursor-pointer" title="Restore Data">
+                                <input type="file" accept=".json" onChange={handleRestore} className="hidden" />
+                                <Icon name="upload" size={18}/>
+                            </label>
                             <button onClick={() => { setIsAdding(!isAdding); if(isAdding) setEditingId(null); }} className="flex-1 md:flex-none bg-purple-600 hover:bg-purple-700 transition-all px-6 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(168,85,247,0.3)] active:scale-95 uppercase tracking-widest text-xs">
                                 <Icon name={isAdding ? "layout-dashboard" : "plus-circle"} /> {isAdding ? "หน้าหลัก" : "บันทึกข้อมูล"}
                             </button>
@@ -609,7 +485,7 @@
                                     </div>
                                     <div className="mt-10 pt-8 border-t border-slate-800 flex gap-4">
                                         <button type="button" onClick={() => setIsAdding(false)} className="flex-1 bg-slate-800 py-5 rounded-2xl font-black uppercase tracking-widest transition-all hover:bg-slate-700">ยกเลิก</button>
-                                        <button type="submit" className="flex-[2] bg-gradient-to-r from-purple-600 to-pink-600 py-5 rounded-2xl font-black uppercase tracking-widest shadow-2xl active:scale-95">{editingId ? "อัปเดตข้อมูล" : "บันทึกข้อมูลเข้าระบบ"}</button>
+                                        <button type="submit" className="flex-[2] bg-gradient-to-r from-purple-600 to-pink-600 py-5 rounded-2xl font-black uppercase tracking-widest shadow-2xl active:scale-95">{editingId ? "อัปเดตข้อมูล" : "บันทึกข้อมูล"}</button>
                                     </div>
                                 </form>
                             ) : (
@@ -783,16 +659,7 @@
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        
-        // Polling to wait for Firebase SDK
-        const checkFirebase = () => {
-            if (window.FirebaseSDK) {
-                root.render(<App />);
-            } else {
-                setTimeout(checkFirebase, 50);
-            }
-        };
-        checkFirebase();
+        root.render(<App />);
     </script>
 </body>
 </html>
