@@ -80,6 +80,21 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // ==========================================
+        // 🔴 ส่วนที่ 1: สำหรับเจ้าของเว็บ (YOU) 🔴
+        // ==========================================
+        const OWNER_CONFIG = {
+          apiKey: "AIzaSyAbWzr8o_OhkjGbEetBYq_nzYmVZ2fTf40",
+          authDomain: "rocogh-88a38.firebaseapp.com",
+          projectId: "rocogh-88a38",
+          storageBucket: "rocogh-88a38.firebasestorage.app",
+          messagingSenderId: "1025971309206",
+          appId: "1:1025971309206:web:d4f9e0ab6bb016dde590b7",
+          measurementId: "G-04JN1ERQ4T"
+        };
+        // ==========================================
+
+
         const { useState, useEffect, useMemo, useRef } = React;
         const Recharts = window.Recharts || { LineChart: () => null, Line: () => null, XAxis: () => null, YAxis: () => null, CartesianGrid: () => null, Tooltip: () => null, ResponsiveContainer: () => null };
         const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
@@ -206,33 +221,34 @@
             // Initialize App & Load Config
             useEffect(() => {
                 const initSystem = async () => {
-                    // 1. Try to load config from localStorage
-                    let fbConfig = null;
-                    const savedConfig = localStorage.getItem('firebase_config_json');
+                    let fbConfig = OWNER_CONFIG;
                     
-                    // 2. Try to load from environment (for preview only)
+                    if (!fbConfig) {
+                        const savedConfig = localStorage.getItem('firebase_config_json');
+                        if (savedConfig) fbConfig = JSON.parse(savedConfig);
+                    }
+                    
                     if (!fbConfig && typeof __firebase_config !== 'undefined') {
                         fbConfig = JSON.parse(__firebase_config);
-                    } else if (savedConfig) {
-                        fbConfig = JSON.parse(savedConfig);
                     }
 
                     if (fbConfig && window.FirebaseSDK) {
                         try {
                             const { initializeApp, getAuth, getFirestore, onAuthStateChanged } = window.FirebaseSDK;
-                            firebaseAppRef.current = initializeApp(fbConfig);
-                            authRef.current = getAuth(firebaseAppRef.current);
-                            dbRef.current = getFirestore(firebaseAppRef.current);
+                            if (!firebaseAppRef.current) {
+                                firebaseAppRef.current = initializeApp(fbConfig);
+                                authRef.current = getAuth(firebaseAppRef.current);
+                                dbRef.current = getFirestore(firebaseAppRef.current);
+                            }
 
                             onAuthStateChanged(authRef.current, (u) => {
                                 setUser(u);
+                                setIsLoading(false);
                                 if (!u) {
-                                    // Fallback to local storage if not logged in
                                     const localRecords = localStorage.getItem('ogh_records');
                                     if (localRecords) setRecords(JSON.parse(localRecords));
                                     const localPrices = localStorage.getItem('ogh_prices');
                                     if (localPrices) setGlobalPrices(JSON.parse(localPrices));
-                                    setIsLoading(false);
                                 }
                             });
                         } catch (e) {
@@ -240,7 +256,6 @@
                             setIsLoading(false);
                         }
                     } else {
-                        // No config - Run in Local Mode
                         console.log("Running in Local Mode");
                         const localRecords = localStorage.getItem('ogh_records');
                         if (localRecords) setRecords(JSON.parse(localRecords));
@@ -250,7 +265,6 @@
                     }
                 };
                 
-                // Wait for SDK a bit
                 if (window.FirebaseSDK) {
                     initSystem();
                 } else {
@@ -258,7 +272,7 @@
                 }
             }, []);
 
-            // Data Sync Effect (Only if User is logged in)
+            // Data Sync Effect
             useEffect(() => {
                 if (!user || !dbRef.current) return;
                 setIsLoading(true);
@@ -292,7 +306,7 @@
                 return () => unsubRecords();
             }, [user]);
 
-            // Save to LocalStorage as backup/local mode
+            // Save to LocalStorage
             useEffect(() => { 
                 if (!user) localStorage.setItem('ogh_records', JSON.stringify(records)); 
             }, [records, user]);
@@ -343,14 +357,16 @@
                 if (authRef.current) {
                     const { signOut } = window.FirebaseSDK;
                     signOut(authRef.current);
+                    setRecords([]); 
+                    window.location.reload(); 
                 }
             };
 
             const saveConfig = () => {
                 try {
-                    JSON.parse(configInput); // Validate JSON
+                    JSON.parse(configInput);
                     localStorage.setItem('firebase_config_json', configInput);
-                    window.location.reload(); // Reload to init firebase
+                    window.location.reload();
                 } catch (e) {
                     alert("รูปแบบ JSON ไม่ถูกต้อง กรุณาตรวจสอบ");
                 }
@@ -366,6 +382,7 @@
 
             const handleSave = async (e) => {
                 e.preventDefault();
+                
                 const dataToSave = {
                     ...formData,
                     id: editingId || Date.now(),
@@ -377,7 +394,6 @@
                 dataToSave.revenuePerMinute = dataToSave.minutesUsed > 0 ? dataToSave.revenue / dataToSave.minutesUsed : 0;
 
                 if (user && dbRef.current) {
-                     // Cloud Save
                      const { collection, doc, addDoc, updateDoc } = window.FirebaseSDK;
                      const appId = 'ro-farm-app';
                      try {
@@ -390,7 +406,6 @@
                         }
                     } catch (err) { console.error("Cloud Save Error:", err); }
                 } else {
-                    // Local Save
                     if (editingId) {
                         setRecords(records.map(r => r.id === editingId ? dataToSave : r));
                     } else {
@@ -414,6 +429,34 @@
                 } else {
                     setRecords(records.filter(r => r.id !== id));
                 }
+            };
+
+            // --- Handlers for Backup/Restore (Fixed Location) ---
+            const handleBackup = () => {
+                const data = { records, globalPrices };
+                const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ogh_backup_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+            };
+
+            const handleRestore = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (data.records) setRecords(data.records);
+                        if (data.globalPrices) setGlobalPrices(data.globalPrices);
+                        alert("กู้คืนข้อมูลสำเร็จ!");
+                    } catch (err) {
+                        alert("ไฟล์ไม่ถูกต้อง");
+                    }
+                };
+                reader.readAsText(file);
             };
 
             const addOtherCostField = () => setFormData(prev => ({ ...prev, otherCosts: [...prev.otherCosts, { name: "", amount: "" }] }));
@@ -490,33 +533,17 @@
                 };
             }, [records]);
 
-            // Backup & Restore
-            const handleBackup = () => {
-                const data = { records, globalPrices };
-                const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `ogh_backup_${new Date().toISOString().slice(0,10)}.json`;
-                a.click();
-            };
-
-            const handleRestore = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const data = JSON.parse(event.target.result);
-                        if (data.records) setRecords(data.records);
-                        if (data.globalPrices) setGlobalPrices(data.globalPrices);
-                        alert("กู้คืนข้อมูลสำเร็จ!");
-                    } catch (err) {
-                        alert("ไฟล์ไม่ถูกต้อง");
-                    }
-                };
-                reader.readAsText(file);
-            };
+            // Render
+            if (isLoading && user) { // Loading state only for logged in user syncing
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+                        <div className="text-center">
+                            <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                            <p className="font-bold tracking-widest animate-pulse">SYNCING DATA...</p>
+                        </div>
+                    </div>
+                );
+            }
 
             return (
                 <div className="min-h-screen p-4 md:p-6 lg:p-8 pb-32 max-w-7xl mx-auto safe-area-pb">
