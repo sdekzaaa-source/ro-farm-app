@@ -282,8 +282,9 @@
                 const recordsRef = collection(dbRef.current, 'artifacts', appId, 'users', user.uid, 'farm_records');
                 const pricesRef = doc(dbRef.current, 'artifacts', appId, 'users', user.uid, 'settings', 'prices');
 
+                // FIXED: Put id: doc.id AFTER ...doc.data() to ensure Firestore ID is used
                 const unsubRecords = onSnapshot(query(recordsRef), (snapshot) => {
-                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
                     setRecords(data);
                     setIsLoading(false);
                 }, (err) => {
@@ -431,7 +432,6 @@
                 }
             };
 
-            // --- Handlers for Backup/Restore (Fixed Location) ---
             const handleBackup = () => {
                 const data = { records, globalPrices };
                 const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
@@ -735,7 +735,7 @@
                                         </div>
                                     </div>
                                     <div className="mt-10 pt-8 border-t border-slate-800 flex gap-4">
-                                        <button type="button" onClick={() => setIsAdding(false)} className="flex-1 bg-slate-800 py-5 rounded-2xl font-black uppercase tracking-widest transition-all hover:bg-slate-700">ยกเลิก</button>
+                                        <button type="button" onClick={() => { setIsAdding(false); setEditingId(null); }} className="flex-1 bg-slate-800 py-5 rounded-2xl font-black uppercase tracking-widest transition-all hover:bg-slate-700">ยกเลิก</button>
                                         <button type="submit" className="flex-[2] bg-gradient-to-r from-purple-600 to-pink-600 py-5 rounded-2xl font-black uppercase tracking-widest shadow-2xl active:scale-95">{editingId ? "อัปเดตข้อมูล" : "บันทึกข้อมูลเข้าระบบ"}</button>
                                     </div>
                                 </form>
@@ -910,7 +910,16 @@
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        
+        // Polling to wait for Firebase SDK
+        const checkFirebase = () => {
+            if (window.FirebaseSDK) {
+                root.render(<App />);
+            } else {
+                setTimeout(checkFirebase, 50);
+            }
+        };
+        checkFirebase();
     </script>
 </body>
 </html>
