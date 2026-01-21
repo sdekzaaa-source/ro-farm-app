@@ -13,7 +13,6 @@
     <meta name="application-name" content="OGH Farm">
 
     <!-- App Icons -->
-    <!-- นำไฟล์รูปภาพชื่อ icon.png มาวางไว้ที่เดียวกับไฟล์นี้เพื่อให้แสดงผลครับ -->
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     
@@ -39,7 +38,6 @@
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
-        /* Mobile Optimization */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -123,6 +121,7 @@
             });
 
             const [isAdding, setIsAdding] = useState(false);
+            const [showManual, setShowManual] = useState(false); // Modal state สำหรับวิธีติดตั้ง
             const [editingId, setEditingId] = useState(null);
             const [chartMode, setChartMode] = useState('profit');
             const [gumFilter, setGumFilter] = useState('all');
@@ -134,43 +133,7 @@
             const [isTimerPaused, setIsTimerPaused] = useState(true);
             const timerRef = useRef(null);
 
-            // Helpers defined inside App to avoid scope issues
-            const formatDateDisplay = (date) => new Date(date).toLocaleDateString('th-TH');
-            
-            const convertToISO = (displayDate) => {
-                if (!displayDate) return "";
-                const parts = displayDate.split('/');
-                return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : displayDate;
-            };
-
-            const convertToDisplay = (isoDate) => {
-                if (!isoDate) return "";
-                const parts = isoDate.split('-');
-                return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : isoDate;
-            };
-
-            const formatTimerDisplay = (ms) => {
-                const mins = Math.floor(ms / 60000);
-                const secs = Math.floor((ms % 60000) / 1000);
-                const centi = Math.floor((ms % 1000) / 10);
-                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${centi.toString().padStart(2, '0')}`;
-            };
-
-            const formatZeny = (num) => new Intl.NumberFormat('th-TH').format(Math.round(num || 0));
-            const formatMZeny = (num) => (Number(num || 0) / 1000000).toFixed(2) + " M";
-
-            const [formData, setFormData] = useState({
-                date: new Date().toLocaleDateString('th-TH'),
-                gumUsed: 0,
-                trashAmount: "",
-                purpleStoneCount: "",
-                isSellingSpell: false,
-                minutesUsed: 60,
-                notes: "",
-                otherCosts: []
-            });
-
-            // --- 2. Handlers (Defined EARLY to prevent ReferenceError) ---
+            // --- 2. Handlers ---
             const handleTimerStart = () => { setIsTimerActive(true); setIsTimerPaused(false); };
             const handleTimerPause = () => { setIsTimerPaused(true); };
             const handleTimerStop = () => {
@@ -216,6 +179,40 @@
                 setEditingId(record.id);
                 setIsAdding(true);
             };
+
+            // Helpers
+            const convertToISO = (displayDate) => {
+                if (!displayDate) return "";
+                const parts = displayDate.split('/');
+                return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : displayDate;
+            };
+
+            const convertToDisplay = (isoDate) => {
+                if (!isoDate) return "";
+                const parts = isoDate.split('-');
+                return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : isoDate;
+            };
+
+            const formatTimerDisplay = (ms) => {
+                const mins = Math.floor(ms / 60000);
+                const secs = Math.floor((ms % 60000) / 1000);
+                const centi = Math.floor((ms % 1000) / 10);
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${centi.toString().padStart(2, '0')}`;
+            };
+
+            const formatZeny = (num) => new Intl.NumberFormat('th-TH').format(Math.round(num || 0));
+            const formatMZeny = (num) => (Number(num || 0) / 1000000).toFixed(2) + " M";
+
+            const [formData, setFormData] = useState({
+                date: new Date().toLocaleDateString('th-TH'),
+                gumUsed: 0,
+                trashAmount: "",
+                purpleStoneCount: "",
+                isSellingSpell: false,
+                minutesUsed: 60,
+                notes: "",
+                otherCosts: []
+            });
 
             // --- 3. Effects ---
             useEffect(() => { localStorage.setItem('ogh_records', JSON.stringify(records)); }, [records]);
@@ -291,17 +288,47 @@
 
             return (
                 <div className="min-h-screen p-4 md:p-6 lg:p-8 pb-32 max-w-7xl mx-auto safe-area-pb">
+                    {/* Installation Manual Modal */}
+                    {showManual && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setShowManual(false)}>
+                            <div className="bg-slate-900 border border-slate-800 w-full max-w-md p-8 rounded-[2rem] shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                                <button onClick={() => setShowManual(false)} className="absolute top-6 right-6 text-slate-500 hover:text-white"><Icon name="x" size={24}/></button>
+                                <h3 className="text-xl font-black mb-6 text-purple-400 italic">📱 วิธีติดตั้งบนมือถือ</h3>
+                                <div className="space-y-6 text-sm">
+                                    <div className="flex gap-4">
+                                        <div className="bg-blue-600/20 text-blue-400 w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0">1</div>
+                                        <p className="text-slate-300"><span className="text-white font-bold">iOS (iPhone):</span> เปิดผ่าน Safari กดปุ่ม <span className="inline-flex bg-slate-800 p-1 rounded"><Icon name="share" size={14}/></span> แล้วเลือก <span className="text-white font-bold">"Add to Home Screen"</span></p>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <div className="bg-green-600/20 text-green-400 w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0">2</div>
+                                        <p className="text-slate-300"><span className="text-white font-bold">Android:</span> เปิดผ่าน Chrome กดจุด 3 จุด <span className="text-white font-bold">(⋮)</span> แล้วเลือก <span className="text-white font-bold">"ติดตั้งแอป"</span> หรือ <span className="text-white font-bold">"เพิ่มลงในหน้าจอหลัก"</span></p>
+                                    </div>
+                                    <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                        <p className="text-[10px] text-slate-500 italic"> ข้อมูลทั้งหมดจะถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องคุณเอง ไม่มีการเก็บไว้บนเซิร์ฟเวอร์ครับ</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setShowManual(false)} className="w-full mt-8 bg-slate-800 py-3 rounded-xl font-bold uppercase tracking-widest text-xs">ตกลง</button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Header */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                         <div>
-                            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                            <div className="flex flex-wrap items-center gap-2 md:gap-4">
                                 <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-purple-400 via-purple-500 to-pink-500 bg-clip-text text-transparent uppercase italic">
                                     Old Glast Heim
                                 </h1>
-                                <a href="https://www.youtube.com/@SDekza-RO" target="_blank" className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-red-500 uppercase tracking-widest px-3 py-1.5 bg-slate-900/80 border border-slate-800 rounded-2xl group shadow-sm transition-all w-fit">
-                                    <Icon name="youtube" size={14} className="text-red-500" />
-                                    <span>SDekza RO</span>
-                                </a>
+                                <div className="flex gap-2">
+                                    <a href="https://www.youtube.com/@SDekza-RO" target="_blank" className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-red-500 uppercase tracking-widest px-3 py-1.5 bg-slate-900/80 border border-slate-800 rounded-2xl group shadow-sm transition-all w-fit">
+                                        <Icon name="youtube" size={14} className="text-red-500" />
+                                        <span>SDekza RO</span>
+                                    </a>
+                                    <button onClick={() => setShowManual(true)} className="inline-flex items-center gap-2 text-[10px] font-black text-blue-400 hover:text-blue-300 uppercase tracking-widest px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-2xl transition-all">
+                                        <Icon name="help-circle" size={14} />
+                                        <span>ติดตั้งแอป</span>
+                                    </button>
+                                </div>
                             </div>
                             <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-black mt-2">Farming Analytics</p>
                         </div>
@@ -324,7 +351,6 @@
                                 <div className="flex flex-wrap items-center gap-2 mt-2 text-[10px] font-bold uppercase">
                                      <span className="text-green-500 flex items-center gap-1 bg-green-500/10 px-2 py-1 rounded"><Icon name="arrow-up" size={10}/> {formatMZeny(stats.maxRevenue)}</span>
                                      <span className="text-red-500 flex items-center gap-1 bg-red-500/10 px-2 py-1 rounded"><Icon name="arrow-down" size={10}/> {formatMZeny(stats.minRevenue)}</span>
-                                     <span className="text-blue-400 flex items-center gap-1"><Icon name="clock" size={12}/> เฉลี่ย {formatZeny(stats.avgRevenuePerMinute)} Z/นาที</span>
                                 </div>
                             </div>
                             <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] shadow-xl border-b-amber-500/30">
@@ -406,7 +432,7 @@
                                             <textarea value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white text-sm outline-none font-medium h-24 mt-2 focus:border-purple-500/50 transition-all" placeholder="จดบันทึกรายละเอียด..."></textarea>
                                         </div>
                                     </div>
-                                    <div className="mt-8 pt-6 border-t border-slate-800 flex gap-4">
+                                    <div className="mt-10 pt-8 border-t border-slate-800 flex gap-4">
                                         <button type="button" onClick={() => setIsAdding(false)} className="flex-1 bg-slate-800 py-5 rounded-2xl font-black uppercase tracking-widest transition-all hover:bg-slate-700">ยกเลิก</button>
                                         <button type="submit" className="flex-[2] bg-gradient-to-r from-purple-600 to-pink-600 py-5 rounded-2xl font-black uppercase tracking-widest shadow-2xl active:scale-95">{editingId ? "อัปเดตข้อมูล" : "บันทึกข้อมูลเข้าระบบ"}</button>
                                     </div>
