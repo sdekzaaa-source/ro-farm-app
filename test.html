@@ -5,242 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OGH Farm - SDekza RO</title>
     
-    <!-- Mobile Web App Meta Tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#020617">
-    <meta name="application-name" content="OGH Farm">
-
-    <!-- App Icons -->
-    <link rel="icon" type="image/png" href="icon.png">
-    <link rel="apple-touch-icon" href="icon.png">
-    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React Dependencies -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
-    <!-- Recharts (UMD version) -->
+    <!-- Recharts -->
     <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Firebase SDKs -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-      import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-      window.FirebaseSDK = { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc };
-    </script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: #020617; 
-            color: #f8fafc;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-        
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        
-        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
-        .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        input, button, select, textarea { outline: none; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
         .safe-area-pb { padding-bottom: env(safe-area-inset-bottom, 20px); }
 
-        .btn-google {
-            background-color: #1e293b;
-            color: #f8fafc;
-            border: 1px solid #334155;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 14px 24px;
-            border-radius: 16px;
-            font-weight: 700;
-            font-size: 14px;
-            transition: all 0.2s;
-            cursor: pointer;
-            width: 100%;
-            max-width: 320px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-        }
+        /* YouTube Card */
+        .yt-card { display: inline-flex; align-items: center; background: #1e293b; border: 1px solid #334155; border-radius: 50px; padding: 4px 4px 4px 12px; gap: 10px; text-decoration: none; transition: all 0.2s; }
+        .yt-card:hover { transform: translateY(-2px); border-color: #475569; background: #334155; }
+        .yt-avatar { width: 28px; height: 28px; border-radius: 50%; background-image: url('https://yt3.googleusercontent.com/vlD4rkRPBg-HIUX6kAbuW1AHgE1FzYa4cs7W3ZD1AV0z4Xg_vM42d1r_slf8SVPhjmJXPslvcg=s160-c-k-c0x00ffffff-no-rj'); background-size: cover; border: 1px solid #475569; }
+        .yt-btn { background: #dc2626; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 10px; display: flex; align-items: center; gap: 4px; }
+        .yt-btn:hover { background: #ef4444; }
+
+        .btn-google { background-color: #1e293b; color: #f8fafc; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 24px; border-radius: 16px; font-weight: 700; font-size: 14px; transition: all 0.2s; cursor: pointer; width: 100%; max-width: 320px; }
         .btn-google:hover { background-color: #334155; transform: translateY(-2px); border-color: #475569; }
-
-        .btn-guest {
-            background-color: transparent;
-            color: #64748b;
-            border: 1px solid #334155;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 8px 16px; 
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 11px; 
-            transition: all 0.2s;
-            cursor: pointer;
-            width: auto; 
-            margin: 0 auto;
-            max-width: 200px; 
-        }
+        .btn-guest { background-color: transparent; color: #64748b; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 16px; border-radius: 12px; font-weight: 600; font-size: 11px; transition: all 0.2s; cursor: pointer; width: auto; margin: 0 auto; max-width: 200px; }
         .btn-guest:hover { background-color: #1e293b; color: white; border-color: #475569; }
-
-        /* YouTube Card Dark Theme */
-        .yt-card-horizontal {
-            display: inline-flex;
-            align-items: center;
-            max-width: 100%;
-            background-color: #1e293b;
-            border-radius: 50px;
-            padding: 4px 4px 4px 8px;
-            font-family: 'Inter', sans-serif;
-            border: 1px solid #334155;
-            transition: all 0.2s ease-in-out;
-            gap: 8px;
-            text-decoration: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .yt-card-horizontal:hover { border-color: #475569; background-color: #334155; transform: translateY(-1px); }
-        .yt-avatar {
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            background-image: url('https://yt3.googleusercontent.com/vlD4rkRPBg-HIUX6kAbuW1AHgE1FzYa4cs7W3ZD1AV0z4Xg_vM42d1r_slf8SVPhjmJXPslvcg=s160-c-k-c0x00ffffff-no-rj');
-            background-size: cover;
-            background-position: center;
-            border: 1px solid #475569;
-        }
-        .yt-info { display: flex; flex-direction: column; justify-content: center; margin-right: 4px; }
-        .yt-name { font-size: 0.75rem; font-weight: 700; color: #f1f5f9; margin: 0; line-height: 1; }
-        .yt-stats { font-size: 0.55rem; color: #94a3b8; margin-top: 1px; }
-        .yt-btn {
-            display: flex; align-items: center; justify-content: center;
-            padding: 0 10px; height: 24px;
-            background-color: #dc2626; color: #fff;
-            border-radius: 14px; font-weight: 700; font-size: 0.65rem;
-            transition: background-color 0.2s;
-        }
-        .yt-btn:hover { background-color: #ef4444; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
+    <!-- Firebase SDKs -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+      window.FirebaseSDK = { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc };
+    </script>
+
     <script type="text/babel">
-        // ==========================================
-        // 🔴 CONFIG SECTION 🔴
-        // ==========================================
-        const OWNER_CONFIG = {
-          apiKey: "AIzaSyAbWzr8o_OhkjGbEetBYq_nzYmVZ2fTf40",
-          authDomain: "rocogh-88a38.firebaseapp.com",
-          projectId: "rocogh-88a38",
-          storageBucket: "rocogh-88a38.firebasestorage.app",
-          messagingSenderId: "1025971309206",
-          appId: "1:1025971309206:web:d4f9e0ab6bb016dde590b7",
-          measurementId: "G-04JN1ERQ4T"
-        };
-        // ==========================================
+        // Config
+        const OWNER_CONFIG = { apiKey: "AIzaSyAbWzr8o_OhkjGbEetBYq_nzYmVZ2fTf40", authDomain: "rocogh-88a38.firebaseapp.com", projectId: "rocogh-88a38", storageBucket: "rocogh-88a38.firebasestorage.app", messagingSenderId: "1025971309206", appId: "1:1025971309206:web:d4f9e0ab6bb016dde590b7", measurementId: "G-04JN1ERQ4T" };
 
         const { useState, useEffect, useMemo, useRef } = React;
-        const Recharts = window.Recharts || { LineChart: () => null, Line: () => null, XAxis: () => null, YAxis: () => null, CartesianGrid: () => null, Tooltip: () => null, ResponsiveContainer: () => null };
-        const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
+        const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = window.Recharts || {};
 
-        // FIXED: Safe Icon Component for Lucide CDN
-        const Icon = ({ name, size = 20, className = "" }) => {
-            const spanRef = useRef(null);
+        // --- Icons & SVGs ---
+        const Icon = ({ name, size = 16, className = "" }) => {
+            const ref = useRef(null);
             useEffect(() => {
-                if (window.lucide && spanRef.current) {
-                    spanRef.current.innerHTML = '';
+                if (window.lucide && ref.current) {
+                    ref.current.innerHTML = '';
                     const i = document.createElement('i');
                     i.setAttribute('data-lucide', name);
                     i.setAttribute('class', className);
-                    spanRef.current.appendChild(i);
-                    window.lucide.createIcons({ root: spanRef.current, nameAttr: 'data-lucide', attrs: { width: size, height: size } });
+                    ref.current.appendChild(i);
+                    window.lucide.createIcons({ root: ref.current, nameAttr: 'data-lucide', attrs: { width: size, height: size } });
                 }
             }, [name, size, className]);
-            return <span ref={spanRef} style={{ display: 'inline-flex', verticalAlign: 'middle' }}></span>;
+            return <span ref={ref} style={{ display: 'inline-flex', verticalAlign: 'middle' }}></span>;
         };
 
-        // 16-bit SVGs
-        const Zeny16Bit = ({ className }) => (<svg viewBox="0 0 32 32" className={className} xmlns="http://www.w3.org/2000/svg" shapeRendering="crispEdges"><rect x="10" y="4" width="12" height="24" fill="#FFD700" rx="4" /><rect x="8" y="6" width="16" height="20" fill="#FFD700" /><rect x="10" y="6" width="12" height="20" fill="#FFEC8B" /><path d="M12 4 L20 4 L22 6 L22 26 L20 28 L12 28 L10 26 L10 6 Z" fill="none" stroke="#B8860B" strokeWidth="2" /><path d="M14 10 L20 10 L20 12 L16 18 L20 18 L20 20 L12 20 L12 18 L16 12 L12 12 Z" fill="#8B4513" /></svg>);
-        const BubbleGum16Bit = ({ className }) => (<svg viewBox="0 0 32 32" className={className} xmlns="http://www.w3.org/2000/svg" shapeRendering="crispEdges"><rect x="6" y="14" width="20" height="8" fill="#42A5F5" /><rect x="4" y="16" width="2" height="4" fill="#1E88E5" /><rect x="26" y="16" width="2" height="4" fill="#1E88E5" /><circle cx="16" cy="12" r="6" fill="#F06292" /><circle cx="14" cy="10" r="2" fill="#F48FB1" /><rect x="8" y="15" width="16" height="1" fill="#90CAF9" opacity="0.5" /></svg>);
-        const CoagulatedSpell16Bit = ({ className }) => (<svg viewBox="0 0 32 32" className={className} xmlns="http://www.w3.org/2000/svg" shapeRendering="crispEdges"><path d="M16 4 L24 12 L24 22 L16 28 L8 22 L8 12 Z" fill="#7E57C2" /><path d="M16 6 L22 12 L22 20 L16 26 L10 20 L10 12 Z" fill="#9575CD" /><path d="M16 4 L16 28" stroke="#D1C4E9" strokeWidth="1" opacity="0.4" /><rect x="13" y="10" width="2" height="2" fill="#EDE7F6" /><rect x="18" y="18" width="1" height="1" fill="#EDE7F6" /></svg>);
-        const ContaminatedMagic16Bit = ({ className }) => (<svg viewBox="0 0 32 32" className={className} xmlns="http://www.w3.org/2000/svg" shapeRendering="crispEdges"><circle cx="16" cy="16" r="10" fill="#EF5350" /><circle cx="16" cy="16" r="6" fill="#B71C1C" /><path d="M16 6 L18 10 L22 10 L20 14 L22 18 L18 18 L16 22 L14 18 L10 18 L12 14 L10 10 L14 10 Z" fill="#FFCDD2" opacity="0.5"/></svg>);
-        const Silvervine16Bit = ({ className }) => (<svg viewBox="0 0 32 32" className={className} xmlns="http://www.w3.org/2000/svg" shapeRendering="crispEdges"><rect x="8" y="10" width="16" height="14" fill="#5D4037" /><rect x="14" y="4" width="4" height="6" fill="#4CAF50" /><rect x="14" y="14" width="4" height="4" fill="#FFD600" /><rect x="8" y="10" width="16" height="2" fill="#795548" /></svg>);
-        const GoogleLogo = () => (<svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>);
+        const SVGs = {
+            Zeny: () => <svg viewBox="0 0 32 32" className="w-4 h-4"><rect x="10" y="4" width="12" height="24" fill="#FFD700" rx="4" /><rect x="8" y="6" width="16" height="20" fill="#FFD700" /><rect x="10" y="6" width="12" height="20" fill="#FFEC8B" /><path d="M12 4 L20 4 L22 6 L22 26 L20 28 L12 28 L10 26 L10 6 Z" fill="none" stroke="#B8860B" strokeWidth="2" /><path d="M14 10 L20 10 L20 12 L16 18 L20 18 L20 20 L12 20 L12 18 L16 12 L12 12 Z" fill="#8B4513" /></svg>,
+            Gum: () => <svg viewBox="0 0 32 32" className="w-4 h-4"><rect x="6" y="14" width="20" height="8" fill="#42A5F5" /><rect x="4" y="16" width="2" height="4" fill="#1E88E5" /><rect x="26" y="16" width="2" height="4" fill="#1E88E5" /><circle cx="16" cy="12" r="6" fill="#F06292" /><circle cx="14" cy="10" r="2" fill="#F48FB1" /><rect x="8" y="15" width="16" height="1" fill="#90CAF9" opacity="0.5" /></svg>,
+            Spell: () => <svg viewBox="0 0 32 32" className="w-4 h-4"><path d="M16 4 L24 12 L24 22 L16 28 L8 22 L8 12 Z" fill="#7E57C2" /><path d="M16 6 L22 12 L22 20 L16 26 L10 20 L10 12 Z" fill="#9575CD" /><path d="M16 4 L16 28" stroke="#D1C4E9" strokeWidth="1" opacity="0.4" /><rect x="13" y="10" width="2" height="2" fill="#EDE7F6" /><rect x="18" y="18" width="1" height="1" fill="#EDE7F6" /></svg>,
+            Magic: () => <svg viewBox="0 0 32 32" className="w-4 h-4"><circle cx="16" cy="16" r="10" fill="#EF5350" /><circle cx="16" cy="16" r="6" fill="#B71C1C" /><path d="M16 6 L18 10 L22 10 L20 14 L22 18 L18 18 L16 22 L14 18 L10 18 L12 14 L10 10 L14 10 Z" fill="#FFCDD2" opacity="0.5"/></svg>,
+            Silvervine: () => <svg viewBox="0 0 32 32" className="w-3 h-3"><rect x="8" y="10" width="16" height="14" fill="#5D4037" /><rect x="14" y="4" width="4" height="6" fill="#4CAF50" /><rect x="14" y="14" width="4" height="4" fill="#FFD600" /><rect x="8" y="10" width="16" height="2" fill="#795548" /></svg>,
+            Google: () => <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        };
 
-        // --- WELCOME SCREEN ---
-        const WelcomeScreen = ({ onLogin, onGuest }) => {
-            return (
-                <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-[#020617] p-6 text-center animate-fade-in relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
-                    <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-600/20 rounded-full blur-[100px] animate-pulse"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-600/20 rounded-full blur-[100px] animate-pulse" style={{animationDelay:'1s'}}></div>
-                    <div className="relative z-10 flex flex-col items-center max-w-md w-full">
-                        <div className="mb-8 relative animate-slide-up">
-                            <div className="w-28 h-28 bg-slate-800 rounded-[2rem] flex items-center justify-center shadow-2xl border-2 border-slate-700/50 transform rotate-3 hover:rotate-0 transition-all duration-500">
-                                <CoagulatedSpell16Bit className="w-20 h-20 drop-shadow-lg" />
-                            </div>
-                            <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg rotate-[-5deg]">OGH Farm</div>
-                        </div>
-                        <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 mb-4 tracking-tighter italic animate-slide-up" style={{animationDelay:'0.1s'}}>
-                            OGH Farming
-                        </h1>
-                        <p className="text-slate-400 text-sm mb-12 font-medium leading-relaxed max-w-xs animate-slide-up" style={{animationDelay:'0.2s'}}>
-                            ระบบบันทึกสถิติและคำนวณกำไร <br/>
-                            <span className="text-slate-500 text-xs">สำหรับผู้เล่น Ragnarok Online (Classic/GGT)</span>
-                        </p>
-                        <div className="w-full space-y-6 animate-slide-up" style={{animationDelay:'0.3s'}}>
-                            <button onClick={onLogin} className="btn-google mx-auto hover:scale-105 active:scale-95 group">
-                                <GoogleLogo /> <span>เข้าสู่ระบบด้วย Gmail</span>
-                            </button>
-                            <button onClick={onGuest} className="btn-guest hover:scale-105 active:scale-95">
-                                <Icon name="user" size={14} /> <span>ใช้งานแบบ Guest</span>
-                            </button>
-                            <div className="flex items-center justify-center gap-2 opacity-60 hover:opacity-100 transition-opacity mt-8">
-                                <a href="https://www.youtube.com/@SDekza-RO" target="_blank" className="yt-card-horizontal">
-                                    <div className="yt-avatar"></div>
-                                    <div className="yt-info"><h2 className="yt-name">SDekza</h2><div className="yt-stats">140+ Subs</div></div>
-                                    <div className="yt-btn"><svg className="yt-icon" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.005 3.005 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>Subscribe</div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+        // --- COMPONENTS ---
+        const WelcomeScreen = ({ onLogin, onGuest }) => (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 p-6 text-center animate-fade-in">
+                <div className="mb-8 w-24 h-24 bg-slate-800 rounded-3xl flex items-center justify-center shadow-xl border border-slate-700">
+                    <SVGs.Spell className="w-12 h-12" />
                 </div>
-            );
-        };
+                <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-4">OGH Farming</h1>
+                <p className="text-slate-400 text-sm mb-12">บันทึกสถิติและคำนวณกำไร<br/>Ragnarok Online Classic / GGT</p>
+                <div className="space-y-4 w-full max-w-xs">
+                    <button onClick={onLogin} className="btn-google"><SVGs.Google /> Login with Gmail</button>
+                    <button onClick={onGuest} className="btn-guest"><Icon name="user" size={14} /> <span>ใช้งานแบบ Guest</span></button>
+                </div>
+                <div className="mt-12 opacity-50 hover:opacity-100 transition-opacity">
+                    <a href="https://www.youtube.com/@SDekza-RO" target="_blank" className="yt-card"><div className="yt-avatar"></div><div className="flex flex-col text-left"><span className="text-[10px] font-bold text-white">SDekza RO</span><span className="text-[8px] text-slate-400">140+ Subs</span></div><div className="yt-btn"><Icon name="youtube" size={10}/> Subscribe</div></a>
+                </div>
+            </div>
+        );
 
         const App = () => {
             // Helpers
-            const formatZeny = (num) => new Intl.NumberFormat('th-TH').format(Math.round(num || 0));
-            const formatMZeny = (num) => (Number(num || 0) / 1000000).toFixed(2) + " M";
-            const formatTimerDisplay = (ms) => {
-                const mins = Math.floor(ms / 60000);
-                const secs = Math.floor((ms % 60000) / 1000);
-                const centi = Math.floor((ms % 1000) / 10);
-                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${centi.toString().padStart(2, '0')}`;
+            const formatZeny = (n) => new Intl.NumberFormat('th-TH').format(Math.round(n||0));
+            const formatMZeny = (n) => (Number(n||0)/1000000).toFixed(2)+" M";
+            const formatTimer = (ms) => {
+                const m = Math.floor(ms/60000).toString().padStart(2,'0');
+                const s = Math.floor((ms%60000)/1000).toString().padStart(2,'0');
+                const c = Math.floor((ms%1000)/10).toString().padStart(2,'0');
+                return `${m}:${s}:${c}`;
             };
-            const convertToISO = (d) => { if(!d) return ""; const p = d.split('/'); return p.length===3 ? `${p[2]}-${p[1]}-${p[0]}` : d; };
+            const convertToISO = (d) => { if(!d)return""; const p=d.split('/'); return p.length===3?`${p[2]}-${p[1]}-${p[0]}`:d; };
             const convertToDisplay = (d) => { if(!d) return ""; const p = d.split('-'); return p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : d; };
 
-            const [records, setRecords] = useState(() => { const s = localStorage.getItem('ogh_records'); return s ? JSON.parse(s) : []; });
-            const [globalPrices, setGlobalPrices] = useState(() => { const s = localStorage.getItem('ogh_prices'); return s ? JSON.parse(s) : { purpleStonePrice: 0, contMagicPrice: 0, gumBoxPrice: 0, silvervineBoxPrice: 0 }; });
+            const [records, setRecords] = useState(() => JSON.parse(localStorage.getItem('ogh_records')) || []);
+            const [globalPrices, setGlobalPrices] = useState(() => JSON.parse(localStorage.getItem('ogh_prices')) || { purpleStonePrice:0, contMagicPrice:0, gumBoxPrice:0, silvervineBoxPrice:0 });
             
             const [activeTab, setActiveTab] = useState('ogh');
             const [isAdding, setIsAdding] = useState(false);
@@ -263,313 +140,395 @@
 
             // Firebase Init
             useEffect(() => {
-                const initSystem = async () => {
-                    let fbConfig = OWNER_CONFIG;
-                    if (!fbConfig) { const s = localStorage.getItem('firebase_config_json'); if (s) fbConfig = JSON.parse(s); }
-                    if (!fbConfig && typeof __firebase_config !== 'undefined') fbConfig = JSON.parse(__firebase_config);
-                    if (fbConfig && window.FirebaseSDK) {
+                const init = async () => {
+                    if (window.FirebaseSDK) {
                         try {
                             const { initializeApp, getAuth, getFirestore, onAuthStateChanged } = window.FirebaseSDK;
-                            if (!firebaseAppRef.current) { firebaseAppRef.current = initializeApp(fbConfig); authRef.current = getAuth(firebaseAppRef.current); dbRef.current = getFirestore(firebaseAppRef.current); }
-                            onAuthStateChanged(authRef.current, (u) => { setUser(u); setIsLoading(false); if(!u) { const lr = localStorage.getItem('ogh_records'); if(lr) setRecords(JSON.parse(lr)); const lp = localStorage.getItem('ogh_prices'); if(lp) setGlobalPrices(JSON.parse(lp)); } });
-                        } catch (e) { setIsLoading(false); }
+                            const app = initializeApp(OWNER_CONFIG);
+                            window.auth = getAuth(app);
+                            window.db = getFirestore(app);
+                            onAuthStateChanged(window.auth, (u) => {
+                                setUser(u);
+                                setIsLoading(false);
+                                if(u) syncData(u.uid);
+                            });
+                        } catch(e) { 
+                            console.log("Firebase Error", e); 
+                            setIsLoading(false);
+                        }
                     } else { setIsLoading(false); }
                 };
-                if(window.FirebaseSDK) initSystem(); else setTimeout(initSystem, 500);
+                setTimeout(init, 500); 
             }, []);
 
-            // Data Sync
-            useEffect(() => {
-                if (isGuestMode) return;
-                if(!user || !dbRef.current) return;
-                setIsLoading(true);
-                const { collection, doc, query, onSnapshot, getDoc, setDoc } = window.FirebaseSDK;
-                const recRef = collection(dbRef.current, 'artifacts', 'ro-farm-app', 'users', user.uid, 'farm_records');
-                const priceRef = doc(dbRef.current, 'artifacts', 'ro-farm-app', 'users', user.uid, 'settings', 'prices');
-                const unsub = onSnapshot(query(recRef), (snap) => { setRecords(snap.docs.map(d => ({id:d.id, ...d.data()}))); setIsLoading(false); });
-                getDoc(priceRef).then(s => { if(s.exists()) setGlobalPrices(s.data()); else setDoc(priceRef, globalPrices); });
-                return () => unsub();
-            }, [user, isGuestMode]);
+            const syncData = (uid) => {
+                if (!window.FirebaseSDK || !window.db) return;
+                const { collection, query, onSnapshot, doc, getDoc } = window.FirebaseSDK;
+                const q = query(collection(window.db, 'artifacts', 'ro-farm-app', 'users', uid, 'farm_records'));
+                onSnapshot(q, (snap) => setRecords(snap.docs.map(d => ({id:d.id, ...d.data()}))));
+                getDoc(doc(window.db, 'artifacts', 'ro-farm-app', 'users', uid, 'settings', 'prices')).then(s => { if(s.exists()) setGlobalPrices(s.data()); });
+            };
 
-            useEffect(() => { if (!user) localStorage.setItem('ogh_records', JSON.stringify(records)); }, [records, user]);
-            useEffect(() => { if (!user) localStorage.setItem('ogh_prices', JSON.stringify(globalPrices)); }, [globalPrices, user]);
-            useEffect(() => { if(isTimerActive && !isTimerPaused) { timerRef.current = setInterval(() => setTimeInMs(p => p>=3600000 ? (setIsTimerActive(false)||setIsTimerPaused(true)||setFormData(f=>({...f, minutesUsed:60}))||3600000) : p+10), 10); } else clearInterval(timerRef.current); return () => clearInterval(timerRef.current); }, [isTimerActive, isTimerPaused]);
+            // Persistence
+            useEffect(() => { if(!user) localStorage.setItem('ogh_records', JSON.stringify(records)); }, [records, user]);
+            useEffect(() => { if(!user) localStorage.setItem('ogh_prices', JSON.stringify(globalPrices)); }, [globalPrices, user]);
             
+            // Timer
+            useEffect(() => {
+                if(isTimerActive && !isTimerPaused) {
+                    timerRef.current = setInterval(() => setTimeInMs(p => p+10), 10);
+                } else {
+                    clearInterval(timerRef.current);
+                }
+                return () => clearInterval(timerRef.current);
+            }, [isTimerActive, isTimerPaused]);
+            
+            // Handlers
             const handleTimerStart = () => { setIsTimerActive(true); setIsTimerPaused(false); };
             const handleTimerPause = () => { setIsTimerPaused(true); };
             const handleTimerStop = () => { const m = Math.ceil(timeInMs/60000); setFormData(p => ({...p, minutesUsed: m>0?m:1})); setIsTimerActive(false); setIsTimerPaused(true); };
             const handleTimerReset = () => { setTimeInMs(0); setIsTimerActive(false); setIsTimerPaused(true); };
             
-            const handleLogin = async () => { if(!authRef.current){setShowConfigModal(true);return;} try{ await window.FirebaseSDK.signInWithPopup(authRef.current, new window.FirebaseSDK.GoogleAuthProvider()); }catch(e){ if(e.code==='auth/unauthorized-domain') alert(`Please add domain: ${window.location.hostname} to Firebase Console`); } };
-            const handleLogout = () => { if(authRef.current) { window.FirebaseSDK.signOut(authRef.current); setUser(null); setIsGuestMode(false); setRecords([]); setGlobalPrices({ purpleStonePrice: 0, contMagicPrice: 0, gumBoxPrice: 0, silvervineBoxPrice: 0 }); window.location.reload(); } };
+            const handleLogin = async () => { if(!window.auth){setShowConfigModal(true);return;} try{ await window.FirebaseSDK.signInWithPopup(window.auth, new window.FirebaseSDK.GoogleAuthProvider()); }catch(e){ if(e.code==='auth/unauthorized-domain') alert(`Please add domain: ${window.location.hostname} to Firebase Console`); } };
+            const handleLogout = () => { if(window.auth) { window.FirebaseSDK.signOut(window.auth); setUser(null); setIsGuestMode(false); setRecords([]); setGlobalPrices({ purpleStonePrice: 0, contMagicPrice: 0, gumBoxPrice: 0, silvervineBoxPrice: 0 }); window.location.reload(); } };
             const handleGuestLogin = () => { setIsGuestMode(true); };
             const handleExitGuest = () => { setIsGuestMode(false); setUser(null); setRecords([]); window.location.reload(); };
             const saveConfig = () => { try { JSON.parse(configInput); localStorage.setItem('firebase_config_json', configInput); window.location.reload(); } catch(e){ alert("Invalid JSON"); }};
-            const updatePricesInCloud = async (np) => { if(user && dbRef.current) await window.FirebaseSDK.setDoc(window.FirebaseSDK.doc(dbRef.current, 'artifacts', 'ro-farm-app', 'users', user.uid, 'settings', 'prices'), np); };
+            const updatePricesInCloud = async (np) => { if(user && window.db) await window.FirebaseSDK.setDoc(window.FirebaseSDK.doc(window.db, 'artifacts', 'ro-farm-app', 'users', user.uid, 'settings', 'prices'), np); };
             
-            const handleSave = async (e) => {
-                e.preventDefault();
-                const priceSnapshot = { ...globalPrices };
-                const d = { 
-                    ...formData, 
-                    id: editingId||Date.now(), 
-                    timestamp: Date.now(), 
-                    mode: activeTab,
-                    prices: priceSnapshot, 
-                    revenue: Number(formData.trashAmount||0) + (formData.isSellingSpell?(Number(formData.purpleStoneCount||0)*priceSnapshot.purpleStonePrice):0) + (activeTab==='aogh'&&formData.isSellingMagic?(Number(formData.contMagicCount||0)*priceSnapshot.contMagicPrice):0), 
-                    totalCost: (formData.gumUsed*(priceSnapshot.gumBoxPrice/10)) + (formData.useSilvervine?(2*(priceSnapshot.silvervineBoxPrice/10)):0) + formData.otherCosts.reduce((a,b)=>a+Number(b.amount||0),0) 
-                };
-                d.profit = d.revenue - d.totalCost; d.revenuePerMinute = d.minutesUsed>0?d.revenue/d.minutesUsed:0;
-                
-                if(user && dbRef.current && !isGuestMode) {
-                    const { collection, doc, addDoc, updateDoc } = window.FirebaseSDK;
-                    const c = collection(dbRef.current, 'artifacts', 'ro-farm-app', 'users', user.uid, 'farm_records');
-                    if(editingId) await updateDoc(doc(dbRef.current, 'artifacts', 'ro-farm-app', 'users', user.uid, 'farm_records', editingId), d); else await addDoc(c, d);
-                } else { if(editingId) setRecords(records.map(r=>r.id===editingId?d:r)); else setRecords([d, ...records]); }
-                setIsAdding(false); setEditingId(null); setFormData({ date: new Date().toLocaleDateString('en-GB'), gumUsed: 0, trashAmount: "", purpleStoneCount: "", contMagicCount: "", isSellingSpell: false, isSellingMagic: false, useSilvervine: true, minutesUsed: 60, notes: "", otherCosts: [] });
-            };
-            const handleDelete = async (id) => { if(user && dbRef.current && !isGuestMode) { try{ await window.FirebaseSDK.deleteDoc(window.FirebaseSDK.doc(dbRef.current, 'artifacts', 'ro-farm-app', 'users', user.uid, 'farm_records', id)); }catch(e){} } else setRecords(records.filter(r=>r.id!==id)); };
             const addOtherCostField = () => setFormData(p => ({...p, otherCosts:[...p.otherCosts, {name:"", amount:""}]}));
             const removeOtherCostField = (i) => setFormData(p => ({...p, otherCosts:p.otherCosts.filter((_,x)=>x!==i)}));
             const updateOtherCost = (i, f, v) => { const n = [...formData.otherCosts]; n[i][f] = v; setFormData(p => ({...p, otherCosts:n})); };
-            const startEdit = (r) => { setFormData({...r, date: r.date}); setEditingId(r.id); setIsAdding(true); };
 
-            // Stats
-            const filteredRecords = useMemo(() => records.filter(r => (r.mode || 'ogh') === activeTab), [records, activeTab]);
-            const processedData = useMemo(() => {
-                const runsPerDate = {}; records.forEach(r => { if(r.useSilvervine!==false) { const d=r.date; runsPerDate[d]=(runsPerDate[d]||0)+1; } });
-                return filteredRecords.map(r => {
-                    const p = r.prices || globalPrices;
-                    const rev = Number(r.trashAmount||0) + (r.isSellingSpell?(Number(r.purpleStoneCount||0)*p.purpleStonePrice):0) + ((r.mode==='aogh'&&r.isSellingMagic)?(Number(r.contMagicCount||0)*p.contMagicPrice):0);
-                    let svCost = 0; if(r.useSilvervine!==false) { const c=runsPerDate[r.date]||1; svCost=(2*(p.silvervineBoxPrice/10))/c; }
-                    const gCost = r.gumUsed*(p.gumBoxPrice/10); const oCost = (r.otherCosts||[]).reduce((a,b)=>a+Number(b.amount||0),0); const tCost = gCost+svCost+oCost;
-                    return { ...r, revenue:rev, totalCost:tCost, profit:rev-tCost, revenuePerMinute:r.minutesUsed>0?rev/r.minutesUsed:0 };
-                }).sort((a,b) => {
-                    if (!a.date || !b.date) return 0;
-                    const [da, ma, ya] = a.date.split('/'); const [db, mb, yb] = b.date.split('/');
-                    const dateA = new Date(ya, ma-1, da); const dateB = new Date(yb, mb-1, db);
-                    return (dateA - dateB) || (a.timestamp - b.timestamp);
+            const handleSave = async (e) => {
+                e.preventDefault();
+                const p = { ...globalPrices }; // Snapshot prices
+                const d = { 
+                    ...formData, 
+                    id: editingId || Date.now(), 
+                    timestamp: Date.now(), 
+                    mode: activeTab,
+                    prices: p,
+                    revenue: Number(formData.trashAmount||0) + (formData.isSellingSpell?(Number(formData.purpleStoneCount||0)*p.purpleStonePrice):0) + (activeTab==='aogh' && formData.isSellingMagic ? (Number(formData.contMagicCount||0)*p.contMagicPrice) : 0),
+                    totalCost: (formData.gumUsed*(p.gumBoxPrice/10)) + (formData.useSilvervine ? (2*(p.silvervineBoxPrice/10)) : 0) + formData.otherCosts.reduce((a,b)=>a+Number(b.amount||0),0)
+                };
+                d.profit = d.revenue - d.totalCost;
+                d.revenuePerMinute = d.minutesUsed > 0 ? d.revenue / d.minutesUsed : 0;
+
+                if (user && window.db && !isGuestMode) {
+                    const { doc, setDoc } = window.FirebaseSDK;
+                    await setDoc(doc(window.db, 'artifacts', 'ro-farm-app', 'users', user.uid, 'farm_records', String(d.id)), d);
+                } else {
+                    setRecords(prev => editingId ? prev.map(r => r.id === editingId ? d : r) : [d, ...prev]);
+                }
+                setIsAdding(false); setEditingId(null);
+                setFormData({ date: new Date().toLocaleDateString('en-GB'), gumUsed: 0, trashAmount: "", purpleStoneCount: "", contMagicCount: "", isSellingSpell: false, isSellingMagic: false, useSilvervine: true, minutesUsed: 60, notes: "", otherCosts: [] });
+            };
+
+            const handleDelete = async (id) => {
+                if (user && window.db && !isGuestMode) {
+                    await window.FirebaseSDK.deleteDoc(window.FirebaseSDK.doc(window.db, 'artifacts', 'ro-farm-app', 'users', user.uid, 'farm_records', String(id)));
+                } else {
+                    setRecords(prev => prev.filter(r => r.id !== id));
+                }
+            };
+
+            const startEdit = (r) => {
+                setFormData({ 
+                    ...r, 
+                    // Ensure defaults for older records
+                    contMagicCount: r.contMagicCount || "",
+                    isSellingMagic: r.isSellingMagic || false,
+                    useSilvervine: r.useSilvervine !== false
                 });
-            }, [filteredRecords, globalPrices, records]);
-            
-            const chartData = useMemo(() => (gumFilter === 'all' ? processedData : processedData.filter(i => i.gumUsed === Number(gumFilter))).map(i => ({...i, purpleStoneCount: Number(i.purpleStoneCount||0), contMagicCount: Number(i.contMagicCount||0)})), [processedData, gumFilter]);
-            const chartConfig = useMemo(() => { switch(chartMode) { case 'revenue': return { key: 'revenue', color: '#10b981', label: 'รายได้', unit: 'Z' }; case 'stones': return { key: 'purpleStoneCount', color: '#f59e0b', label: 'หินม่วง', unit: 'ชิ้น' }; case 'magic': return { key: 'contMagicCount', color: '#ef4444', label: 'หินแดง', unit: 'ชิ้น' }; case 'profit': default: return { key: 'profit', color: '#a855f7', label: 'กำไร', unit: 'Z' }; } }, [chartMode]);
-            const sortedTableData = useMemo(() => { const d = [...processedData]; if(sortOrder==='revenue-desc') return d.sort((a,b)=>b.revenue-a.revenue); if(sortOrder==='revenue-asc') return d.sort((a,b)=>a.revenue-b.revenue); if(sortOrder==='profit-desc') return d.sort((a,b)=>b.profit-a.profit); if(sortOrder==='profit-asc') return d.sort((a,b)=>a.profit-b.profit); if(sortOrder==='date-asc') return d.sort((a,b)=>{const [d1,m1,y1]=a.date.split('/');const [d2,m2,y2]=b.date.split('/');return (new Date(y1,m1-1,d1)-new Date(y2,m2-1,d2))||(a.timestamp-b.timestamp)}); return d.sort((a,b)=>{const [d1,m1,y1]=a.date.split('/');const [d2,m2,y2]=b.date.split('/');return (new Date(y2,m2-1,d2)-new Date(y1,m1-1,d1))||(b.timestamp-a.timestamp)}); }, [processedData, sortOrder]);
-            const stats = useMemo(() => {
-                if(!processedData.length) return { totalProfit:0, avgRevenue:0, totalStoredStones:0, totalStoredMagic:0, minRevenue:0, maxRevenue:0, avgRevenuePerMinute:0 };
-                const revs = processedData.map(r => r.revenue);
-                return { totalProfit: processedData.reduce((a,b)=>a+b.profit,0), avgRevenue: revs.reduce((a,b)=>a+b,0)/processedData.length, totalStoredStones: processedData.reduce((a,b)=>a+(!b.isSellingSpell?Number(b.purpleStoneCount||0):0),0), totalStoredMagic: processedData.reduce((a,b)=>a+(!b.isSellingMagic?Number(b.contMagicCount||0):0),0), minRevenue: Math.min(...revs), maxRevenue: Math.max(...revs), avgRevenuePerMinute: processedData.reduce((a,b)=>a+(b.revenuePerMinute||0),0)/processedData.length };
-            }, [processedData]);
+                setEditingId(r.id); setIsAdding(true);
+            };
 
-            if (isLoading && user) return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white"><div className="text-center"><div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="font-bold tracking-widest animate-pulse">SYNCING DATA...</p></div></div>;
-            if (!user && !isGuestMode && records.length === 0 && !isAdding) return <WelcomeScreen onLogin={handleLogin} onGuest={handleGuestLogin} />;
+            // Stats Calc
+            const filteredRecords = records.filter(r => (r.mode || 'ogh') === activeTab);
+            const processedData = filteredRecords.map(r => {
+                const p = r.prices || globalPrices;
+                const rev = Number(r.trashAmount||0) + (r.isSellingSpell?(Number(r.purpleStoneCount||0)*p.purpleStonePrice):0) + ((r.mode==='aogh'&&r.isSellingMagic)?(Number(r.contMagicCount||0)*p.contMagicPrice):0);
+                
+                // Silvervine Calc
+                let svCost = 0;
+                if(r.useSilvervine !== false) {
+                    const runsThatDay = records.filter(rec => rec.date === r.date && rec.useSilvervine !== false).length;
+                    svCost = (2 * (p.silvervineBoxPrice / 10)) / (runsThatDay || 1);
+                }
+                const gumCost = r.gumUsed*(p.gumBoxPrice/10);
+                const totalCost = gumCost + svCost + (r.otherCosts||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+
+                return { ...r, revenue:rev, totalCost, profit:rev-totalCost, gumCost, silvervineCost:svCost };
+            }).sort((a,b) => {
+                const [d1,m1,y1] = a.date.split('/'); const [d2,m2,y2] = b.date.split('/');
+                return (new Date(y2,m2-1,d2) - new Date(y1,m1-1,d1)) || (b.timestamp - a.timestamp);
+            });
+
+            const stats = useMemo(() => ({
+                totalProfit: processedData.reduce((a,b)=>a+b.profit,0),
+                avgRevenue: processedData.length ? processedData.reduce((a,b)=>a+b.revenue,0)/processedData.length : 0,
+                maxRevenue: Math.max(0, ...processedData.map(r=>r.revenue)),
+                minRevenue: processedData.length ? Math.min(...processedData.map(r=>r.revenue)) : 0,
+                avgRevenuePerMinute: processedData.length ? processedData.reduce((a,b)=>a+(b.minutesUsed>0?b.revenue/b.minutesUsed:0),0)/processedData.length : 0,
+                totalStoredStones: processedData.reduce((a,b)=>a+(!b.isSellingSpell?Number(b.purpleStoneCount||0):0),0),
+                totalStoredMagic: processedData.reduce((a,b)=>a+(!b.isSellingMagic?Number(b.contMagicCount||0):0),0)
+            }), [processedData]);
+
+            const chartData = processedData.map(r => ({ ...r, purpleStoneCount: Number(r.purpleStoneCount||0), contMagicCount: Number(r.contMagicCount||0) })).reverse();
+
+            if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white font-bold">LOADING...</div>;
+            if (!user && !isGuestMode && records.length === 0 && !isAdding) return <WelcomeScreen onLogin={handleLogin} onGuest={()=>setIsGuestMode(true)} />;
 
             return (
-                <div className="min-h-screen p-4 md:p-6 lg:p-8 pb-32 max-w-7xl mx-auto safe-area-pb">
-                    {/* ... Modals (Config, Manual) ... */}
+                <div className="min-h-screen p-4 md:p-6 lg:p-8 pb-32 max-w-5xl mx-auto safe-area-pb">
+                    {/* ... Config Modal ... */}
                     {showConfigModal && (<div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"><div className="bg-slate-900 border border-slate-800 w-full max-w-lg p-8 rounded-[2rem] shadow-2xl relative"><button onClick={()=>setShowConfigModal(false)} className="absolute top-6 right-6 text-slate-500 hover:text-white"><Icon name="x"/></button><h3 className="text-xl font-black mb-4 text-purple-400">⚙️ ตั้งค่า Firebase</h3><textarea className="w-full h-40 bg-slate-950 border border-slate-700 rounded-xl p-4 text-xs font-mono text-green-400 outline-none mb-4" value={configInput} onChange={e=>setConfigInput(e.target.value)} placeholder='{ "apiKey": "..." }'></textarea><button onClick={saveConfig} className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold uppercase text-xs">บันทึก</button></div></div>)}
                     {showManual && (<div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={()=>setShowManual(false)}><div className="bg-slate-900 border border-slate-800 w-full max-w-md p-8 rounded-[2rem] shadow-2xl relative" onClick={e=>e.stopPropagation()}><button onClick={()=>setShowManual(false)} className="absolute top-6 right-6 text-slate-500 hover:text-white"><Icon name="x"/></button><h3 className="text-xl font-black mb-6 text-purple-400 italic">📱 วิธีติดตั้ง</h3><div className="space-y-4 text-sm text-slate-300"><p>1. <b>iOS:</b> Safari > แชร์ > Add to Home Screen</p><p>2. <b>Android:</b> Chrome > เมนู > Install App</p></div><button onClick={()=>setShowManual(false)} className="w-full mt-8 bg-slate-800 py-3 rounded-xl font-bold uppercase text-xs">ตกลง</button></div></div>)}
 
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div className="flex justify-between items-center mb-6">
                         <div>
-                            <div className="flex flex-wrap items-center gap-2 md:gap-4"><h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-purple-400 via-purple-500 to-pink-500 bg-clip-text text-transparent uppercase italic">Old Glast Heim</h1>
-                                <div className="flex gap-2">
-                                    <a href="https://www.youtube.com/@SDekza-RO" target="_blank" className="yt-card-horizontal">
-                                        <div className="yt-avatar"></div><div className="yt-info"><h2 className="yt-name">SDekza</h2><div className="yt-stats">140+ Subs</div></div><div className="yt-btn"><svg className="yt-icon" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.005 3.005 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>Subscribe</div>
-                                    </a>
-                                    {!user && <button onClick={() => setShowManual(true)} className="inline-flex items-center gap-2 text-[10px] font-black text-blue-400 hover:text-blue-300 uppercase tracking-widest px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-2xl transition-all"><Icon name="help-circle" size={14}/><span>ติดตั้งแอป</span></button>}
-                                </div>
-                            </div>
-                            <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-black mt-2">{user ? "Cloud Farming Dashboard" : "Offline Farming Dashboard"}</p>
+                            <h1 className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent italic">Old Glast Heim</h1>
+                            <p className="text-xs text-slate-500 font-bold tracking-widest">{user ? 'CLOUD MODE' : 'OFFLINE MODE'}</p>
                         </div>
-                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                             {user ? (<div className="flex items-center gap-3 bg-slate-900 p-1 pr-4 rounded-2xl border border-slate-800"><img src={user.photoURL || "https://via.placeholder.com/32"} className="w-8 h-8 rounded-xl" /><div className="flex flex-col"><span className="text-[10px] font-black text-white truncate max-w-[100px]">{user.displayName}</span><button onClick={handleLogout} className="text-[8px] font-bold text-red-500 uppercase text-left">Logout</button></div></div>) : (<div className="flex gap-2">{isGuestMode && <button onClick={handleExitGuest} className="text-[10px] text-red-500 font-bold px-3 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition-all">Exit Guest</button>}<button onClick={handleLogin} className="btn-google text-[10px] py-2 cursor-pointer"><GoogleLogo /> Login</button></div>)}
-                             <button onClick={() => { setIsAdding(!isAdding); if(isAdding) setEditingId(null); }} className="flex-1 md:flex-none bg-purple-600 hover:bg-purple-700 transition-all px-6 py-3 rounded-2xl font-black flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(168,85,247,0.3)] active:scale-95 uppercase tracking-widest text-xs"><Icon name={isAdding ? "layout-dashboard" : "plus-circle"} /> {isAdding ? "หน้าหลัก" : "บันทึก"}</button>
+                        <div className="flex gap-2">
+                             {user && <button onClick={() => window.FirebaseSDK.signOut(window.auth).then(()=>{setUser(null); setIsGuestMode(false);})} className="text-[10px] text-red-400 border border-red-500/30 px-3 py-1 rounded-lg hover:bg-red-500/10">LOGOUT</button>}
+                             {isGuestMode && <button onClick={() => {setIsGuestMode(false); setRecords([]);}} className="text-[10px] text-slate-400 border border-slate-600 px-3 py-1 rounded-lg hover:bg-slate-800">EXIT</button>}
+                             <button onClick={() => setIsAdding(!isAdding)} className="bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg flex items-center gap-2"><Icon name={isAdding ? "layout-dashboard" : "plus-circle"} /> {isAdding ? "หน้าหลัก" : "บันทึก"}</button>
                         </div>
                     </div>
-                    
-                    <div className="flex justify-center mb-8"><div className="bg-slate-900/50 p-1 rounded-2xl border border-slate-800 flex gap-2"><button onClick={() => setActiveTab('ogh')} className={`px-6 py-2 rounded-xl text-xs font-black uppercase transition-all ${activeTab === 'ogh' ? 'bg-purple-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}>Normal (OGH)</button><button onClick={() => setActiveTab('aogh')} className={`px-6 py-2 rounded-xl text-xs font-black uppercase transition-all ${activeTab === 'aogh' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}>Hard (AOGH)</button></div></div>
 
-                    {/* Content */}
-                    {!isAdding && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-fade-in">
-                            {records.length === 0 ? (
-                                <div className="col-span-3 bg-slate-900 border border-slate-800 p-12 rounded-[2.5rem] shadow-xl text-center flex flex-col items-center justify-center h-[300px]">
-                                    <div className="w-20 h-20 bg-slate-800/50 rounded-full flex items-center justify-center mb-4 border border-slate-700"><Icon name="scroll" size={40} className="text-slate-600" /></div>
-                                    <h3 className="text-xl font-black text-slate-300 mb-2">ยังไม่มีข้อมูลการฟาร์ม</h3>
-                                    <p className="text-slate-500 text-xs mb-6">เริ่มบันทึกรอบแรกของคุณเพื่อดูสถิติ</p>
-                                    <button onClick={() => setIsAdding(true)} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg active:scale-95 text-xs"><Icon name="plus-circle" size={16} /> บันทึกรอบแรก</button>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] shadow-xl"><div className="p-3 bg-green-500/10 rounded-xl text-green-500 w-fit mb-4"><Icon name="wallet" size={24} /></div><h3 className="text-slate-400 text-xs font-black uppercase mb-1 tracking-widest">กำไรรวมสุทธิ</h3><p className="text-3xl font-black">{formatMZeny(stats.totalProfit)} <span className="text-sm text-slate-600 font-bold ml-1">Zeny</span></p></div>
-                                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] shadow-xl relative border-b-blue-500/30"><div className="p-3 bg-blue-500/10 rounded-xl text-blue-500 w-fit mb-4"><Icon name="trending-up" size={24} /></div><h3 className="text-slate-400 text-xs font-black uppercase mb-1 tracking-widest">ยอดขายเฉลี่ย</h3><p className="text-3xl font-black">{formatMZeny(stats.avgRevenue)} <span className="text-sm text-slate-600 font-bold ml-1">Zeny</span></p><div className="flex flex-wrap items-center gap-2 mt-2 text-[10px] font-bold uppercase text-slate-500"><span className="text-green-500 flex items-center gap-1 bg-green-500/10 px-2 py-1 rounded"><Icon name="arrow-up" size={10}/> {formatMZeny(stats.maxRevenue)}</span><span className="text-red-500 flex items-center gap-1 bg-red-500/10 px-2 py-1 rounded"><Icon name="arrow-down" size={10}/> {formatMZeny(stats.minRevenue)}</span><span className="text-blue-400 flex items-center gap-1"><Icon name="clock" size={12}/> เฉลี่ย {formatZeny(stats.avgRevenuePerMinute)} Z/นาที</span></div></div>
-                                    {activeTab === 'ogh' ? (
-                                        <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] shadow-xl border-b-amber-500/30"><div className="p-3 bg-amber-500/10 rounded-xl text-amber-500 w-fit mb-4"><Icon name="archive" size={24} /></div><h3 className="text-slate-400 text-xs font-black uppercase mb-1 tracking-widest">Coagulated Spell ในคลัง</h3><p className="text-3xl font-black">{stats.totalStoredStones.toLocaleString()} <span className="text-sm text-slate-600 font-bold ml-1">ชิ้น</span></p><div className="text-[10px] text-amber-400 mt-2 font-bold uppercase italic flex items-center gap-1"><Icon name="sparkles" size={12} /> มูลค่า: {formatMZeny(stats.totalStoredStones * globalPrices.purpleStonePrice)} Zeny</div></div>
-                                    ) : (
-                                        <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] shadow-xl border-b-red-500/30"><div className="flex items-center justify-between mb-4"><div className="p-3 bg-red-500/10 rounded-xl text-red-500"><Icon name="skull" size={24} /></div><div className="text-right"><p className="text-[10px] text-slate-400 uppercase tracking-tighter">Coagulated</p><p className="text-lg font-black text-slate-200">{stats.totalStoredStones.toLocaleString()} <span className="text-[8px]">ชิ้น</span></p></div></div><h3 className="text-slate-400 text-xs font-black uppercase mb-1 tracking-widest">Contaminated Magic ในคลัง</h3><p className="text-3xl font-black">{stats.totalStoredMagic.toLocaleString()} <span className="text-sm text-slate-600 font-bold ml-1">ชิ้น</span></p><div className="text-[10px] text-red-400 mt-2 font-bold uppercase italic flex items-center gap-1"><Icon name="sparkles" size={12} /> รวมมูลค่า: {formatMZeny((stats.totalStoredMagic * globalPrices.contMagicPrice) + (stats.totalStoredStones * globalPrices.purpleStonePrice))} Zeny</div></div>
-                                    )}
-                                </>
-                            )}
+                    {/* Tabs */}
+                    <div className="flex justify-center mb-6">
+                        <div className="bg-slate-900/80 p-1 rounded-xl border border-slate-800 flex gap-1">
+                            <button onClick={()=>setActiveTab('ogh')} className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeTab==='ogh'?'bg-purple-600 text-white shadow':'text-slate-500 hover:text-white'}`}>OGH (Normal)</button>
+                            <button onClick={()=>setActiveTab('aogh')} className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeTab==='aogh'?'bg-red-600 text-white shadow':'text-slate-500 hover:text-white'}`}>AOGH (Hard)</button>
                         </div>
-                    )}
+                    </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Same Dashboard Body (Form/Table/Sidebar) */}
-                        <div className="lg:col-span-2">
-                            {isAdding ? (
-                                <form onSubmit={handleSave} className="bg-slate-900 border border-slate-800 p-6 md:p-10 rounded-[2.5rem] shadow-xl animate-fade-in">
-                                    {/* ... Form Content (Preserved) ... */}
-                                    <div className="flex justify-between items-center mb-8"><h2 className="text-xl md:text-2xl font-black uppercase text-purple-400 italic flex items-center gap-3"><Icon name={editingId ? "pencil" : "plus-circle"} size={24} /> {editingId ? "แก้ไข" : "บันทึก"} ({activeTab.toUpperCase()})</h2><label className="flex items-center gap-2 cursor-pointer bg-slate-950 p-2 px-3 rounded-xl border border-slate-800 hover:border-slate-700 transition-all"><div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${formData.useSilvervine ? 'bg-green-500 border-green-500' : 'border-slate-600'}`}>{formData.useSilvervine && <Icon name="check" size={10} className="text-white" />}</div><input type="checkbox" className="hidden" checked={formData.useSilvervine} onChange={e => setFormData({...formData, useSilvervine: e.target.checked})} /><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">ใช้ Silvervine <Silvervine16Bit className="w-3 h-3"/></span></label></div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                        <div className="space-y-3 h-24"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 h-4"><Icon name="calendar" size={14}/> วันที่ฟาร์ม</label><input type="text" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white font-bold outline-none focus:ring-2 focus:ring-purple-500/50" required placeholder="DD/MM/YYYY" /></div>
-                                        <div className="space-y-3 h-24"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 h-4"><BubbleGum16Bit className="w-4 h-4"/> Bubble Gum</label><div className="flex bg-slate-950 p-1 rounded-2xl border border-slate-800 h-[58px]">{[0, 1, 2].map(n => (<button type="button" key={n} onClick={() => setFormData({...formData, gumUsed: n})} className={`flex-1 rounded-xl text-sm font-black transition-all ${formData.gumUsed === n ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>{n} EA</button>))}</div></div>
+                    {/* MAIN CONTENT */}
+                    {!isAdding ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in">
+                            {/* Stat Cards */}
+                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-3xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-3 opacity-10"><Icon name="wallet" size={64}/></div>
+                                <h3 className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">กำไรรวมสุทธิ</h3>
+                                <p className="text-2xl font-black text-white">{formatMZeny(stats.totalProfit)} <span className="text-xs text-slate-600">Z</span></p>
+                            </div>
+                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-3xl">
+                                <h3 className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">ยอดขายเฉลี่ย</h3>
+                                <p className="text-2xl font-black text-white">{formatMZeny(stats.avgRevenue)} <span className="text-xs text-slate-600">Z</span></p>
+                                <div className="flex items-center gap-2 mt-2 text-[10px] font-bold">
+                                    <span className="text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded flex items-center gap-1"><Icon name="clock" size={10} /> {formatZeny(stats.avgRevenuePerMinute)}/m</span>
+                                </div>
+                            </div>
+                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-3xl">
+                                <h3 className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">มูลค่าในคลัง ({activeTab.toUpperCase()})</h3>
+                                <div className="flex items-baseline gap-2">
+                                    <p className="text-2xl font-black text-amber-400">{formatMZeny((stats.totalStoredStones * globalPrices.purpleStonePrice) + (stats.totalStoredMagic * globalPrices.contMagicPrice))}</p>
+                                    <span className="text-[10px] text-slate-500 font-bold">Zeny</span>
+                                </div>
+                                <div className="mt-2 space-y-1">
+                                    <p className="text-[10px] text-slate-400 flex justify-between"><span>Spell:</span> <span className="text-white">{stats.totalStoredStones} ea</span></p>
+                                    {activeTab === 'aogh' && <p className="text-[10px] text-slate-400 flex justify-between"><span>Magic:</span> <span className="text-white">{stats.totalStoredMagic} ea</span></p>}
+                                </div>
+                            </div>
+
+                            {/* Chart Area */}
+                            <div className="md:col-span-2 bg-slate-900 border border-slate-800 p-6 rounded-3xl h-64">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={chartData}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                        <XAxis dataKey="date" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} />
+                                        <YAxis stroke="#475569" fontSize={10} tickFormatter={v => `${v/1000}k`} tickLine={false} axisLine={false} />
+                                        <Tooltip contentStyle={{backgroundColor:'#0f172a', border:'none', borderRadius:'8px'}} itemStyle={{fontSize:'12px'}} formatter={(v)=>[formatZeny(v), "Profit"]} />
+                                        <Line type="monotone" dataKey="profit" stroke="#a855f7" strokeWidth={3} dot={false} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            {/* Sidebar Group */}
+                            <div className="space-y-4">
+                                {/* Price Card */}
+                                <div className={`bg-slate-900 border p-5 rounded-3xl relative ${!records.length && Object.values(globalPrices).every(v=>v===0) ? 'border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'border-slate-800'}`}>
+                                    {!records.length && Object.values(globalPrices).every(v=>v===0) && <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow animate-bounce">! ตั้งราคา</span>}
+                                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">ราคาตลาด (Market Price)</h4>
+                                    <div className="space-y-3">
+                                        {[
+                                            {k:'purpleStonePrice', l:'Coagulated Spell', i:<SVGs.Spell/>},
+                                            ...(activeTab==='aogh' ? [{k:'contMagicPrice', l:'Contaminated Magic', i:<SVGs.Magic/>}] : []),
+                                            {k:'gumBoxPrice', l:'Gum Box', i:<SVGs.Gum/>},
+                                            {k:'silvervineBoxPrice', l:'Silvervine Box', i:<SVGs.Silvervine/>}
+                                        ].map(o => (
+                                            <div key={o.k} className="flex justify-between items-center">
+                                                <span className="flex items-center gap-2 text-[10px] text-slate-400">{o.i} {o.l}</span>
+                                                <input type="number" className={`bg-transparent text-right text-xs font-bold w-20 outline-none ${!globalPrices[o.k] ? 'text-rose-400 placeholder-rose-500/50' : 'text-white'}`} placeholder="0" value={globalPrices[o.k] || ''} onChange={e => { const v=Number(e.target.value); setGlobalPrices(p => { const n={...p, [o.k]:v}; if(user && window.db) window.FirebaseSDK.setDoc(window.FirebaseSDK.doc(window.db, 'artifacts', 'ro-farm-app', 'users', user.uid, 'settings', 'prices'), n); return n; }); }} />
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="grid grid-cols-2 gap-6 mb-6">
-                                        <div className="space-y-3"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 h-4"><Icon name="clock" size={14}/> เวลาที่ใช้</label><div className="relative h-[58px]"><input type="number" value={formData.minutesUsed} onChange={e => setFormData({...formData, minutesUsed: Number(e.target.value)})} className="w-full h-full bg-slate-950 border border-slate-800 rounded-2xl p-4 pr-12 text-white font-bold outline-none" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-500 uppercase tracking-widest pointer-events-none">นาที</span></div></div>
-                                        <div className="space-y-3"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest h-4 flex items-center">ยอดขาย</label><div className="relative h-[58px]"><input type="number" value={formData.trashAmount} onChange={e => setFormData({...formData, trashAmount: e.target.value})} className="w-full h-full bg-slate-950 border border-slate-800 rounded-2xl p-4 pr-12 text-white font-bold outline-none" placeholder="" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-500 uppercase tracking-widest pointer-events-none">Zeny</span></div></div>
+                                </div>
+
+                                {/* Timer Card (Compact) */}
+                                <div className="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Timer</h4>
+                                        <span className="text-xl font-black text-white tabular-nums">{formatTimer(timeInMs)}</span>
                                     </div>
-                                    <div className={`grid gap-6 mb-6 ${activeTab === 'aogh' ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between items-center h-4"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><CoagulatedSpell16Bit className="w-4 h-4"/> Coagulated Spell</label></div>
-                                            <div className="flex gap-4 h-[58px]">
-                                                <div className="relative flex-1"><input type="number" value={formData.purpleStoneCount} onChange={e => setFormData({...formData, purpleStoneCount: e.target.value})} className="w-full h-full bg-slate-950 border border-slate-800 rounded-2xl p-4 pr-12 text-white font-bold outline-none" placeholder="" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-500 uppercase tracking-widest pointer-events-none">ชิ้น</span></div>
-                                                <div className="flex bg-slate-950 p-1 rounded-2xl border border-slate-800 w-36 shrink-0">
-                                                    <button type="button" onClick={() => setFormData({...formData, isSellingSpell: true})} className={`flex-1 rounded-xl text-[10px] font-black uppercase transition-all ${formData.isSellingSpell ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>Sell</button>
-                                                    <button type="button" onClick={() => setFormData({...formData, isSellingSpell: false})} className={`flex-1 rounded-xl text-[10px] font-black uppercase transition-all ${!formData.isSellingSpell ? 'bg-green-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>Store</button>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <button onClick={() => { setIsTimerActive(!isTimerActive); setIsTimerPaused(false); }} className={`col-span-2 rounded-lg text-[10px] font-bold py-3 ${isTimerActive ? 'bg-amber-500 text-white' : 'bg-green-600 text-white'}`}>{isTimerActive ? 'PAUSE' : 'START'}</button>
+                                        <button onClick={() => { setTimeInMs(0); setIsTimerActive(false); }} className="bg-slate-800 text-slate-400 hover:text-white rounded-lg text-[10px] font-bold py-3">RESET</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* History Table */}
+                            <div className="md:col-span-3 bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden mt-4">
+                                <div className="p-6 border-b border-slate-800 flex justify-between items-center">
+                                    <h3 className="text-sm font-black text-white flex items-center gap-2"><Icon name="history"/> ประวัติการฟาร์ม</h3>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-xs">
+                                        <thead className="bg-slate-950/50 text-slate-500 font-bold uppercase tracking-wider">
+                                            <tr>
+                                                <th className="px-6 py-4">วันที่</th>
+                                                <th className="px-6 py-4">ไอเทม</th>
+                                                <th className="px-6 py-4 text-right">กำไรสุทธิ</th>
+                                                <th className="px-6 py-4 text-center">จัดการ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-800">
+                                            {processedData.map(r => (
+                                                <React.Fragment key={r.id}>
+                                                    <tr className="hover:bg-slate-800/50 cursor-pointer transition-colors" onClick={() => setExpandedId(expandedId===r.id?null:r.id)}>
+                                                        <td className="px-6 py-4 font-bold text-slate-300">{r.date}</td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex gap-2">
+                                                                <span className="bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 font-bold">GUM {r.gumUsed}</span>
+                                                                <span className={`bg-${r.isSellingSpell?'green':'amber'}-500/10 text-${r.isSellingSpell?'green':'amber'}-400 px-2 py-0.5 rounded border border-${r.isSellingSpell?'green':'amber'}-500/20 font-bold`}>{r.purpleStoneCount} Spell</span>
+                                                                {r.mode==='aogh' && <span className={`bg-${r.isSellingMagic?'green':'red'}-500/10 text-${r.isSellingMagic?'green':'red'}-400 px-2 py-0.5 rounded border border-${r.isSellingMagic?'green':'red'}-500/20 font-bold`}>{r.contMagicCount} Magic</span>}
+                                                            </div>
+                                                        </td>
+                                                        <td className={`px-6 py-4 text-right font-black ${r.profit>0?'text-green-400':'text-red-400'}`}>{formatZeny(r.profit)}</td>
+                                                        <td className="px-6 py-4 text-center">
+                                                            <button onClick={(e)=>{e.stopPropagation();startEdit(r)}} className="text-slate-500 hover:text-white mr-2"><Icon name="pencil" size={14}/></button>
+                                                            <button onClick={(e)=>{e.stopPropagation();handleDelete(r.id)}} className="text-slate-500 hover:text-red-500"><Icon name="trash-2" size={14}/></button>
+                                                        </td>
+                                                    </tr>
+                                                    {expandedId === r.id && (
+                                                        <tr className="bg-slate-950/30">
+                                                            <td colSpan="4" className="px-6 py-4">
+                                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[10px] text-slate-400">
+                                                                    <div><p className="font-bold text-slate-500 mb-1">รายรับ</p><p>Trash: {formatZeny(r.trashAmount)}</p><p>Total: <span className="text-green-400">{formatZeny(r.revenue)}</span></p></div>
+                                                                    <div><p className="font-bold text-slate-500 mb-1">ต้นทุน</p><p>Gum: {formatZeny(r.gumCost)}</p><p>Silvervine: {formatZeny(r.silvervineCost)}</p><p>Total: <span className="text-red-400">{formatZeny(r.totalCost)}</span></p></div>
+                                                                    <div><p className="font-bold text-slate-500 mb-1">เวลา</p><p>{r.minutesUsed} นาที</p><p>Avg: {formatZeny(r.revenuePerMinute)}/m</p></div>
+                                                                    <div><p className="font-bold text-slate-500 mb-1">Note</p><p className="italic">{r.notes || "-"}</p></div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </React.Fragment>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        // ADD FORM
+                        <form onSubmit={handleSave} className="bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-xl max-w-2xl mx-auto animate-slide-up">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-black text-white flex items-center gap-2"><Icon name={editingId?"pencil":"plus-circle"} className="text-purple-500"/> {editingId?"แก้ไขข้อมูล":"บันทึกข้อมูล"}</h2>
+                                <label className="flex items-center gap-2 cursor-pointer bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-slate-700 transition-all">
+                                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${formData.useSilvervine?'bg-green-500 border-green-500':'border-slate-600'}`}>{formData.useSilvervine && <Icon name="check" size={10} className="text-white"/>}</div>
+                                    <input type="checkbox" className="hidden" checked={formData.useSilvervine} onChange={e=>setFormData({...formData, useSilvervine:e.target.checked})}/>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">ใช้ Silvervine <SVGs.Silvervine/></span>
+                                </label>
+                            </div>
+
+                            <div className="space-y-6">
+                                {/* Row 1 */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1"><Icon name="calendar" size={12}/> วันที่ (DD/MM/YYYY)</label>
+                                        <input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm font-bold" value={formData.date} onChange={e=>setFormData({...formData, date:e.target.value})} required placeholder="DD/MM/YYYY" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1"><SVGs.Gum/> Bubble Gum</label>
+                                        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+                                            {[0,1,2].map(n => <button type="button" key={n} onClick={()=>setFormData({...formData, gumUsed:n})} className={`flex-1 rounded-lg text-xs font-bold py-2 transition-all ${formData.gumUsed===n ? 'bg-blue-600 text-white shadow':'text-slate-500 hover:text-slate-300'}`}>{n}</button>)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Row 2 */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1"><Icon name="clock" size={12}/> เวลาที่ใช้ (นาที)</label>
+                                        <input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm font-bold" value={formData.minutesUsed} onChange={e=>setFormData({...formData, minutesUsed:Number(e.target.value)})} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">ยอดขาย (Zeny)</label>
+                                        <input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm font-bold" value={formData.trashAmount} onChange={e=>setFormData({...formData, trashAmount:e.target.value})} placeholder="0" />
+                                    </div>
+                                </div>
+
+                                {/* Row 3 */}
+                                <div className="space-y-4 pt-4 border-t border-slate-800/50">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {/* Coagulated */}
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1"><SVGs.Spell/> Coagulated Spell</label>
+                                            <div className="flex gap-2">
+                                                <input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm font-bold" value={formData.purpleStoneCount} onChange={e=>setFormData({...formData, purpleStoneCount:e.target.value})} placeholder="0" />
+                                                <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+                                                    <button type="button" onClick={()=>setFormData({...formData, isSellingSpell:true})} className={`px-3 rounded-lg text-[10px] font-bold uppercase transition-all ${formData.isSellingSpell ? 'bg-rose-600 text-white shadow' : 'text-slate-500'}`}>Sell</button>
+                                                    <button type="button" onClick={()=>setFormData({...formData, isSellingSpell:false})} className={`px-3 rounded-lg text-[10px] font-bold uppercase transition-all ${!formData.isSellingSpell ? 'bg-green-600 text-white shadow' : 'text-slate-500'}`}>Store</button>
                                                 </div>
                                             </div>
                                         </div>
+                                        
+                                        {/* Magic (AOGH only) */}
                                         {activeTab === 'aogh' && (
-                                            <div className="space-y-3 animate-in fade-in">
-                                                <div className="flex justify-between items-center h-4"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><ContaminatedMagic16Bit className="w-4 h-4"/> Contaminated Magic</label></div>
-                                                <div className="flex gap-4 h-[58px]">
-                                                    <div className="relative flex-1"><input type="number" value={formData.contMagicCount} onChange={e => setFormData({...formData, contMagicCount: e.target.value})} className="w-full h-full bg-slate-950 border border-slate-800 rounded-2xl p-4 pr-12 text-white font-bold outline-none border-red-500/30 focus:border-red-500" placeholder="" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-500 uppercase tracking-widest pointer-events-none">ชิ้น</span></div>
-                                                    <div className="flex bg-slate-950 p-1 rounded-2xl border border-slate-800 w-36 shrink-0">
-                                                        <button type="button" onClick={() => setFormData({...formData, isSellingMagic: true})} className={`flex-1 rounded-xl text-[10px] font-black uppercase transition-all ${formData.isSellingMagic ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>Sell</button>
-                                                        <button type="button" onClick={() => setFormData({...formData, isSellingMagic: false})} className={`flex-1 rounded-xl text-[10px] font-black uppercase transition-all ${!formData.isSellingMagic ? 'bg-green-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>Store</button>
+                                            <div className="space-y-2 animate-fade-in">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1"><SVGs.Magic/> Contaminated Magic</label>
+                                                <div className="flex gap-2">
+                                                    <input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm font-bold" value={formData.contMagicCount} onChange={e=>setFormData({...formData, contMagicCount:e.target.value})} placeholder="0" />
+                                                    <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+                                                        <button type="button" onClick={()=>setFormData({...formData, isSellingMagic:true})} className={`px-3 rounded-lg text-[10px] font-bold uppercase transition-all ${formData.isSellingMagic ? 'bg-rose-600 text-white shadow' : 'text-slate-500'}`}>Sell</button>
+                                                        <button type="button" onClick={()=>setFormData({...formData, isSellingMagic:false})} className={`px-3 rounded-lg text-[10px] font-bold uppercase transition-all ${!formData.isSellingMagic ? 'bg-green-600 text-white shadow' : 'text-slate-500'}`}>Store</button>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
                                     </div>
-                                    
-                                    <div className="md:col-span-2 space-y-3 border-t border-slate-800 pt-6"><div className="flex justify-between items-center"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Icon name="plus" size={14}/> ต้นทุนเพิ่มเติม</label><button type="button" onClick={addOtherCostField} className="text-[9px] font-black px-3 py-1 rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-all">+ เพิ่มรายการ</button></div>{formData.otherCosts.map((cost, idx) => (<div key={idx} className="flex gap-3"><input type="text" value={cost.name} onChange={(e) => updateOtherCost(idx, 'name', e.target.value)} className="flex-[2] bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-xs font-bold outline-none" placeholder="ชื่อรายการ..." /><div className="flex-1 relative"><input type="number" value={cost.amount} onChange={(e) => updateOtherCost(idx, 'amount', e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 pr-8 text-white text-xs font-bold outline-none text-right" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-slate-600">Z</span></div><button type="button" onClick={() => removeOtherCostField(idx)} className="text-red-500 p-2 hover:bg-red-500/10 rounded-xl"><Icon name="minus-circle" size={18}/></button></div>))}</div>
-                                    <div className="md:col-span-2 space-y-3 pt-6"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Icon name="file-text" size={14}/> บันทึกเพิ่มเติม (Memo)</label><textarea value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white text-sm outline-none font-medium h-24 mt-2 focus:border-purple-500/50 transition-all" placeholder="จดบันทึกรายละเอียด..."></textarea></div>
-                                    <div className="mt-10 pt-8 border-t border-slate-800 flex gap-4"><button type="button" onClick={() => setIsAdding(false)} className="flex-1 bg-slate-800 py-5 rounded-2xl font-black uppercase tracking-widest transition-all hover:bg-slate-700">ยกเลิก</button><button type="submit" className="flex-[2] bg-gradient-to-r from-purple-600 to-pink-600 py-5 rounded-2xl font-black uppercase tracking-widest shadow-2xl active:scale-95">{editingId ? "อัปเดตข้อมูล" : "บันทึกข้อมูลเข้าระบบ"}</button></div>
-                                </form>
-                            ) : (
-                                <>
-                                    {records.length > 0 && (
-                                        <>
-                                            {/* Chart */}
-                                            <div className="bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-xl h-[400px] md:h-[450px] mb-8 flex flex-col animate-fade-in"><div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4"><div className="flex items-center gap-4"><h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3 italic"><Icon name="trending-up" className="text-green-500"/> สถิติ ({activeTab.toUpperCase()})</h2><select value={gumFilter} onChange={e => setGumFilter(e.target.value)} className="bg-slate-950 text-[10px] font-black uppercase p-2 rounded-xl border border-slate-800 outline-none text-slate-300"><option value="all">ทุก Gum</option><option value="0">Gum 0</option><option value="1">Gum 1</option><option value="2">Gum 2</option></select></div><div className="flex bg-slate-950 p-1 rounded-2xl border border-slate-800"><button onClick={() => setChartMode('profit')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${chartMode === 'profit' ? 'bg-purple-600 text-white shadow-lg' : 'text-slate-500'}`}>กำไร</button><button onClick={() => setChartMode('revenue')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${chartMode === 'revenue' ? 'bg-green-600 text-white shadow-lg' : 'text-slate-500'}`}>รายได้</button><button onClick={() => setChartMode('stones')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${chartMode === 'stones' ? 'bg-amber-500 text-white shadow-lg' : 'text-slate-500'}`}>หินม่วง</button>{activeTab === 'aogh' && <button onClick={() => setChartMode('magic')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${chartMode === 'magic' ? 'bg-red-500 text-white shadow-lg' : 'text-slate-500'}`}>หินแดง</button>}</div></div><div className="flex-1 w-full"><ResponsiveContainer width="100%" height="100%"><LineChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} /><XAxis dataKey="date" stroke="#475569" fontSize={10} axisLine={false} tickLine={false} /><YAxis stroke="#475569" fontSize={10} tickFormatter={v => `${v/1000}k`} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px' }} formatter={(v) => [formatZeny(v) + ' ' + chartConfig.unit, chartConfig.label]} /><Line type="monotone" dataKey={chartConfig.key} stroke={chartConfig.color} strokeWidth={4} dot={{ r: 4 }} /></LineChart></ResponsiveContainer></div></div>
-                                            
-                                            {/* History Table */}
-                                            <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-xl overflow-hidden animate-fade-in">
-                                                <div className="p-8 border-b border-slate-800 flex justify-between items-center"><h2 className="text-xl font-black text-blue-400 italic flex items-center gap-3 tracking-tight"><Icon name="history" /> ประวัติการฟาร์ม</h2><select className="bg-slate-950 text-[10px] font-black uppercase p-2 rounded-xl border border-slate-800 outline-none text-slate-300" onChange={e => setSortOrder(e.target.value)}><option value="date-desc">ล่าสุด</option><option value="date-asc">เก่าสุด</option><option value="revenue-desc">รายได้ สูง-ต่ำ</option><option value="profit-desc">กำไร สูง-ต่ำ</option></select></div>
-                                                <div className="overflow-x-auto custom-scrollbar"><table className="w-full text-left"><thead className="bg-slate-900/50 border-b border-slate-800"><tr><th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">วันที่</th><th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">ข้อมูลการฟาร์ม</th><th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase text-right tracking-widest whitespace-nowrap">กำไรสุทธิ</th><th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase text-center tracking-widest whitespace-nowrap">จัดการ</th></tr></thead><tbody className="divide-y divide-slate-800/50">{sortedTableData.map((record) => (<React.Fragment key={record.id}><tr className="hover:bg-white/[0.02] cursor-pointer transition-colors" onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}><td className="px-6 py-4 font-bold text-sm text-slate-300 flex items-center gap-2 whitespace-nowrap">{record.date} {expandedId === record.id ? <Icon name="chevron-up" size={14}/> : <Icon name="chevron-down" size={14}/>}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex gap-2">
-                                                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black border border-emerald-500/20 bg-emerald-500/10 text-emerald-400`}>
-                                                            GUM {record.gumUsed}
-                                                        </span>
-                                                        
-                                                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black border border-purple-500/20 bg-purple-500/10 text-purple-400 flex items-center gap-1`}>
-                                                            <CoagulatedSpell16Bit className="w-3 h-3" />
-                                                            {record.purpleStoneCount || 0}
-                                                            <span className="opacity-60 text-[8px] uppercase">
-                                                                {record.isSellingSpell ? '(Sell)' : '(Keep)'}
-                                                            </span>
-                                                        </span>
+                                </div>
 
-                                                        {(record.mode === 'aogh' || record.contMagicCount > 0) && (
-                                                             <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black border border-rose-500/20 bg-rose-500/10 text-rose-400 flex items-center gap-1`}>
-                                                                <ContaminatedMagic16Bit className="w-3 h-3" />
-                                                                {record.contMagicCount || 0}
-                                                                <span className="opacity-60 text-[8px] uppercase">
-                                                                    {record.isSellingMagic ? '(Sell)' : '(Keep)'}
-                                                                </span>
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className={`px-6 py-4 text-right font-black text-lg tabular-nums whitespace-nowrap ${record.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>{formatZeny(record.profit)} <span className="text-[10px] opacity-40 ml-1">Z</span></td><td className="px-6 py-4 text-center whitespace-nowrap"><div className="flex justify-center gap-2"><button onClick={(e) => { e.stopPropagation(); startEdit(record); }} className="text-slate-500 hover:text-purple-400 p-2 bg-slate-800/50 rounded-xl"><Icon name="pencil" size={14} /></button><button onClick={(e) => { e.stopPropagation(); handleDelete(record.id); }} className="text-slate-500 hover:text-red-500 p-2 bg-slate-800/50 rounded-xl"><Icon name="trash-2" size={14} /></button></div></td></tr>{expandedId === record.id && (<tr className="bg-slate-950/50 border-x-2 border-purple-500/30"><td colSpan="4" className="px-6 md:px-10 py-6 border-b border-slate-800"><div className="grid grid-cols-1 md:grid-cols-4 gap-8"><div className="space-y-3 border-r border-slate-800 pr-8"><h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Icon name="sparkles" size={12} className="text-purple-500"/> รายละเอียดรายได้</h4><p className="text-xs text-slate-300 flex justify-between font-bold"><span>ยอดขายรวม:</span> <span className="text-green-400 font-black">{formatZeny(record.revenue)} Z</span></p><p className="text-xs text-slate-300 flex justify-between font-bold"><span>เวลาที่ใช้:</span> <span>{record.minutesUsed || 0} นาที</span></p><p className="text-xs text-slate-300 flex justify-between font-bold"><span>เฉลี่ย/นาที:</span> <span className="text-blue-400">{formatZeny(record.revenuePerMinute || 0)} Z</span></p></div><div className="space-y-3 border-r border-slate-800 pr-8"><h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Icon name="package" size={12} className="text-blue-500"/> รายละเอียดต้นทุน</h4><p className="text-xs text-slate-300 flex justify-between font-bold"><span>ต้นทุนรวม:</span> <span className="text-red-400 font-black">{formatZeny(record.totalCost)} Z</span></p><div className="pt-2">{Array.isArray(record.otherCosts) && record.otherCosts.length > 0 ? record.otherCosts.map((c, i) => (<p key={i} className="text-[11px] text-slate-400 flex justify-between"><span>- {c.name}:</span> <span>{formatZeny(c.amount)} Z</span></p>)) : <p className="text-[10px] text-slate-600 italic">ไม่มีต้นทุนเพิ่มเติม</p>}</div></div><div className="md:col-span-2 space-y-3"><h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Icon name="file-text" size={12} className="text-amber-500"/> บันทึกเพิ่มเติม</h4><p className="text-[11px] text-slate-300 leading-relaxed italic bg-slate-900/50 p-4 rounded-xl border border-slate-800 whitespace-pre-wrap">{record.notes || "ไม่มีข้อความบันทึก"}</p></div></div></td></tr>)}</React.Fragment>))}</tbody></table></div>
-                                            </div>
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </div>
-
-                        {/* Sidebar */}
-                        <div className="space-y-6">
-                            <div className={`bg-slate-900 border p-5 rounded-[2rem] shadow-xl relative transition-all duration-300 ${!records.length && Object.values(globalPrices).every(v => v === 0) ? 'border-rose-400 shadow-[0_0_20px_rgba(251,113,133,0.3)] animate-pulse' : 'border-slate-800'}`}>
-                                {!records.length && Object.values(globalPrices).every(v => v === 0) && (
-                                    <div className="absolute -top-3 -right-3 bg-rose-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg animate-bounce">
-                                        ! ตั้งค่าราคาก่อนเริ่ม
-                                    </div>
-                                )}
-                                <h3 className="text-sm font-black mb-6 text-indigo-400 uppercase tracking-widest flex items-center gap-3 italic font-black"><Icon name="database" /> ราคาปัจจุบัน</h3>
-                                <div className="space-y-4">
-                                    {[
-                                        { key: 'purpleStonePrice', label: 'Coagulated Spell', icon: <CoagulatedSpell16Bit className="absolute right-[-8px] bottom-[-8px] w-20 h-20 opacity-5" /> },
-                                        ...(activeTab === 'aogh' ? [{ key: 'contMagicPrice', label: 'Contaminated Magic', icon: <ContaminatedMagic16Bit className="absolute right-[-8px] bottom-[-8px] w-20 h-20 opacity-5" /> }] : []),
-                                        { key: 'gumBoxPrice', label: 'ราคา Bubble Gum Box', icon: <BubbleGum16Bit className="absolute right-[-8px] bottom-[-8px] w-20 h-20 opacity-5" /> },
-                                        { key: 'silvervineBoxPrice', label: 'ราคา Silvervine Box', icon: <Silvervine16Bit className="absolute right-[-8px] bottom-[-8px] w-20 h-20 opacity-5" /> }
-                                    ].map(item => (
-                                        <div key={item.key} className="bg-slate-950 p-5 rounded-2xl border border-slate-800 group hover:border-indigo-500/30 transition-all relative overflow-hidden">
-                                            {item.icon}
-                                            <p className="text-[9px] text-slate-600 font-black uppercase mb-1 tracking-tighter relative z-10">{item.label}</p>
-                                            <div className="flex items-baseline gap-2 relative z-10">
-                                                <input type="number" value={globalPrices[item.key] || ''} 
-                                                    onChange={e => {
-                                                        const newVal = Number(e.target.value);
-                                                        setGlobalPrices({...globalPrices, [item.key]: newVal});
-                                                        updatePricesInCloud({...globalPrices, [item.key]: newVal});
-                                                    }} 
-                                                    className={`bg-transparent text-2xl font-black outline-none w-full text-white ${!globalPrices[item.key] ? 'placeholder-rose-500/50' : ''}`}
-                                                    placeholder="0"
-                                                />
-                                                <span className="text-[10px] font-bold text-slate-600 uppercase">Zeny</span>
-                                            </div>
-                                        </div>
+                                <div className="space-y-3 border-t border-slate-800 pt-6">
+                                    <div className="flex justify-between items-center"><label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1"><Icon name="plus" size={12}/> ต้นทุนเพิ่มเติม</label><button type="button" onClick={addOtherCostField} className="text-[9px] font-black px-3 py-1 rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-all">+ เพิ่มรายการ</button></div>
+                                    {formData.otherCosts.map((cost, idx) => (
+                                        <div key={idx} className="flex gap-3"><input type="text" value={cost.name} onChange={(e) => updateOtherCost(idx, 'name', e.target.value)} className="flex-[2] bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-xs font-bold outline-none" placeholder="ชื่อรายการ..." /><div className="flex-1 relative"><input type="number" value={cost.amount} onChange={(e) => updateOtherCost(idx, 'amount', e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 pr-8 text-white text-xs font-bold outline-none text-right" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-slate-600">Z</span></div><button type="button" onClick={() => removeOtherCostField(idx)} className="text-red-500 p-2 hover:bg-red-500/10 rounded-xl"><Icon name="minus-circle" size={18}/></button></div>
                                     ))}
                                 </div>
-                            </div>
 
-                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-[2rem] shadow-xl border-t-red-500/20">
-                                <h3 className="text-xs font-black mb-3 text-red-400 uppercase tracking-widest flex items-center gap-2 italic"><Icon name="clock" size={14}/> TIMER</h3>
-                                <div className="text-3xl font-black text-white tabular-nums mb-4 bg-slate-950 text-center py-4 rounded-xl border border-slate-800 shadow-inner tracking-tighter">
-                                    {formatTimerDisplay(timeInMs)}
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {!isTimerActive || isTimerPaused ? (
-                                        <button onClick={handleTimerStart} className="bg-green-600 hover:bg-green-500 py-3 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 shadow-lg transition-all active:scale-95"><Icon name="play" size={12} fill="currentColor"/> {timeInMs > 0 ? "ต่อ" : "เริ่ม"}</button>
-                                    ) : (
-                                        <button onClick={handleTimerPause} className="bg-amber-600 hover:bg-amber-500 py-3 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 shadow-lg transition-all active:scale-95"><Icon name="pause" size={12} fill="currentColor"/> พัก</button>
-                                    )}
-                                    <button onClick={handleTimerStop} className="bg-slate-800 hover:bg-red-600 py-3 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 transition-all active:scale-95 group shadow-lg"><Icon name="square" size={12} fill="currentColor" className="group-hover:text-white"/> หยุด</button>
-                                    <button onClick={handleTimerReset} className="col-span-2 py-3 bg-slate-950 border border-slate-800 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-slate-300 transition-colors">รีเซต</button>
+                                <div className="space-y-2 pt-2">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1"><Icon name="file-text" size={12}/> บันทึกเพิ่มเติม</label>
+                                    <textarea className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm" value={formData.notes} onChange={e=>setFormData({...formData, notes:e.target.value})} placeholder="..." />
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                            
+                            <div className="mt-8 pt-6 border-t border-slate-800 flex gap-4">
+                                <button type="button" onClick={() => setIsAdding(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-bold transition-all">ยกเลิก</button>
+                                <button type="submit" className="flex-[2] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white py-4 rounded-xl font-bold shadow-lg transition-all transform active:scale-95">บันทึกข้อมูล</button>
+                            </div>
+                        </form>
+                    )}
                 </div>
             );
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        
-        const checkFirebase = () => {
-            if (window.FirebaseSDK) {
-                root.render(<App />);
-            } else {
-                setTimeout(checkFirebase, 50);
-            }
-        };
-        checkFirebase();
+        root.render(<App />);
     </script>
 </body>
 </html>
