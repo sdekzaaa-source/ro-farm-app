@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <!-- 1. Lock Zoom: Prevent zooming on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OGH TRACKER - SDekza RO</title>
     
@@ -26,6 +27,7 @@
         
         html {
             font-size: clamp(14px, 0.85vw + 10px, 18px);
+            touch-action: manipulation; /* Prevent double-tap to zoom */
         }
 
         @media (min-width: 2500px) {
@@ -38,7 +40,7 @@
             padding: 0;
             transition: background-color 0.5s ease, color 0.5s ease;
             line-height: 1.5;
-            touch-action: manipulation;
+            overflow-x: hidden; /* Prevent horizontal scroll on body */
         }
 
         .glass-card {
@@ -67,6 +69,7 @@
             -moz-appearance: textfield;
         }
 
+        /* Fade Animation Classes */
         .fade-content {
             transition: opacity 0.5s ease-in-out;
         }
@@ -82,8 +85,7 @@
 
         // --- 1. GLOBAL CONSTANTS ---
         const YT_AVATAR_URL = "https://yt3.googleusercontent.com/vlD4rkRPBg-HIUX6kAbuW1AHgE1FzYa4cs7W3ZD1AV0z4Xg_vM42d1r_slf8SVPhjmJXPslvcg=s160-c-k-c0x00ffffff-no-rj";
-        // Updated Version Number
-        const APP_VERSION = "Ver.1.01";
+        const APP_VERSION = "Ver.1.02";
 
         const i18n = {
             th: {
@@ -307,7 +309,7 @@
             const itemsPerPage = isMobile ? 4 : 10;
 
             const [formData, setFormData] = useState({
-                date: new Date().toLocaleDateString('en-GB'),
+                date: new Date().toISOString().split('T')[0], // Initialize with YYYY-MM-DD
                 gumUsed: 0, trashAmount: "", purpleStoneCount: "", contMagicCount: "",
                 isSellingSpell: false, isSellingMagic: false, useSilvervine: true,
                 minutesUsed: 60, notes: "", otherCosts: [], runMode: 'ogh',
@@ -483,11 +485,22 @@
                 e.preventDefault();
                 const id = editingId || Date.now().toString();
                 const entryMode = formData.runMode || activeTab;
-                const entry = { ...formData, id, timestamp: Date.now(), mode: entryMode, prices: { ...globalPrices } };
+                
+                // Convert YYYY-MM-DD to DD/MM/YYYY for display/storage
+                const [y, m, d] = formData.date.split('-');
+                const formattedDate = `${d}/${m}/${y}`;
+                
+                const entry = { ...formData, date: formattedDate, id, timestamp: Date.now(), mode: entryMode, prices: { ...globalPrices } };
                 setRecords(prev => editingId ? prev.map(r => r.id === editingId ? entry : r) : [entry, ...prev]);
                 setIsAdding(false); setEditingId(null);
-                setFormData({ date: new Date().toLocaleDateString('en-GB'), gumUsed: 0, trashAmount: "", purpleStoneCount: "", contMagicCount: "", isSellingSpell: false, isSellingMagic: false, useSilvervine: true, minutesUsed: 60, notes: "", otherCosts: [], runMode: 'ogh',
-                customSpellPrice: "", customMagicPrice: "" });
+                
+                setFormData({ 
+                    date: new Date().toISOString().split('T')[0], // Reset to current date
+                    gumUsed: 0, trashAmount: "", purpleStoneCount: "", contMagicCount: "",
+                    isSellingSpell: false, isSellingMagic: false, useSilvervine: true,
+                    minutesUsed: 60, notes: "", otherCosts: [], runMode: 'ogh',
+                    customSpellPrice: "", customMagicPrice: "" 
+                });
             };
 
             const handleDelete = (id) => setRecords(prev => prev.filter(r => r.id !== id));
@@ -595,7 +608,7 @@
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-6">
-                                            <div className="space-y-2 font-medium font-black"><label className={`text-xs md:text-sm font-medium uppercase tracking-widest ${themeClasses.textDim} font-black`}>{t.date}</label><input type="text" value={formData.date} onChange={e => setFormData(p => ({...p, date: e.target.value}))} className={`w-full border rounded-xl p-3 outline-none focus:border-purple-500 text-sm ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-[#faf9f6] border-stone-300 text-stone-900 shadow-inner font-black'}`} /></div>
+                                            <div className="space-y-2 font-medium font-black"><label className={`text-xs md:text-sm font-medium uppercase tracking-widest ${themeClasses.textDim} font-black`}>{t.date}</label><input type="date" value={formData.date} onChange={e => setFormData(p => ({...p, date: e.target.value}))} className={`w-full border rounded-xl p-3 outline-none focus:border-purple-500 text-sm ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-[#faf9f6] border-stone-300 text-stone-900 shadow-inner font-black'}`} /></div>
                                             <div className="space-y-2 font-medium font-black font-black font-black font-black"><label className={`text-xs md:text-sm font-medium uppercase tracking-widest ${themeClasses.textDim} font-black`}>{t.gum}</label><div className={`flex p-1 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-[#e9e6dc] border-stone-300 shadow-inner font-black'}`}>{[0, 1, 2].map(n => (<button key={n} type="button" onClick={() => setFormData(p => ({...p, gumUsed: n}))} className={`flex-1 py-2 rounded-lg text-xs font-black transition-all ${formData.gumUsed === n ? 'bg-blue-600 text-white shadow-md' : 'text-stone-500 font-black'}`}>{n}</button>))}</div></div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-6">
@@ -617,7 +630,7 @@
                                         <div className="space-y-4 pt-4 border-t border-stone-300 dark:border-slate-800 font-black">
                                             <div className="flex justify-between items-center font-black font-black font-black"><label className={`text-xs md:text-sm font-medium uppercase tracking-widest flex items-center gap-1 ${themeClasses.textDim} font-black font-black`}><Icon name="FileText" size={14}/> {t.notes}</label><button type="button" onClick={() => setFormData(p => ({...p, otherCosts: [...p.otherCosts, {name: "", amount: ""}]}))} className="text-[10px] md:text-[12px] font-black text-blue-500 hover:text-blue-600 transition-colors uppercase font-black font-black">+ {t.etc}</button></div>
                                             {formData.otherCosts.map((cost, idx) => (
-                                                <div key={idx} className="flex gap-2 font-medium font-medium font-black font-black"><input type="text" value={cost.name} onChange={e => { const nc = [...formData.otherCosts]; nc[idx].name = e.target.value; setFormData(p => ({...p, otherCosts: nc})); }} placeholder="ชื่อรายการ" className={`flex-[2] border rounded-lg p-2.5 text-xs outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-[#faf9f6] border-stone-300 text-stone-900 shadow-inner font-black'}`} /><input type="number" value={cost.amount} onFocus={(e) => e.target.select()} onChange={e => { const nc = [...formData.otherCosts]; nc[idx].amount = e.target.value; setFormData(p => ({...p, otherCosts: nc})); }} className={`flex-1 border rounded-lg p-2.5 text-xs outline-none text-right font-black ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-[#faf9f6] border-stone-300 text-stone-900 shadow-inner font-black'}`} /><button type="button" onClick={() => setFormData(p => ({...p, otherCosts: p.otherCosts.filter((_, i) => i !== idx)}))} className="text-rose-500 hover:text-rose-400 font-black font-black"><Icon name="MinusCircle" size={18} /></button></div>
+                                                <div key={idx} className="flex gap-2 font-medium font-medium font-black font-black"><input type="text" value={cost.name} onChange={e => { const nc = [...formData.otherCosts]; nc[idx].name = e.target.value; setFormData(p => ({...p, otherCosts: nc})); }} placeholder="ชื่อรายการ" className={`flex-[2] border rounded-lg p-2.5 text-xs outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-[#faf9f6] border-stone-300 text-stone-900 shadow-inner font-black'}`} /><input type="number" value={cost.amount} onFocus={(e) => e.target.select()} onChange={e => { const nc = [...formData.otherCosts]; nc[idx].amount = e.target.value; setFormData(p => ({...p, otherCosts: nc})); }} className={`flex-1 border rounded-lg p-2.5 text-xs outline-none text-right font-black ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-[#faf9f6] border-stone-300 text-stone-900 shadow-inner font-black'}`} /><button type="button" onClick={() => setFormData(p => ({...p, otherCosts: p.otherCosts.filter((_, i) => i !== idx)}))} className="text-rose-500 hover:text-rose-400 font-black"><Icon name="MinusCircle" size={18} /></button></div>
                                             ))}
                                             <textarea value={formData.notes} onChange={e => setFormData(p => ({...p, notes: e.target.value}))} placeholder="บันทึก..." className={`w-full border rounded-xl p-4 text-xs font-medium outline-none h-24 resize-none transition-all ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white focus:border-purple-500 font-black font-black' : 'bg-stone-50 border-stone-200 text-stone-900 focus:border-purple-400 shadow-inner font-black font-black'}`} />
                                         </div>
@@ -787,105 +800,104 @@
 
                                                 {/* TABLE WITH INTERNAL SCROLL */}
                                                 <div className="overflow-x-auto font-black max-h-[500px] overflow-y-auto relative font-black">
-                                                    {paginatedData.length === 0 ? (
-                                                        <div className="flex flex-col items-center justify-center h-full opacity-40">
-                                                            <Icon name="Inbox" size={48} className={themeClasses.textDim} />
-                                                            <p className={`mt-2 text-sm font-bold ${themeClasses.textDim}`}>{t.noData}</p>
-                                                        </div>
-                                                    ) : (
-                                                        <div>
-                                                            {/* Desktop Table View */}
-                                                            <table className="hidden md:table w-full text-left text-[11px] md:text-[13px] font-black">
-                                                                <thead className={`sticky top-0 z-10 ${theme === 'dark' ? 'bg-slate-900' : 'bg-[#e9e6dc] shadow-sm'}`}>
-                                                                    <tr>
-                                                                        <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.date}</th>
-                                                                        <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.mode}</th>
-                                                                        <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.drops}</th>
-                                                                        <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.itemGum} / {t.itemSilvervine}</th>
-                                                                        <th className={`px-6 py-4 text-right font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.netProfit}</th>
-                                                                        <th className={`px-6 py-4 text-center font-black uppercase tracking-widest ${themeClasses.textDim}`}>จัดการ</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody className={`divide-y transition-all ${theme === 'dark' ? 'divide-slate-800/40' : 'divide-stone-300'}`}>
-                                                                    {paginatedData.map(record => (
-                                                                        <React.Fragment key={record.id}>
-                                                                            <tr className={`hover:bg-stone-400/5 cursor-pointer transition-colors font-medium ${theme === 'dark' ? '' : 'text-stone-700'}`} onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}>
-                                                                                <td className="px-6 py-4 whitespace-nowrap">{record.date}</td>
-                                                                                <td className="px-6 py-4"><span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${record.mode === 'aogh' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-purple-500/10 text-purple-500 border border-purple-500/20'}`}>{record.mode || 'ogh'}</span></td>
-                                                                                <td className="px-6 py-4">
-                                                                                    <div className="flex flex-col gap-1.5">
-                                                                                        <div className="flex items-center gap-1.5"><SVGs.Spell className="w-3.5 h-3.5"/><span>{record.purpleStoneCount || 0}</span></div>
-                                                                                        {(record.mode === 'aogh' || (record.contMagicCount && record.contMagicCount > 0)) && (
-                                                                                            <div className="flex items-center gap-1.5"><SVGs.Magic className="w-3.5 h-3.5"/><span>{record.contMagicCount || 0}</span></div>
-                                                                                        )}
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td className="px-6 py-4 whitespace-nowrap font-medium"><div className="flex gap-2 items-center"><span className="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold border border-blue-500/10 flex items-center gap-1.5 font-black"><SVGs.GumBox className="w-3.5 h-3.5 font-black"/> {record.gumUsed}</span><span className={`px-2 py-0.5 rounded font-bold border flex items-center gap-1.5 ${record.useSilvervine ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/10 font-black' : 'bg-slate-500/10 text-slate-500 border-slate-500/10 opacity-30 font-black'}`}><SVGs.SilvervineBox className="w-3.5 h-3.5 font-black"/> {record.useSilvervine ? '✓' : '✕'}</span></div></td>
-                                                                                <td className={`px-6 py-4 text-right font-bold text-base ${record.profit >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}><ZenyDisplay amount={record.profit} /></td>
-                                                                                <td className="px-5 py-4 text-center">
-                                                                                    <div className="flex items-center justify-center gap-2">
-                                                                                        <button onClick={(e) => { e.stopPropagation(); handleShare(record); }} className={`text-blue-500 hover:text-blue-400 transition-colors p-1.5`} title="Share"><Icon name="Share2" size={14}/></button>
-                                                                                        <button onClick={(e) => { e.stopPropagation(); openEditModal(record); }} className={`text-amber-500 hover:text-amber-400 transition-colors p-1.5`} title="Edit"><Icon name="Pencil" size={14}/></button>
-                                                                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(record.id); }} className={`${themeClasses.textDim} hover:text-rose-600 transition-colors p-1.5`}><Icon name="Trash2" size={14}/></button>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                            {expandedId === record.id && (
-                                                                                <tr className={`border-l-4 border-purple-500 animate-in slide-in-from-left-1 transition-all ${theme === 'dark' ? 'bg-slate-950/40' : 'bg-[#f4f2ee]'}`}><td colSpan="6" className="px-6 py-6 font-medium"><div className="grid grid-cols-1 md:grid-cols-4 gap-8"><div><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.costBreakdown}</p><p className="flex justify-between py-1 font-medium">{t.itemGum}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.gumCost} /></span></p><p className="flex justify-between py-1 font-medium">{t.itemSilvervine}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.silvervineCost} /></span></p><p className="flex justify-between py-1 font-medium">{t.etc}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.etcCost} /></span></p></div><div><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.revSource}</p><p className="flex justify-between py-1 font-medium">ขยะ: <span className={themeClasses.textMain}><ZenyDisplay amount={record.trashAmount} /></span></p><p className="flex justify-between py-1 font-medium">{t.stone}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.revenue - record.trashAmount} /></span></p></div><div className="md:col-span-2"><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.notes}</p><p className={`italic p-5 rounded-2xl min-h-[80px] whitespace-pre-wrap border text-sm font-medium ${theme === 'dark' ? 'bg-slate-950/50 border-slate-800 text-slate-400' : 'bg-white border-stone-300 text-stone-600 shadow-inner'}`}>{record.notes || '-'}</p></div></div></td></tr>
-                                                                            )}
-                                                                        </React.Fragment>
-                                                                    ))}
-                                                                </tbody>
-                                                            </table>
-
-                                                            {/* Mobile Card List View */}
-                                                            <div className="md:hidden p-4 space-y-4">
-                                                                {paginatedData.map(record => (
-                                                                    <div key={record.id} onClick={() => setExpandedId(expandedId === record.id ? null : record.id)} className={`rounded-2xl border p-4 transition-all ${theme === 'dark' ? 'bg-slate-950/40 border-slate-800' : 'bg-white border-stone-200 shadow-sm'}`}>
-                                                                        <div className="flex justify-between items-start mb-3">
-                                                                            <div className="flex items-center gap-3">
-                                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${record.mode === 'aogh' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-purple-500/10 text-purple-500 border border-purple-500/20'}`}>{record.mode || 'ogh'}</span>
-                                                                                <span className={`text-xs font-medium ${themeClasses.textDim}`}>{record.date}</span>
-                                                                            </div>
-                                                                            <div className={`text-base font-bold ${record.profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}><ZenyDisplay amount={record.profit} /></div>
-                                                                        </div>
-                                                                        
-                                                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                                                            <div className="flex flex-col gap-1">
-                                                                                <div className="flex items-center gap-1.5 text-xs font-medium"><SVGs.Spell className="w-3.5 h-3.5"/><span>{record.purpleStoneCount || 0}</span></div>
+                                                    <table className="w-full text-left text-[11px] md:text-[13px] font-black">
+                                                        <thead className={`sticky top-0 z-10 ${theme === 'dark' ? 'bg-slate-900' : 'bg-[#e9e6dc] shadow-sm'}`}>
+                                                            <tr>
+                                                                <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.date}</th>
+                                                                <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.mode}</th>
+                                                                <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.drops}</th>
+                                                                <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.itemGum} / {t.itemSilvervine}</th>
+                                                                <th className={`px-6 py-4 text-right font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.netProfit}</th>
+                                                                <th className={`px-6 py-4 text-center font-black uppercase tracking-widest ${themeClasses.textDim}`}>จัดการ</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className={`divide-y transition-all ${theme === 'dark' ? 'divide-slate-800/40' : 'divide-stone-300'}`}>
+                                                            {paginatedData.map(record => (
+                                                                <React.Fragment key={record.id}>
+                                                                    <tr className={`hover:bg-stone-400/5 cursor-pointer transition-colors font-medium ${theme === 'dark' ? '' : 'text-stone-700'}`} onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}>
+                                                                        <td className="px-6 py-4 whitespace-nowrap">{record.date}</td>
+                                                                        <td className="px-6 py-4"><span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${record.mode === 'aogh' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-purple-500/10 text-purple-500 border border-purple-500/20'}`}>{record.mode || 'ogh'}</span></td>
+                                                                        <td className="px-6 py-4">
+                                                                            <div className="flex flex-col gap-1.5">
+                                                                                <div className="flex items-center gap-1.5"><SVGs.Spell className="w-3.5 h-3.5"/><span>{record.purpleStoneCount || 0}</span></div>
                                                                                 {(record.mode === 'aogh' || (record.contMagicCount && record.contMagicCount > 0)) && (
-                                                                                    <div className="flex items-center gap-1.5 text-xs font-medium"><SVGs.Magic className="w-3.5 h-3.5"/><span>{record.contMagicCount || 0}</span></div>
+                                                                                    <div className="flex items-center gap-1.5"><SVGs.Magic className="w-3.5 h-3.5"/><span>{record.contMagicCount || 0}</span></div>
                                                                                 )}
                                                                             </div>
-                                                                            <div className="flex gap-2 justify-end items-start">
-                                                                                <span className="bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded font-bold border border-blue-500/10 flex items-center gap-1 text-[10px]"><SVGs.GumBox className="w-3 h-3"/> {record.gumUsed}</span>
-                                                                                <span className={`px-1.5 py-0.5 rounded font-bold border flex items-center gap-1 text-[10px] ${record.useSilvervine ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/10' : 'bg-slate-500/10 text-slate-500 border-slate-500/10 opacity-50'}`}><SVGs.SilvervineBox className="w-3 h-3"/> {record.useSilvervine ? '✓' : '✕'}</span>
+                                                                        </td>
+                                                                        <td className="px-6 py-4 whitespace-nowrap font-medium"><div className="flex gap-2 items-center"><span className="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold border border-blue-500/10 flex items-center gap-1.5 font-black"><SVGs.GumBox className="w-3.5 h-3.5 font-black"/> {record.gumUsed}</span><span className={`px-2 py-0.5 rounded font-bold border flex items-center gap-1.5 ${record.useSilvervine ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/10 font-black' : 'bg-slate-500/10 text-slate-500 border-slate-500/10 opacity-30 font-black'}`}><SVGs.SilvervineBox className="w-3.5 h-3.5 font-black"/> {record.useSilvervine ? '✓' : '✕'}</span></div></td>
+                                                                        <td className={`px-6 py-4 text-right font-bold text-base ${record.profit >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}><ZenyDisplay amount={record.profit} /></td>
+                                                                        <td className="px-5 py-4 text-center">
+                                                                            <div className="flex items-center justify-center gap-2">
+                                                                                <button onClick={(e) => { e.stopPropagation(); handleShare(record); }} className={`text-blue-500 hover:text-blue-400 transition-colors p-1.5`} title="Share"><Icon name="Share2" size={14}/></button>
+                                                                                <button onClick={(e) => { e.stopPropagation(); openEditModal(record); }} className={`text-amber-500 hover:text-amber-400 transition-colors p-1.5`} title="Edit"><Icon name="Pencil" size={14}/></button>
+                                                                                <button onClick={(e) => { e.stopPropagation(); handleDelete(record.id); }} className={`${themeClasses.textDim} hover:text-rose-600 transition-colors p-1.5`}><Icon name="Trash2" size={14}/></button>
                                                                             </div>
-                                                                        </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                    {expandedId === record.id && (
+                                                                        <tr className={`border-l-4 border-purple-500 animate-in slide-in-from-left-1 transition-all ${theme === 'dark' ? 'bg-slate-950/40' : 'bg-[#f4f2ee]'}`}><td colSpan="6" className="px-6 py-6 font-medium"><div className="grid grid-cols-1 md:grid-cols-4 gap-8"><div><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.costBreakdown}</p><p className="flex justify-between py-1 font-medium font-black">{t.itemGum}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.gumCost} /></span></p><p className="flex justify-between py-1 font-medium font-black">{t.itemSilvervine}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.silvervineCost} /></span></p><p className="flex justify-between py-1 font-medium font-black">{t.etc}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.etcCost} /></span></p></div><div><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.revSource}</p><p className="flex justify-between py-1 font-medium font-black">ขยะ: <span className={themeClasses.textMain}><ZenyDisplay amount={record.trashAmount} /></span></p><p className="flex justify-between py-1 font-medium font-black">{t.stone}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.revenue - record.trashAmount} /></span></p></div><div className="md:col-span-2 font-black"><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.notes}</p><p className={`italic p-5 rounded-2xl min-h-[80px] whitespace-pre-wrap border text-sm font-medium ${theme === 'dark' ? 'bg-slate-950/50 border-slate-800 text-slate-400' : 'bg-white border-stone-300 text-stone-600 shadow-inner'}`}>{record.notes || '-'}</p></div></div></td></tr>
+                                                                    )}
+                                                                </React.Fragment>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
 
-                                                                        <div className={`flex justify-between items-center pt-3 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-stone-100'}`}>
-                                                                            <p className="text-[10px] opacity-50">แตะเพื่อดูรายละเอียด</p>
-                                                                            <div className="flex gap-3">
-                                                                                <button onClick={(e) => { e.stopPropagation(); handleShare(record); }} className="text-blue-500"><Icon name="Share2" size={14}/></button>
-                                                                                <button onClick={(e) => { e.stopPropagation(); openEditModal(record); }} className="text-amber-500"><Icon name="Pencil" size={14}/></button>
-                                                                                <button onClick={(e) => { e.stopPropagation(); handleDelete(record.id); }} className="text-rose-500"><Icon name="Trash2" size={14}/></button>
-                                                                            </div>
-                                                                        </div>
-                                                                        
-                                                                        {expandedId === record.id && (
-                                                                            <div className={`mt-4 pt-4 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-stone-100'} animate-in slide-in-from-top-2`}>
-                                                                                 <div className="grid grid-cols-2 gap-4 text-xs font-medium mb-3">
-                                                                                    <div><p className="opacity-50 text-[10px] uppercase mb-1">รายได้</p><p className="text-emerald-500"><ZenyDisplay amount={record.revenue} /></p></div>
-                                                                                    <div><p className="opacity-50 text-[10px] uppercase mb-1">ต้นทุน</p><p className="text-rose-500"><ZenyDisplay amount={record.totalCost} /></p></div>
-                                                                                 </div>
-                                                                                 <div className={`p-3 rounded-xl text-xs italic ${theme === 'dark' ? 'bg-slate-900' : 'bg-stone-50'}`}>{record.notes || "ไม่มีบันทึก"}</div>
-                                                                            </div>
+                                                    {/* Mobile Card List View */}
+                                                    <div className="md:hidden p-4 space-y-4">
+                                                        {paginatedData.map(record => (
+                                                            <div key={record.id} onClick={() => setExpandedId(expandedId === record.id ? null : record.id)} className={`rounded-2xl border p-4 transition-all ${theme === 'dark' ? 'bg-slate-950/40 border-slate-800' : 'bg-white border-stone-200 shadow-sm'}`}>
+                                                                <div className="flex justify-between items-start mb-3">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${record.mode === 'aogh' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-purple-500/10 text-purple-500 border border-purple-500/20'}`}>{record.mode || 'ogh'}</span>
+                                                                        <span className={`text-xs font-medium ${themeClasses.textDim}`}>{record.date}</span>
+                                                                    </div>
+                                                                    <div className={`text-base font-bold ${record.profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}><ZenyDisplay amount={record.profit} /></div>
+                                                                </div>
+                                                                
+                                                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <div className="flex items-center gap-1.5 text-xs font-medium"><SVGs.Spell className="w-3.5 h-3.5"/><span>{record.purpleStoneCount || 0}</span></div>
+                                                                        {(record.mode === 'aogh' || (record.contMagicCount && record.contMagicCount > 0)) && (
+                                                                            <div className="flex items-center gap-1.5 text-xs font-medium"><SVGs.Magic className="w-3.5 h-3.5"/><span>{record.contMagicCount || 0}</span></div>
                                                                         )}
                                                                     </div>
-                                                                ))}
+                                                                    <div className="flex gap-2 justify-end items-start">
+                                                                        <span className="bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded font-bold border border-blue-500/10 flex items-center gap-1 text-[10px]"><SVGs.GumBox className="w-3 h-3"/> {record.gumUsed}</span>
+                                                                        <span className={`px-1.5 py-0.5 rounded font-bold border flex items-center gap-1 text-[10px] ${record.useSilvervine ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/10' : 'bg-slate-500/10 text-slate-500 border-slate-500/10 opacity-50'}`}><SVGs.SilvervineBox className="w-3 h-3"/> {record.useSilvervine ? '✓' : '✕'}</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className={`flex justify-between items-center pt-3 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-stone-100'}`}>
+                                                                    <p className="text-[10px] opacity-50">แตะเพื่อดูรายละเอียด</p>
+                                                                    <div className="flex gap-3">
+                                                                        <button onClick={(e) => { e.stopPropagation(); handleShare(record); }} className="text-blue-500"><Icon name="Share2" size={14}/></button>
+                                                                        <button onClick={(e) => { e.stopPropagation(); openEditModal(record); }} className="text-amber-500"><Icon name="Pencil" size={14}/></button>
+                                                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(record.id); }} className="text-rose-500"><Icon name="Trash2" size={14}/></button>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                {expandedId === record.id && (
+                                                                    <div className={`mt-4 pt-4 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-stone-100'} animate-in slide-in-from-top-2`}>
+                                                                         <div className="grid grid-cols-2 gap-4 text-xs font-medium mb-3">
+                                                                            <div>
+                                                                                <p className="opacity-50 text-[10px] uppercase mb-1">รายได้</p>
+                                                                                <div className="flex justify-between"><span className="text-[10px] opacity-70">ขยะ:</span> <ZenyDisplay amount={record.trashAmount} /></div>
+                                                                                <div className="flex justify-between"><span className="text-[10px] opacity-70">หิน:</span> <ZenyDisplay amount={record.revenue - record.trashAmount} /></div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <p className="opacity-50 text-[10px] uppercase mb-1">ต้นทุน</p>
+                                                                                <div className="flex justify-between"><span className="text-[10px] opacity-70">กั้ม:</span> <ZenyDisplay amount={record.gumCost} /></div>
+                                                                                <div className="flex justify-between"><span className="text-[10px] opacity-70">มะละกอ:</span> <ZenyDisplay amount={record.silvervineCost} /></div>
+                                                                                <div className="flex justify-between"><span className="text-[10px] opacity-70">อื่นๆ:</span> <ZenyDisplay amount={record.etcCost} /></div>
+                                                                            </div>
+                                                                         </div>
+                                                                         <div className={`p-3 rounded-xl text-xs italic ${theme === 'dark' ? 'bg-slate-900' : 'bg-stone-50'}`}>{record.notes || "ไม่มีบันทึก"}</div>
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        </div>
-                                                    )}
+                                                        ))}
+                                                    </div>
                                                 </div>
 
                                                 {/* PAGINATION FOOTER */}
@@ -944,17 +956,17 @@
                                             {saleItem === 'spell' ? <SVGs.Spell className="w-8 h-8 font-black"/> : <SVGs.Magic className="w-8 h-8 font-black"/>} 
                                             {t.sellPopup}
                                         </h2>
-                                        <div className="space-y-6 font-medium">
-                                            <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-6 font-medium font-black">
+                                            <div className="grid grid-cols-2 gap-4 font-black">
                                                 <div className="space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 font-black">{t.sellQuantity}</label><input type="number" min="1" max={saleItem === 'spell' ? stats.stockSpell : stats.stockMagic} value={saleFormData.quantity} onChange={e => setSaleFormData({...saleFormData, quantity: e.target.value})} className={`w-full p-4 rounded-xl border font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-stone-50 border-stone-200 shadow-inner'}`} placeholder="0" /></div>
                                                 <div className="space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 font-black">{t.sellPrice}</label><input type="number" min="0" value={saleFormData.price} onChange={e => setSaleFormData({...saleFormData, price: e.target.value})} className={`w-full p-4 rounded-xl border font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-stone-50 border-stone-200 shadow-inner'}`} placeholder="0" /></div>
                                             </div>
                                             <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 text-center font-black">
                                                 <p className="text-[10px] uppercase font-bold opacity-50 mb-1 font-black">ยอดขายที่จะได้รับ</p>
-                                                <p className="text-xl font-black text-emerald-500"><ZenyDisplay amount={Number(saleFormData.quantity) * Number(saleFormData.price)} /></p>
+                                                <p className="text-xl font-black text-emerald-500 font-black"><ZenyDisplay amount={Number(saleFormData.quantity) * Number(saleFormData.price)} /></p>
                                             </div>
                                         </div>
-                                        <div className="flex gap-4 mt-8 font-black"><button onClick={() => setShowSaleModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-xs transition-all ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white font-black' : 'bg-stone-100 hover:bg-stone-200 text-stone-600'}`}>{t.cancel}</button><button onClick={handleManualSellSubmit} className="flex-[2] bg-gradient-to-r from-emerald-500 to-green-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all">ยืนยันการขาย</button></div>
+                                        <div className="flex gap-4 mt-8 font-black"><button onClick={() => setShowSaleModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-xs transition-all ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white font-black' : 'bg-stone-100 hover:bg-stone-200 text-stone-600'}`}>{t.cancel}</button><button onClick={handleManualSellSubmit} className="flex-[2] bg-gradient-to-r from-emerald-500 to-green-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all font-black">ยืนยันการขาย</button></div>
                                     </div>
                                 </div>
                             )}
@@ -965,15 +977,15 @@
                                     <div className={`border w-full max-w-lg p-8 md:p-10 rounded-[3rem] shadow-2xl relative transition-all ${theme === 'dark' ? 'bg-slate-900 border-slate-800 font-black' : 'bg-white border-stone-300'}`} onClick={e => e.stopPropagation()}>
                                         <button onClick={() => setShowEditModal(false)} className={`${themeClasses.textDim} absolute top-8 right-8 hover:text-rose-500 font-black`}><Icon name="X" size={24} /></button>
                                         <h2 className="text-xl md:text-2xl font-black mb-8 text-amber-500 italic uppercase font-black">{t.editRecord}</h2>
-                                        <div className="space-y-6 max-h-[65vh] overflow-y-auto px-1 pr-3 font-medium">
+                                        <div className="space-y-6 max-h-[65vh] overflow-y-auto px-1 pr-3 font-medium font-black">
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 font-black">{t.trashSale}</label><input type="number" value={editModalData.trashAmount} onFocus={(e) => e.target.select()} onChange={e => setEditModalData({...editModalData, trashAmount: e.target.value})} className={`w-full p-3 rounded-xl border font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-stone-50 border-stone-200 text-stone-900 shadow-inner'}`} /></div>
                                                 <div className="space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 font-black">{t.duration}</label><input type="number" value={editModalData.minutesUsed} onFocus={(e) => e.target.select()} onChange={e => setEditModalData({...editModalData, minutesUsed: Number(editModalData.minutesUsed)})} className={`w-full p-3 rounded-xl border font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-stone-50 border-stone-200 text-stone-900 shadow-inner'}`} /></div>
                                             </div>
-                                            <div className="grid grid-cols-1 gap-4">
+                                            <div className="grid grid-cols-1 gap-4 font-black">
                                                 <div className="flex gap-4 items-end">
-                                                    <div className="flex-1 space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 flex items-center gap-1"><SVGs.Spell className="w-3.5 h-3.5"/> {t.itemSpell}</label><input type="number" value={editModalData.purpleStoneCount} onFocus={(e) => e.target.select()} onChange={e => setEditModalData({...editModalData, purpleStoneCount: e.target.value})} className={`w-full p-3 rounded-xl border font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-stone-50 border-stone-200 text-stone-900 shadow-inner'}`} /></div>
-                                                    <div className={`flex p-1 rounded-xl border w-32 shrink-0 h-[46px] ${theme === 'dark' ? 'bg-slate-950 border-slate-800 font-black' : 'bg-[#e9e6dc] border-stone-300 shadow-inner'}`}><button type="button" onClick={() => setEditModalData({...editModalData, isSellingSpell: true})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${editModalData.isSellingSpell ? 'bg-rose-600 text-white shadow-md' : 'text-stone-600'}`}>{t.sell}</button><button type="button" onClick={() => setEditModalData({...editModalData, isSellingSpell: false})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${!editModalData.isSellingSpell ? 'bg-emerald-600 text-white shadow-md' : 'text-stone-600'}`}>{t.storeShort}</button></div>
+                                                    <div className="flex-1 space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 flex items-center gap-1 font-black"><SVGs.Spell className="w-3.5 h-3.5 font-black"/> {t.itemSpell}</label><input type="number" value={editModalData.purpleStoneCount} onFocus={(e) => e.target.select()} onChange={e => setEditModalData({...editModalData, purpleStoneCount: e.target.value})} className={`w-full p-3 rounded-xl border font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-stone-50 border-stone-200 text-stone-900 shadow-inner'}`} /></div>
+                                                    <div className={`flex p-1 rounded-xl border w-32 shrink-0 h-[46px] ${theme === 'dark' ? 'bg-slate-950 border-slate-800 font-black' : 'bg-[#e9e6dc] border-stone-300 shadow-inner'}`}><button type="button" onClick={() => setEditModalData({...editModalData, isSellingSpell: true})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${editModalData.isSellingSpell ? 'bg-rose-600 text-white shadow-md font-black' : 'text-stone-600'}`}>{t.sell}</button><button type="button" onClick={() => setEditModalData({...editModalData, isSellingSpell: false})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${!editModalData.isSellingSpell ? 'bg-emerald-600 text-white shadow-md' : 'text-stone-600'}`}>{t.storeShort}</button></div>
                                                 </div>
                                                 {editModalData.isSellingSpell && (
                                                     <div className="space-y-1.5 animate-in slide-in-from-top-1 font-black"><label className="text-[10px] font-black uppercase opacity-50 text-rose-500 font-black">ระบุราคาขายหินม่วง (ชิ้นละ)</label><input type="number" value={editModalData.customSpellPrice} onFocus={(e) => e.target.select()} onChange={e => setEditModalData({...editModalData, customSpellPrice: e.target.value})} className={`w-full p-3 rounded-xl border border-rose-500/30 font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 text-rose-400' : 'bg-rose-50 text-rose-600 shadow-inner'}`} /></div>
@@ -981,7 +993,7 @@
                                                 {editModalData.mode === 'aogh' && (
                                                     <React.Fragment>
                                                         <div className="flex gap-4 items-end mt-2">
-                                                            <div className="flex-1 space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 flex items-center gap-1"><SVGs.Magic className="w-3.5 h-3.5"/> {t.itemMagic}</label><input type="number" value={editModalData.contMagicCount} onFocus={(e) => e.target.select()} onChange={e => setEditModalData({...editModalData, contMagicCount: e.target.value})} className={`w-full p-3 rounded-xl border font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-stone-50 border-stone-200 text-stone-900 shadow-inner'}`} /></div>
+                                                            <div className="flex-1 space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 flex items-center gap-1 font-black"><SVGs.Magic className="w-3.5 h-3.5 font-black"/> {t.itemMagic}</label><input type="number" value={editModalData.contMagicCount} onFocus={(e) => e.target.select()} onChange={e => setEditModalData({...editModalData, contMagicCount: e.target.value})} className={`w-full p-3 rounded-xl border font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-stone-50 border-stone-200 text-stone-900 shadow-inner'}`} /></div>
                                                             <div className={`flex p-1 rounded-xl border w-32 shrink-0 h-[46px] ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-[#e9e6dc] border-stone-300 shadow-inner'}`}><button type="button" onClick={() => setEditModalData({...editModalData, isSellingMagic: true})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${editModalData.isSellingMagic ? 'bg-rose-600 text-white shadow-md' : 'text-stone-600'}`}>{t.sell}</button><button type="button" onClick={() => setEditModalData({...editModalData, isSellingMagic: false})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${!editModalData.isSellingMagic ? 'bg-emerald-600 text-white shadow-md' : 'text-stone-600'}`}>{t.storeShort}</button></div>
                                                         </div>
                                                         {editModalData.isSellingMagic && (
@@ -1001,7 +1013,7 @@
                             {showDeleteAllModal && (
                                 <div className="fixed inset-0 z-[999] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 font-black font-black font-black" onClick={() => setShowDeleteAllModal(false)}>
                                     <div className={`border w-full max-sm p-10 rounded-[3rem] shadow-2xl relative transition-all text-center ${theme === 'dark' ? 'bg-slate-900 border-slate-800 font-black' : 'bg-white border-stone-300 font-black'}`} onClick={e => e.stopPropagation()}>
-                                        <div className="mx-auto w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center text-rose-500 mb-8 font-black"><Icon name="Trash2" size={40} /></div>
+                                        <div className="mx-auto w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center text-rose-500 mb-8 font-black font-black font-black"><Icon name="Trash2" size={40} /></div>
                                         <h3 className={`text-xl md:text-2xl font-black uppercase mb-5 ${themeClasses.textMain} font-black`}>{t.confirmDeleteAll}</h3>
                                         <p className={`text-sm font-medium mb-10 leading-relaxed ${themeClasses.textDim} font-black`}>{t.deleteWarn}</p>
                                         <div className="flex gap-4 font-black">
