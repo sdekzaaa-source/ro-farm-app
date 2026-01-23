@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <!-- 1. Lock Zoom: Added maximum-scale=1.0 and user-scalable=no -->
+    <!-- 1. Lock Zoom Config -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OGH TRACKER - SDekza RO</title>
     
@@ -39,7 +39,7 @@
             padding: 0;
             transition: background-color 0.5s ease, color 0.5s ease;
             line-height: 1.5;
-            /* 1. Lock Zoom: Prevent double-tap zoom */
+            /* Prevent double-tap zoom */
             touch-action: manipulation;
         }
 
@@ -104,7 +104,7 @@
                 deleteAll: "ลบทั้งหมด", confirmDeleteAll: "ยืนยันการลบข้อมูลทั้งหมดหรือไม่?", deleteWarn: "การกระทำนี้จะลบประวัติการฟาร์มและรายการขายทั้งหมดและไม่สามารถกู้คืนได้",
                 share: "แชร์ผลลัพธ์", saveImage: "บันทึกรูปภาพ", copyText: "คัดลอกข้อความ", shareSuccess: "คัดลอกเรียบร้อย!",
                 zPerMin: "Zeny/Min", totalRevenue: "ยอดขายรวม", totalCost: "ต้นทุนรวม", action: "จัดการ", store: "เก็บ", storeShort: "เก็บ", drops: "ดรอป",
-                searchPlaceholder: "ค้นหาวันที่...", allModes: "ทั้งหมด", page: "หน้า", of: "จาก", noData: "ไม่มีข้อมูล"
+                searchPlaceholder: "เลือกวันที่...", allModes: "ทั้งหมด", page: "หน้า", of: "จาก", noData: "ไม่มีข้อมูล"
             },
             en: {
                 dashboard: "OLD GLAST HEIM", welcomeSub: "Statistics & Profit Analytics System", loginBtn: "Login with Gmail", guestBtn: "Use as Guest",
@@ -210,7 +210,6 @@
             return icons[name] || null;
         }
 
-        // WelcomeScreen Component
         function WelcomeScreen({ onLogin, onGuest, onShowInstall, lang, setLang, theme }) {
             const t = i18n[lang];
             return (
@@ -249,7 +248,6 @@
             );
         }
 
-        // Main App Component
         function App() {
             const [lang, setLang] = useState('th');
             const [theme, setTheme] = useState('dark'); 
@@ -569,6 +567,7 @@
                                 <div className={`max-w-xl mx-auto border rounded-[2.5rem] p-8 md:p-10 shadow-2xl animate-in fade-in zoom-in duration-200 ${themeClasses.card}`}>
                                     <form onSubmit={handleSaveInternal} className="space-y-8 font-black">
                                         <div className="flex justify-between items-center border-b border-stone-300 dark:border-slate-800 pb-6 font-black"><h2 className="text-xl md:text-2xl font-black text-purple-400 italic uppercase font-black">{editingId ? t.editRecord : t.newRecord}</h2></div>
+                                        {/* ... Form Content ... */}
                                         <div className="space-y-3 font-black">
                                             <label className={`text-xs md:text-sm font-medium uppercase tracking-widest flex items-center gap-2 ${themeClasses.textDim} font-black`}><Icon name="Settings" size={14}/> {t.selectionMode}</label>
                                             <div className="flex flex-col sm:flex-row gap-3">
@@ -606,7 +605,7 @@
                                         <div className="space-y-4 pt-4 border-t border-stone-300 dark:border-slate-800 font-black">
                                             <div className="flex justify-between items-center font-black font-black font-black"><label className={`text-xs md:text-sm font-medium uppercase tracking-widest flex items-center gap-1 ${themeClasses.textDim} font-black font-black`}><Icon name="FileText" size={14}/> {t.notes}</label><button type="button" onClick={() => setFormData(p => ({...p, otherCosts: [...p.otherCosts, {name: "", amount: ""}]}))} className="text-[10px] md:text-[12px] font-black text-blue-500 hover:text-blue-600 transition-colors uppercase font-black font-black">+ {t.etc}</button></div>
                                             {formData.otherCosts.map((cost, idx) => (
-                                                <div key={idx} className="flex gap-2 font-medium font-medium font-black font-black"><input type="text" value={cost.name} onChange={e => { const nc = [...formData.otherCosts]; nc[idx].name = e.target.value; setFormData(p => ({...p, otherCosts: nc})); }} placeholder="ชื่อรายการ" className={`flex-[2] border rounded-lg p-2.5 text-xs outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-[#faf9f6] border-stone-300 text-stone-900 shadow-inner font-black'}`} /><input type="number" value={cost.amount} onFocus={(e) => e.target.select()} onChange={e => { const nc = [...formData.otherCosts]; nc[idx].amount = e.target.value; setFormData(p => ({...p, otherCosts: nc})); }} className={`flex-1 border rounded-lg p-2.5 text-xs outline-none text-right font-black ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-[#faf9f6] border-stone-300 text-stone-900 shadow-inner font-black'}`} /><button type="button" onClick={() => setFormData(p => ({...p, otherCosts: p.otherCosts.filter((_, i) => i !== idx)}))} className="text-rose-500 hover:text-rose-400 font-black font-black"><Icon name="MinusCircle" size={18} /></button></div>
+                                                <div key={idx} className="flex gap-2 font-medium font-medium font-black font-black"><input type="text" value={cost.name} onChange={e => { const nc = [...formData.otherCosts]; nc[idx].name = e.target.value; setFormData(p => ({...p, otherCosts: nc})); }} placeholder="ชื่อรายการ" className={`flex-[2] border rounded-lg p-2.5 text-xs outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-[#faf9f6] border-stone-300 text-stone-900 shadow-inner font-black'}`} /><input type="number" value={cost.amount} onFocus={(e) => e.target.select()} onChange={e => { const nc = [...formData.otherCosts]; nc[idx].amount = e.target.value; setFormData(p => ({...p, otherCosts: nc})); }} className={`flex-1 border rounded-lg p-2.5 text-xs outline-none text-right font-black ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-[#faf9f6] border-stone-300 text-stone-900 shadow-inner font-black'}`} /><button type="button" onClick={() => setFormData(p => ({...p, otherCosts: p.otherCosts.filter((_, i) => i !== idx)}))} className="text-rose-500 hover:text-rose-400 font-black font-black font-black"><Icon name="MinusCircle" size={18} /></button></div>
                                             ))}
                                             <textarea value={formData.notes} onChange={e => setFormData(p => ({...p, notes: e.target.value}))} placeholder="บันทึก..." className={`w-full border rounded-xl p-4 text-xs font-medium outline-none h-24 resize-none transition-all ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white focus:border-purple-500 font-black font-black' : 'bg-stone-50 border-stone-200 text-stone-900 focus:border-purple-400 shadow-inner font-black font-black'}`} />
                                         </div>
@@ -617,7 +616,7 @@
                                 <div className="space-y-6">
                                     {/* ... PRICES ... */}
                                     <section className={`border p-5 md:p-6 rounded-[2rem] shadow-xl backdrop-blur-sm transition-all duration-300 ${themeClasses.card} ${priceValidationPulse ? 'border-rose-500 animate-bounce' : ''}`}>
-                                        <h3 className={`text-xl font-black uppercase flex items-center gap-2 italic mb-5 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'} font-black font-black`}><Icon name="TrendingUp" size={16} /> {t.prices}</h3>
+                                        <h3 className={`text-xl font-bold flex items-center gap-2 italic mb-5 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'} font-black`}><Icon name="TrendingUp" size={16} /> {t.prices}</h3>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 font-black">
                                             {/* ... Price inputs ... */}
                                              {[
@@ -638,10 +637,10 @@
                                     </section>
 
                                     {/* GRID ROW: NET PROFIT / AVG REV / INVENTORY */}
-                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-black font-black font-black">
+                                    <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 px-4 -mx-4 lg:grid lg:grid-cols-3 lg:gap-6 lg:pb-0 lg:px-0 lg:mx-0 no-scrollbar">
                                         
                                         {/* 1. NET PROFIT CARD */}
-                                        <div className={`border rounded-[2rem] shadow-xl transition-all overflow-hidden flex flex-col h-full ${themeClasses.card}`}>
+                                        <div className={`border rounded-[2rem] shadow-xl transition-all overflow-hidden flex flex-col h-full ${themeClasses.card} min-w-[85vw] sm:min-w-[45vw] lg:min-w-0 snap-center`}>
                                             <div className="p-4 pb-0 flex justify-between items-start">
                                                 <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500"><Icon name="Wallet" size={24} /></div>
                                                 <h3 className={`text-xl font-bold mt-1 ${themeClasses.textDim}`}>{t.netProfit}</h3>
@@ -665,7 +664,7 @@
                                         </div>
 
                                         {/* 2. AVG REVENUE CARD (FADE VERSION) */}
-                                        <div className={`border rounded-[2rem] shadow-xl transition-all overflow-hidden flex flex-col h-full ${themeClasses.card}`}>
+                                        <div className={`border rounded-[2rem] shadow-xl transition-all overflow-hidden flex flex-col h-full ${themeClasses.card} min-w-[85vw] sm:min-w-[45vw] lg:min-w-0 snap-center`}>
                                             <div className="p-4 pb-0 flex justify-between items-start">
                                                 <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500"><Icon name="TrendingUp" size={24} /></div>
                                                 <div className="flex items-center gap-3">
@@ -676,7 +675,7 @@
                                             
                                             <div className="flex-grow relative h-[140px]">
                                                 {/* OGH Content */}
-                                                <div className={`absolute inset-0 p-6 pt-4 flex flex-col fade-content ${slideIndex === 0 ? 'opacity-100' : 'opacity-0'}`}>
+                                                <div className={`absolute inset-0 p-6 pt-4 flex flex-col fade-content ${slideIndex === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
                                                     <div className="mb-4">
                                                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-500 mb-1">OGH Mode</p>
                                                         <p onClick={() => setShowDetailChart('avgRevenue')} className={`text-4xl font-black cursor-pointer ${themeClasses.textMain} tracking-tighter`}><ZenyDisplay amount={oghStats.avgRevenue} /></p>
@@ -696,7 +695,7 @@
                                                 </div>
 
                                                 {/* AOGH Content */}
-                                                <div className={`absolute inset-0 p-6 pt-4 flex flex-col fade-content ${slideIndex === 1 ? 'opacity-100' : 'opacity-0'}`}>
+                                                <div className={`absolute inset-0 p-6 pt-4 flex flex-col fade-content ${slideIndex === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
                                                     <div className="mb-4">
                                                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 mb-1">AOGH Mode</p>
                                                         <p onClick={() => setShowDetailChart('avgRevenue')} className={`text-4xl font-black cursor-pointer ${themeClasses.textMain} tracking-tighter`}><ZenyDisplay amount={aoghStats.avgRevenue} /></p>
@@ -718,7 +717,7 @@
                                         </div>
 
                                         {/* 3. INVENTORY CARD */}
-                                        <div className={`border rounded-[2rem] shadow-xl transition-all overflow-hidden flex flex-col h-full ${themeClasses.card}`}>
+                                        <div className={`border rounded-[2rem] shadow-xl transition-all overflow-hidden flex flex-col h-full ${themeClasses.card} min-w-[85vw] sm:min-w-[45vw] lg:min-w-0 snap-center`}>
                                             <div className="p-4 pb-0 flex justify-between items-start">
                                                 <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-500"><Icon name="Archive" size={24} /></div>
                                                 <h3 className={`text-xl font-bold mt-1 ${themeClasses.textDim}`}>{t.inventory}</h3>
@@ -748,21 +747,22 @@
                                         </div>
                                     </div>
 
-                                    {/* LOWER ROW: HISTORY & TIMER */}
+                                    {/* LOWER ROW: HISTORY & TIMER - EQUAL HEIGHT */}
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
-                                        <div className="lg:col-span-2 space-y-4">
-                                            <div className={`border rounded-[2rem] overflow-hidden shadow-xl transition-all ${themeClasses.card} font-black`}>
-                                                <div className={`p-6 border-b flex flex-col md:flex-row gap-4 justify-between items-start md:items-center transition-all ${theme === 'dark' ? 'bg-slate-950/20 border-slate-800' : 'bg-stone-50/50 border-stone-200'}`}>
-                                                    <h2 className="text-base md:text-lg font-black text-blue-600 italic flex items-center gap-2 uppercase tracking-widest font-black"><Icon name="History" size={20} /> {t.history}</h2>
+                                        <div className="lg:col-span-2">
+                                            <div className={`border rounded-[2rem] overflow-hidden shadow-xl transition-all ${themeClasses.card} h-[520px] flex flex-col`}>
+                                                {/* Header */}
+                                                <div className={`p-4 border-b flex flex-col md:flex-row gap-4 justify-between items-start md:items-center transition-all ${theme === 'dark' ? 'bg-slate-950/20 border-slate-800' : 'bg-stone-50/50 border-stone-200'}`}>
+                                                    <h2 className="text-xl font-bold text-blue-600 italic flex items-center gap-2 uppercase tracking-widest"><Icon name="History" size={20} /> {t.history}</h2>
                                                     
-                                                    {/* FILTERING AREA */}
-                                                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto font-black font-black">
+                                                    {/* FILTERING */}
+                                                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                                                         <div className={`flex p-1 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-[#e9e6dc] border-stone-200 shadow-inner'}`}>
                                                             <button onClick={() => { setFilterMode('all'); setCurrentPage(1); }} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${filterMode === 'all' ? 'bg-blue-600 text-white shadow-md' : 'text-stone-500'}`}>{t.allModes}</button>
                                                             <button onClick={() => { setFilterMode('ogh'); setCurrentPage(1); }} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${filterMode === 'ogh' ? 'bg-purple-600 text-white shadow-md' : 'text-stone-500'}`}>OGH</button>
                                                             <button onClick={() => { setFilterMode('aogh'); setCurrentPage(1); }} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${filterMode === 'aogh' ? 'bg-rose-600 text-white shadow-md' : 'text-stone-500'}`}>AOGH</button>
                                                         </div>
-                                                        <div className="relative flex-grow md:flex-grow-0 font-black font-black">
+                                                        <div className="relative flex-grow md:flex-grow-0">
                                                             <input 
                                                                 type="date" 
                                                                 value={searchDate}
@@ -773,54 +773,61 @@
                                                     </div>
                                                 </div>
 
-                                                {/* TABLE WITH INTERNAL SCROLL */}
-                                                <div className="overflow-x-auto font-black max-h-[500px] overflow-y-auto relative font-black">
-                                                    <table className="w-full text-left text-[11px] md:text-[13px] font-black">
-                                                        <thead className={`sticky top-0 z-10 ${theme === 'dark' ? 'bg-slate-900' : 'bg-[#e9e6dc] shadow-sm'}`}>
-                                                            <tr>
-                                                                <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.date}</th>
-                                                                <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.mode}</th>
-                                                                <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.drops}</th>
-                                                                <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.itemGum} / {t.itemSilvervine}</th>
-                                                                <th className={`px-6 py-4 text-right font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.netProfit}</th>
-                                                                <th className={`px-6 py-4 text-center font-black uppercase tracking-widest ${themeClasses.textDim}`}>จัดการ</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className={`divide-y transition-all ${theme === 'dark' ? 'divide-slate-800/40' : 'divide-stone-300'}`}>
-                                                            {paginatedData.map(record => (
-                                                                <React.Fragment key={record.id}>
-                                                                    <tr className={`hover:bg-stone-400/5 cursor-pointer transition-colors font-medium ${theme === 'dark' ? '' : 'text-stone-700'}`} onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}>
-                                                                        <td className="px-6 py-5 whitespace-nowrap">{record.date}</td>
-                                                                        <td className="px-6 py-5"><span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${record.mode === 'aogh' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-purple-500/10 text-purple-500 border border-purple-500/20'}`}>{record.mode || 'ogh'}</span></td>
-                                                                        <td className="px-6 py-5">
-                                                                            <div className="flex flex-col gap-1.5">
-                                                                                <div className="flex items-center gap-1.5"><SVGs.Spell className="w-3.5 h-3.5"/><span>{record.purpleStoneCount || 0}</span></div>
-                                                                                {(record.mode === 'aogh' || (record.contMagicCount && record.contMagicCount > 0)) && (
-                                                                                    <div className="flex items-center gap-1.5"><SVGs.Magic className="w-3.5 h-3.5"/><span>{record.contMagicCount || 0}</span></div>
-                                                                                )}
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="px-6 py-5 whitespace-nowrap font-medium font-black"><div className="flex gap-2 items-center"><span className="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold border border-blue-500/10 flex items-center gap-1.5 font-black"><SVGs.GumBox className="w-3.5 h-3.5 font-black"/> {record.gumUsed}</span><span className={`px-2 py-0.5 rounded font-bold border flex items-center gap-1.5 ${record.useSilvervine ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/10 font-black' : 'bg-slate-500/10 text-slate-500 border-slate-500/10 opacity-30 font-black'}`}><SVGs.SilvervineBox className="w-3.5 h-3.5 font-black"/> {record.useSilvervine ? '✓' : '✕'}</span></div></td>
-                                                                        <td className={`px-6 py-5 text-right font-bold text-base ${record.profit >= 0 ? 'text-emerald-600' : 'text-rose-500'} font-black`}>{formatUnitZeny(record.profit)}</td>
-                                                                        <td className="px-5 py-5 text-center font-black">
-                                                                            <div className="flex items-center justify-center gap-2">
-                                                                                <button onClick={(e) => { e.stopPropagation(); handleShare(record); }} className={`text-blue-500 hover:text-blue-400 transition-colors p-1.5 font-black`} title="Share"><Icon name="Share2" size={14}/></button>
-                                                                                <button onClick={(e) => { e.stopPropagation(); openEditModal(record); }} className={`text-amber-500 hover:text-amber-400 transition-colors p-1.5 font-black`} title="Edit"><Icon name="Pencil" size={14}/></button>
-                                                                                <button onClick={(e) => { e.stopPropagation(); handleDelete(record.id); }} className={`${themeClasses.textDim} hover:text-rose-600 transition-colors p-1.5 font-black`}><Icon name="Trash2" size={14}/></button>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                    {expandedId === record.id && (
-                                                                        <tr className={`border-l-4 border-purple-500 animate-in slide-in-from-left-1 transition-all ${theme === 'dark' ? 'bg-slate-950/40' : 'bg-[#f4f2ee]'}`}><td colSpan="6" className="px-6 py-8 font-medium font-black"><div className="grid grid-cols-1 md:grid-cols-4 gap-8"><div><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.costBreakdown}</p><p className="flex justify-between py-1 font-medium font-black">{t.itemGum}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.gumCost} /></span></p><p className="flex justify-between py-1 font-medium font-black">{t.itemSilvervine}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.silvervineCost} /></span></p><p className="flex justify-between py-1 font-medium font-black">{t.etc}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.etcCost} /></span></p></div><div><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.revSource}</p><p className="flex justify-between py-1 font-medium font-black">ขยะ: <span className={themeClasses.textMain}><ZenyDisplay amount={record.trashAmount} /></span></p><p className="flex justify-between py-1 font-medium font-black">{t.stone}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.revenue - record.trashAmount} /></span></p></div><div className="md:col-span-2 font-black"><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.notes}</p><p className={`italic p-5 rounded-2xl min-h-[80px] whitespace-pre-wrap border text-sm font-medium ${theme === 'dark' ? 'bg-slate-950/50 border-slate-800 text-slate-400' : 'bg-white border-stone-300 text-stone-600 shadow-inner'}`}>{record.notes || '-'}</p></div></div></td></tr>
-                                                                    )}
-                                                                </React.Fragment>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
+                                                {/* TABLE SCROLL AREA */}
+                                                <div className="flex-grow overflow-y-auto relative">
+                                                    {paginatedData.length === 0 ? (
+                                                        <div className="flex flex-col items-center justify-center h-full opacity-40">
+                                                            <Icon name="Inbox" size={48} className={themeClasses.textDim} />
+                                                            <p className={`mt-2 text-sm font-bold ${themeClasses.textDim}`}>{t.noData}</p>
+                                                        </div>
+                                                    ) : (
+                                                        <table className="w-full text-left text-[11px] md:text-[13px] font-black">
+                                                            <thead className={`sticky top-0 z-10 ${theme === 'dark' ? 'bg-slate-900' : 'bg-[#e9e6dc] shadow-sm'}`}>
+                                                                <tr>
+                                                                    <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.date}</th>
+                                                                    <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.mode}</th>
+                                                                    <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.drops}</th>
+                                                                    <th className={`px-6 py-4 font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.itemGum} / {t.itemSilvervine}</th>
+                                                                    <th className={`px-6 py-4 text-right font-medium uppercase tracking-widest ${themeClasses.textDim}`}>{t.netProfit}</th>
+                                                                    <th className={`px-6 py-4 text-center font-black uppercase tracking-widest ${themeClasses.textDim}`}>จัดการ</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className={`divide-y transition-all ${theme === 'dark' ? 'divide-slate-800/40' : 'divide-stone-300'}`}>
+                                                                {paginatedData.map(record => (
+                                                                    <React.Fragment key={record.id}>
+                                                                        <tr className={`hover:bg-stone-400/5 cursor-pointer transition-colors font-medium ${theme === 'dark' ? '' : 'text-stone-700'}`} onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}>
+                                                                            <td className="px-6 py-4 whitespace-nowrap">{record.date}</td>
+                                                                            <td className="px-6 py-4"><span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${record.mode === 'aogh' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-purple-500/10 text-purple-500 border border-purple-500/20'}`}>{record.mode || 'ogh'}</span></td>
+                                                                            <td className="px-6 py-4">
+                                                                                <div className="flex flex-col gap-1.5">
+                                                                                    <div className="flex items-center gap-1.5"><SVGs.Spell className="w-3.5 h-3.5"/><span>{record.purpleStoneCount || 0}</span></div>
+                                                                                    {(record.mode === 'aogh' || (record.contMagicCount && record.contMagicCount > 0)) && (
+                                                                                        <div className="flex items-center gap-1.5"><SVGs.Magic className="w-3.5 h-3.5"/><span>{record.contMagicCount || 0}</span></div>
+                                                                                    )}
+                                                                                </div>
+                                                                            </td>
+                                                                            <td className="px-6 py-4 whitespace-nowrap font-medium"><div className="flex gap-2 items-center"><span className="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold border border-blue-500/10 flex items-center gap-1.5 font-black"><SVGs.GumBox className="w-3.5 h-3.5 font-black"/> {record.gumUsed}</span><span className={`px-2 py-0.5 rounded font-bold border flex items-center gap-1.5 ${record.useSilvervine ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/10 font-black' : 'bg-slate-500/10 text-slate-500 border-slate-500/10 opacity-30 font-black'}`}><SVGs.SilvervineBox className="w-3.5 h-3.5 font-black"/> {record.useSilvervine ? '✓' : '✕'}</span></div></td>
+                                                                            <td className={`px-6 py-4 text-right font-bold text-base ${record.profit >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}><ZenyDisplay amount={record.profit} /></td>
+                                                                            <td className="px-5 py-4 text-center">
+                                                                                <div className="flex items-center justify-center gap-2">
+                                                                                    <button onClick={(e) => { e.stopPropagation(); handleShare(record); }} className={`text-blue-500 hover:text-blue-400 transition-colors p-1.5`} title="Share"><Icon name="Share2" size={14}/></button>
+                                                                                    <button onClick={(e) => { e.stopPropagation(); openEditModal(record); }} className={`text-amber-500 hover:text-amber-400 transition-colors p-1.5`} title="Edit"><Icon name="Pencil" size={14}/></button>
+                                                                                    <button onClick={(e) => { e.stopPropagation(); handleDelete(record.id); }} className={`${themeClasses.textDim} hover:text-rose-600 transition-colors p-1.5`}><Icon name="Trash2" size={14}/></button>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                        {expandedId === record.id && (
+                                                                            <tr className={`border-l-4 border-purple-500 animate-in slide-in-from-left-1 transition-all ${theme === 'dark' ? 'bg-slate-950/40' : 'bg-[#f4f2ee]'}`}><td colSpan="6" className="px-6 py-6 font-medium"><div className="grid grid-cols-1 md:grid-cols-4 gap-8"><div><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.costBreakdown}</p><p className="flex justify-between py-1 font-medium">{t.itemGum}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.gumCost} /></span></p><p className="flex justify-between py-1 font-medium">{t.itemSilvervine}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.silvervineCost} /></span></p><p className="flex justify-between py-1 font-medium">{t.etc}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.etcCost} /></span></p></div><div><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.revSource}</p><p className="flex justify-between py-1 font-medium">ขยะ: <span className={themeClasses.textMain}><ZenyDisplay amount={record.trashAmount} /></span></p><p className="flex justify-between py-1 font-medium">{t.stone}: <span className={themeClasses.textMain}><ZenyDisplay amount={record.revenue - record.trashAmount} /></span></p></div><div className="md:col-span-2"><p className={`font-black mb-3 uppercase text-[11px] tracking-widest ${themeClasses.textDim} font-black`}>{t.notes}</p><p className={`italic p-5 rounded-2xl min-h-[80px] whitespace-pre-wrap border text-sm font-medium ${theme === 'dark' ? 'bg-slate-950/50 border-slate-800 text-slate-400' : 'bg-white border-stone-300 text-stone-600 shadow-inner'}`}>{record.notes || '-'}</p></div></div></td></tr>
+                                                                        )}
+                                                                    </React.Fragment>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    )}
                                                 </div>
 
                                                 {/* PAGINATION FOOTER */}
-                                                <div className={`p-4 border-t flex justify-between items-center ${theme === 'dark' ? 'bg-slate-950/40 border-slate-800' : 'bg-stone-50 border-stone-100'} font-black font-black`}>
+                                                <div className={`p-4 border-t flex justify-between items-center ${theme === 'dark' ? 'bg-slate-950/40 border-slate-800' : 'bg-stone-50 border-stone-100'}`}>
                                                     <p className={`text-[10px] uppercase font-bold ${themeClasses.textDim}`}>{t.page} {currentPage} {t.of} {totalPages}</p>
                                                     <div className="flex gap-2">
                                                         <button 
@@ -843,22 +850,22 @@
                                         </div>
 
                                         <aside className="space-y-6">
-                                            <div className={`border p-6 rounded-[2rem] shadow-xl border-t-rose-500/20 transition-all h-full flex flex-col ${themeClasses.card} font-black font-black`}>
+                                            <div className={`border p-6 rounded-[2rem] shadow-xl border-t-rose-500/20 transition-all h-full flex flex-col ${themeClasses.card} h-[520px]`}>
                                                 <div className="flex justify-between items-start mb-4">
                                                     <div className="p-3 bg-rose-500/10 rounded-2xl text-rose-500"><Icon name="Clock" size={24} /></div>
-                                                    <h3 className={`text-lg font-bold mt-1 ${themeClasses.textDim}`}>{t.timer}</h3>
+                                                    <h3 className={`text-xl font-bold mt-1 ${themeClasses.textDim}`}>{t.timer}</h3>
                                                 </div>
                                                 <div className="flex-grow flex flex-col justify-center py-6">
                                                     <div className={`text-5xl font-black tabular-nums text-center transition-all ${themeClasses.textMain}`}>{formatTimer(timeInMs)}</div>
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-4 mt-auto font-black font-black">
+                                                <div className="grid grid-cols-2 gap-4 mt-auto font-black">
                                                     {!isTimerActive || isTimerPaused ? (
-                                                        <button onClick={() => { setIsTimerActive(true); setIsTimerPaused(false); }} className="bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg font-black"><Icon name="Play" size={14} />เริ่ม</button>
+                                                        <button onClick={() => { setIsTimerActive(true); setIsTimerPaused(false); }} className="bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg"><Icon name="Play" size={14} />เริ่ม</button>
                                                     ) : (
-                                                        <button onClick={() => setIsTimerPaused(true)} className="bg-amber-600 hover:bg-amber-500 text-white py-4 rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg font-black"><Icon name="Pause" size={14} />พัก</button>
+                                                        <button onClick={() => setIsTimerPaused(true)} className="bg-amber-600 hover:bg-amber-500 text-white py-4 rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg"><Icon name="Pause" size={14} />พัก</button>
                                                     )}
-                                                    <button onClick={() => { setFormData(p => ({...p, minutesUsed: Math.ceil(timeInMs / 60000) || 1})); setIsTimerActive(false); setIsTimerPaused(true); setIsAdding(true); }} className={`py-4 rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 transition-all active:scale-95 group shadow-lg ${theme === 'dark' ? 'bg-slate-800 hover:bg-rose-600 text-white font-black' : 'bg-stone-300 hover:bg-rose-600 hover:text-white text-stone-700 font-black'}`}><Icon name="Square" size={14} className="group-hover:text-white font-black" />หยุด</button>
-                                                    <button onClick={() => { setTimeInMs(0); setIsTimerActive(false); setIsTimerPaused(true); }} className={`col-span-2 py-2 text-[10px] font-black uppercase transition-colors ${themeClasses.textDim} hover:text-rose-600 font-black`}>Reset Timer</button>
+                                                    <button onClick={() => { setFormData(p => ({...p, minutesUsed: Math.ceil(timeInMs / 60000) || 1})); setIsTimerActive(false); setIsTimerPaused(true); setIsAdding(true); }} className={`py-4 rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 transition-all active:scale-95 group shadow-lg ${theme === 'dark' ? 'bg-slate-800 hover:bg-rose-600 text-white font-black' : 'bg-stone-300 hover:bg-rose-600 hover:text-white text-stone-700 font-black'}`}><Icon name="Square" size={14} className="group-hover:text-white" />หยุด</button>
+                                                    <button onClick={() => { setTimeInMs(0); setIsTimerActive(false); setIsTimerPaused(true); }} className={`col-span-2 py-2 text-[10px] font-black uppercase transition-colors ${themeClasses.textDim} hover:text-rose-600`}>Reset Timer</button>
                                                 </div>
                                             </div>
                                         </aside>
@@ -868,15 +875,15 @@
                             
                             {/* SALE MODAL */}
                             {showSaleModal && (
-                                <div className="fixed inset-0 z-[900] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200 font-black font-black" onClick={() => setShowSaleModal(false)}>
+                                <div className="fixed inset-0 z-[900] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200 font-black" onClick={() => setShowSaleModal(false)}>
                                     <div className={`border w-full max-w-md p-8 md:p-10 rounded-[3rem] shadow-2xl relative transition-all ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white font-black' : 'bg-white border-stone-300 font-black'}`} onClick={e => e.stopPropagation()}>
                                         <button onClick={() => setShowSaleModal(false)} className={`${themeClasses.textDim} absolute top-8 right-8 hover:text-rose-500 font-black`}><Icon name="X" size={24} /></button>
                                         <h2 className="text-xl md:text-2xl font-black mb-8 text-emerald-500 italic uppercase flex items-center gap-2 font-black">
                                             {saleItem === 'spell' ? <SVGs.Spell className="w-8 h-8 font-black"/> : <SVGs.Magic className="w-8 h-8 font-black"/>} 
                                             {t.sellPopup}
                                         </h2>
-                                        <div className="space-y-6 font-medium font-black">
-                                            <div className="grid grid-cols-2 gap-4 font-black">
+                                        <div className="space-y-6 font-medium">
+                                            <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 font-black">{t.sellQuantity}</label><input type="number" min="1" max={saleItem === 'spell' ? stats.stockSpell : stats.stockMagic} value={saleFormData.quantity} onChange={e => setSaleFormData({...saleFormData, quantity: e.target.value})} className={`w-full p-4 rounded-xl border font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-stone-50 border-stone-200 shadow-inner'}`} placeholder="0" /></div>
                                                 <div className="space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 font-black">{t.sellPrice}</label><input type="number" min="0" value={saleFormData.price} onChange={e => setSaleFormData({...saleFormData, price: e.target.value})} className={`w-full p-4 rounded-xl border font-bold outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white font-black' : 'bg-stone-50 border-stone-200 shadow-inner'}`} placeholder="0" /></div>
                                             </div>
@@ -885,7 +892,7 @@
                                                 <p className="text-xl font-black text-emerald-500 font-black"><ZenyDisplay amount={Number(saleFormData.quantity) * Number(saleFormData.price)} /></p>
                                             </div>
                                         </div>
-                                        <div className="flex gap-4 mt-8 font-black"><button onClick={() => setShowSaleModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-xs transition-all ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white font-black' : 'bg-stone-100 hover:bg-stone-200 text-stone-600'}`}>{t.cancel}</button><button onClick={handleManualSellSubmit} className="flex-[2] bg-gradient-to-r from-emerald-500 to-green-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all font-black">ยืนยันการขาย</button></div>
+                                        <div className="flex gap-4 mt-8 font-black"><button onClick={() => setShowSaleModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-xs transition-all ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white font-black' : 'bg-stone-100 hover:bg-stone-200 text-stone-600 font-black'}`}>{t.cancel}</button><button onClick={handleManualSellSubmit} className="flex-[2] bg-gradient-to-r from-emerald-500 to-green-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all font-black">ยืนยันการขาย</button></div>
                                     </div>
                                 </div>
                             )}
@@ -920,7 +927,7 @@
                                                         )}
                                                     </React.Fragment>
                                                 )}
-                                                <div className="space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 font-black">{t.gum}</label><div className={`flex p-1 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-[#e9e6dc] border-stone-300 shadow-inner'}`}>{[0, 1, 2].map(n => (<button key={n} type="button" onClick={() => setEditModalData({...editModalData, gumUsed: n})} className={`flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all ${editModalData.gumUsed === n ? 'bg-blue-600 text-white shadow-md' : 'text-stone-500'}`}>{n}</button>))}</div></div>
+                                                <div className="space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 font-black">{t.gum}</label><div className={`flex p-1 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800 font-black' : 'bg-[#e9e6dc] border-stone-300 shadow-inner'}`}>{[0, 1, 2].map(n => (<button key={n} type="button" onClick={() => setEditModalData({...editModalData, gumUsed: n})} className={`flex-1 py-1.5 rounded-lg text-[10px] font-black transition-all ${editModalData.gumUsed === n ? 'bg-blue-600 text-white shadow-md' : 'text-stone-500'}`}>{n}</button>))}</div></div>
                                             </div>
                                             <div className="space-y-1.5 font-black"><label className="text-[10px] font-black uppercase opacity-50 font-black">{t.notes}</label><textarea value={editModalData.notes} onChange={e => setEditModalData({...editModalData, notes: e.target.value})} className={`w-full p-3 rounded-xl border font-medium text-xs h-24 outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900 shadow-inner'}`} /></div>
                                         </div>
@@ -942,19 +949,6 @@
                                     </div>
                                 </div>
                             )}
-                        </div>
-                    )}
-                    {showManual && (
-                        <div className="fixed inset-0 z-[999] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-300 font-black font-black font-black font-black font-black" onClick={() => setShowManual(false)}>
-                            <div className={`border w-full max-w-sm p-10 rounded-[3rem] shadow-2xl relative transition-all ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white font-black' : 'bg-white border-stone-300 text-stone-900 font-black'}`} onClick={e => e.stopPropagation()}>
-                                <button onClick={() => setShowManual(false)} className={`${themeClasses.textDim} absolute top-8 right-8 hover:text-rose-600 font-black`}><Icon name="X" size={24} /></button>
-                                <h2 className="text-xl md:text-2xl font-black mb-8 text-purple-600 italic uppercase font-black font-black font-black font-black">{t.install} Guide</h2>
-                                <div className="space-y-8 text-sm text-stone-600 font-black font-black font-black font-black font-black font-black font-black">
-                                    <div className="space-y-3 font-medium font-black font-black font-black font-black font-black"><p className={`font-black uppercase text-[11px] tracking-widest ${themeClasses.textMain} font-black font-black`}>สำหรับ iOS (Safari)</p><p className={`p-5 rounded-2xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800 font-black' : 'bg-white border-stone-300 shadow-sm font-black'} font-medium font-black`}>กดปุ่มแชร์ &gt; เลือก <span className="text-blue-600 font-black font-black">"เพิ่มไปยังหน้าจอโฮม"</span></p></div>
-                                    <div className="space-y-3 font-medium font-black font-black font-black font-black font-black"><p className={`font-black uppercase text-[11px] tracking-widest ${themeClasses.textMain} font-black font-black`}>สำหรับ Android (Chrome)</p><p className={`p-5 rounded-2xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800 font-black' : 'bg-white border-stone-300 shadow-sm font-black'} font-medium font-black`}>กดปุ่มเมนู (จุดสามจุด) &gt; เลือก <span className="text-purple-600 font-black font-black">"ติดตั้งแอป"</span></p></div>
-                                </div>
-                                <button onClick={() => setShowManual(false)} className={`w-full mt-10 py-5 rounded-2xl font-black uppercase text-xs tracking-widest transition-all shadow-lg ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white font-black' : 'bg-stone-300 hover:bg-stone-400 text-stone-700 font-black'}`}>Close</button>
-                            </div>
                         </div>
                     )}
                 </div>
