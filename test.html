@@ -88,8 +88,10 @@
 
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
+
+        // --- 1. GLOBAL CONSTANTS ---
         const YT_AVATAR_URL = "https://yt3.googleusercontent.com/vlD4rkRPBg-HIUX6kAbuW1AHgE1FzYa4cs7W3ZD1AV0z4Xg_vM42d1r_slf8SVPhjmJXPslvcg=s160-c-k-c0x00ffffff-no-rj";
-        const APP_VERSION = "Ver.1.03";
+        const APP_VERSION = "Ver.1.04";
 
         const i18n = {
             th: {
@@ -100,7 +102,7 @@
                 trashSale: "ยอดขายขยะ (Zeny)", gum: "บับเบิ้ลกั้ม", silvervine: "มะละกอ", etc: "ต้นทุนอื่นๆ", notes: "บันทึกช่วยจำ", save: "บันทึกข้อมูล",
                 cancel: "ยกเลิก", subs: "140+ Subs", profit: "กำไร", revenue: "รายได้", mode: "โหมด", guestLogin: "Login mode: Guest", gmailLogin: "Login mode: Gmail",
                 itemSpell: "หินม่วง", itemMagic: "หินแดง", itemGum: "บับเบิ้ลกั้ม", itemGumBox: "กล่องบับเบิ้ลกั้ม", itemSilvervine: "มะละกอ", itemSilvervineBox: "กล่องมะละกอ",
-                unit: "ชิ้น", langName: "English", revSource: "รายได้", costBreakdown: "ต้นทุน", stone: "หิน", trash: "ขยะ",
+                unit: "ชิ้น", langName: "English", revSource: "ที่มาของรายได้", costBreakdown: "รายละเอียดต้นทุน", stone: "หิน", trash: "ขยะ",
                 selectionMode: "เลือกโหมดการเล่น", max: "สูงสุด", min: "ต่ำสุด", currentValue: "มูลค่าปัจจุบัน", sell: "ขาย", sellPopup: "ขายไอเทมจากคลัง",
                 sellQuantity: "จำนวนที่จะขาย", sellPrice: "ราคาขายต่อชิ้น", confirmSell: "ยืนยันการขาย", fromSpell: "จากการขายหินม่วง", fromMagic: "จากการขายหินแดง",
                 priceWarning: "กรุณาระบุราคาตลาดปัจจุบันให้ครบถ้วนก่อนเพิ่มข้อมูล", gumShort: "กั้ม", viewDetails: "คลิกเพื่อดูรายละเอียดกราฟ",
@@ -108,7 +110,26 @@
                 deleteAll: "ลบทั้งหมด", confirmDeleteAll: "ยืนยันการลบข้อมูลทั้งหมดหรือไม่?", deleteWarn: "การกระทำนี้จะลบประวัติการฟาร์มและรายการขายทั้งหมดและไม่สามารถกู้คืนได้",
                 share: "แชร์ผลลัพธ์", saveImage: "บันทึกรูปภาพ", copyText: "คัดลอกข้อความ", shareSuccess: "คัดลอกเรียบร้อย!",
                 zPerMin: "Zeny/Min", totalRevenue: "ยอดขายรวม", totalCost: "ต้นทุนรวม", action: "จัดการ", store: "เก็บ", storeShort: "เก็บ", drops: "ดรอป",
-                searchPlaceholder: "เลือกวันที่...", allModes: "ทั้งหมด", page: "หน้า", of: "จาก", noData: "ไม่มีข้อมูล"
+                searchPlaceholder: "เลือกวันที่...", allModes: "ทั้งหมด", page: "หน้า", of: "จาก", noData: "ไม่มีข้อมูล", shareTitle: "OGH RUN SUMMARY"
+            },
+            en: {
+                dashboard: "OLD GLAST HEIM", welcomeSub: "Statistics & Profit Analytics System", loginBtn: "Login with Gmail", guestBtn: "Use as Guest",
+                exit: "Exit", home: "Home", addData: "Add Data", netProfit: "Net Profit", totalBothModes: "Total for both modes", avgRev: "Avg. Revenue / Round",
+                avgMin: "Avg. Revenue / Min", inventory: "Inventory", stats: "Statistics", history: "History", prices: "Market Prices",
+                timer: "Farm Timer", install: "Install App", newRecord: "New Record", editRecord: "Edit Record", date: "Date", duration: "Duration (Min)",
+                trashSale: "Trash Sales (Zeny)", gum: "Bubble Gum", silvervine: "Silvervine", etc: "Other Costs (etc.)", notes: "Notes (Memo)", save: "Save Data",
+                cancel: "Cancel", subs: "140+ Subs", profit: "Profit", revenue: "Revenue", mode: "Mode", guestLogin: "Guest", gmailLogin: "Gmail User",
+                itemSpell: "Coagulated Spell", itemMagic: "Contaminated Magic", itemGum: "Bubble Gum", itemGumBox: "Bubble Gum Box", itemSilvervine: "Silvervine",
+                itemSilvervineBox: "Silvervine Box", unit: "ea.", langName: "ภาษาไทย", revSource: "Revenue Source", costBreakdown: "Costs Breakdown",
+                stone: "Stone", trash: "Trash", selectionMode: "Select Run Mode", max: "Max", min: "Min", currentValue: "Current Value", sell: "Sell",
+                sellPopup: "Sell Item from Stock", sellQuantity: "Quantity to Sell", sellPrice: "Price per ea.", confirmSell: "Confirm Sale",
+                fromSpell: "from Coagulated Spell sales", fromMagic: "from Contaminated Magic sales", priceWarning: "Please fill in all market prices before adding data",
+                gumShort: "Gum", viewDetails: "Click to view chart details", range1W: "1 Week", range1M: "30 Days", range3M: "3 Months", range1Y: "1 Year",
+                assetTrend: "Acquired Asset Value", theme: "Change Theme",
+                deleteAll: "Delete All", confirmDeleteAll: "Confirm delete all data?", deleteWarn: "This will permanently remove all farm records and sales history.",
+                share: "Share Result", saveImage: "Save Image", copyText: "Copy Text", shareSuccess: "Copied!",
+                zPerMin: "Zeny/Min", totalRevenue: "Total Sales", totalCost: "Total Cost", action: "Action", store: "Store", storeShort: "Store", drops: "Drops",
+                searchPlaceholder: "Search date...", allModes: "All", page: "Page", of: "of", noData: "No Data", shareTitle: "OGH RUN SUMMARY"
             }
         };
 
@@ -122,7 +143,9 @@
             ChevronLeft: ({size, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="15 18 9 12 15 6"/></svg>,
             Search: ({size, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
             Inbox: ({size, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>,
-            Calendar: ({size, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Calendar: ({size, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+            Share: ({size, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
+            Download: ({size, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12.01" y2="3"/></svg>
         };
 
         const Icon = ({ name, size = 16, className = "" }) => {
@@ -196,7 +219,11 @@
                         <button onClick={onShowInstall} className={`w-full h-14 flex items-center justify-center gap-2 px-6 rounded-2xl font-semibold text-sm hover:translate-y-[-2px] transition-all border ${theme === 'dark' ? 'bg-transparent text-blue-500 border-blue-900/30 hover:bg-blue-950/20' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'}`}>
                             <Icon name="HelpCircle" size={16} /> <span className="font-bold">{t.install}</span>
                         </button>
+                        <button onClick={() => setLang(lang === 'th' ? 'en' : 'th')} className={`flex items-center gap-2 mx-auto pt-4 text-[10px] font-black uppercase tracking-widest transition-colors ${theme === 'dark' ? 'text-slate-600 hover:text-white' : 'text-stone-400 hover:text-stone-800'}`}>
+                            <Icon name="Languages" size={14} /> <span className="font-black">{i18n[lang].langName}</span>
+                        </button>
 
+                        {/* Modified: Youtube Link Card at the bottom of Welcome Screen */}
                         <a href="https://www.youtube.com/@SDekza-RO" target="_blank" rel="noreferrer" className={`mt-8 w-full flex items-center justify-between p-4 rounded-2xl border transition-all hover:scale-105 active:scale-95 ${theme === 'dark' ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200 shadow-sm'}`}>
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-cover shadow-sm border-2 border-red-600" style={{backgroundImage: `url('${YT_AVATAR_URL}')`}}></div>
@@ -210,10 +237,6 @@
                                 <span>Subscribe</span>
                             </div>
                         </a>
-
-                        <button onClick={() => setLang(lang === 'th' ? 'en' : 'th')} className={`flex items-center gap-2 mx-auto pt-4 text-[10px] font-black uppercase tracking-widest transition-colors ${theme === 'dark' ? 'text-slate-600 hover:text-white' : 'text-stone-400 hover:text-stone-800'}`}>
-                            <Icon name="Languages" size={14} /> <span className="font-black">{i18n[lang].langName}</span>
-                        </button>
                     </div>
                 </div>
             );
@@ -564,6 +587,7 @@
                                                 </label>
                                             </div>
                                         </div>
+                                        {/* Mobile Friendly Layout: 1 Column on Mobile, 2 on Desktop */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-2 font-medium font-black"><label className={`text-xs md:text-sm font-medium uppercase tracking-widest ${themeClasses.textDim} font-black`}>{t.date}</label>
                                                 <div className="relative">
@@ -601,6 +625,7 @@
                                 </div>
                             ) : (
                                 <div className="space-y-6">
+                                    {/* ... PRICES ... */}
                                     <section className={`border p-5 md:p-6 rounded-[2rem] shadow-xl backdrop-blur-sm transition-all duration-300 ${themeClasses.card} ${priceValidationPulse ? 'border-rose-500 animate-bounce' : ''}`}>
                                         <h3 className={`text-xl font-black uppercase flex items-center gap-2 italic mb-5 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'} font-black font-black`}><Icon name="TrendingUp" size={16} /> {t.prices}</h3>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 font-black">
@@ -621,10 +646,11 @@
                                         </div>
                                     </section>
 
+                                    {/* GRID ROW: NET PROFIT / AVG REV / INVENTORY */}
                                     <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 px-4 -mx-4 lg:grid lg:grid-cols-3 lg:gap-6 lg:pb-0 lg:px-0 lg:mx-0 no-scrollbar font-black">
                                         
                                         {/* 1. NET PROFIT CARD */}
-                                        <div className={`border rounded-[2rem] shadow-xl transition-all overflow-hidden flex flex-col h-[280px] lg:h-full ${themeClasses.card} min-w-[85vw] sm:min-w-[45vw] lg:min-w-0 snap-center`}>
+                                        <div className={`border rounded-[2rem] shadow-xl transition-all overflow-hidden flex flex-col h-[280px] lg:h-[350px] ${themeClasses.card} min-w-[85vw] sm:min-w-[45vw] lg:min-w-0 snap-center`}>
                                             <div className="p-4 pb-0 flex justify-between items-start">
                                                 <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500"><Icon name="Wallet" size={24} /></div>
                                                 <h3 className={`text-xl font-bold mt-1 ${themeClasses.textDim}`}>{t.netProfit}</h3>
@@ -647,8 +673,8 @@
                                             </div>
                                         </div>
 
-                                        {/* 2. AVG REVENUE CARD */}
-                                        <div className={`border rounded-[2rem] shadow-xl transition-all overflow-hidden flex flex-col h-[280px] lg:h-full ${themeClasses.card} min-w-[85vw] sm:min-w-[45vw] lg:min-w-0 snap-center`}>
+                                        {/* 2. AVG REVENUE CARD (FADE VERSION) */}
+                                        <div className={`border rounded-[2rem] shadow-xl transition-all overflow-hidden flex flex-col h-[280px] lg:h-[350px] ${themeClasses.card} min-w-[85vw] sm:min-w-[45vw] lg:min-w-0 snap-center`}>
                                             <div className="p-4 pb-0 flex justify-between items-start">
                                                 <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500"><Icon name="TrendingUp" size={24} /></div>
                                                 <div className="flex items-center gap-3">
@@ -734,10 +760,10 @@
                                     {/* LOWER ROW: HISTORY & TIMER */}
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
                                         <div className="lg:col-span-2 space-y-4">
-                                            <div className={`border rounded-[2rem] overflow-hidden shadow-xl transition-all ${themeClasses.card} h-[520px] flex flex-col`}>
+                                            <div className={`border rounded-[2rem] overflow-hidden shadow-xl transition-all ${themeClasses.card} h-[500px] flex flex-col font-black`}>
                                                 {/* Header */}
                                                 <div className={`p-4 border-b flex flex-col md:flex-row gap-4 justify-between items-start md:items-center transition-all ${theme === 'dark' ? 'bg-slate-950/20 border-slate-800' : 'bg-stone-50/50 border-stone-200'}`}>
-                                                    <h2 className="text-base md:text-lg font-black text-blue-600 italic flex items-center gap-2 uppercase tracking-widest font-black"><Icon name="History" size={20} /> {t.history}</h2>
+                                                    <h2 className="text-xl font-bold text-blue-600 italic flex items-center gap-2 uppercase tracking-widest"><Icon name="History" size={20} /> {t.history}</h2>
                                                     
                                                     {/* FILTERING AREA */}
                                                     <div className="flex flex-wrap items-center gap-3 w-full md:w-auto font-black font-black">
@@ -788,12 +814,12 @@
                                                                             </div>
                                                                         </td>
                                                                         <td className="px-6 py-4 whitespace-nowrap font-medium"><div className="flex gap-2 items-center"><span className="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold border border-blue-500/10 flex items-center gap-1.5 font-black"><SVGs.GumBox className="w-3.5 h-3.5 font-black"/> {record.gumUsed}</span><span className={`px-2 py-0.5 rounded font-bold border flex items-center gap-1.5 ${record.useSilvervine ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/10 font-black' : 'bg-slate-500/10 text-slate-500 border-slate-500/10 opacity-30 font-black'}`}><SVGs.SilvervineBox className="w-3.5 h-3.5 font-black"/> {record.useSilvervine ? '✓' : '✕'}</span></div></td>
-                                                                        <td className={`px-6 py-4 text-right font-bold text-base ${record.profit >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}><ZenyDisplay amount={record.profit} /></td>
-                                                                        <td className="px-5 py-4 text-center">
+                                                                        <td className={`px-6 py-4 text-right font-bold text-base ${record.profit >= 0 ? 'text-emerald-600' : 'text-rose-500'} font-black`}>{formatUnitZeny(record.profit)}</td>
+                                                                        <td className="px-5 py-4 text-center font-black">
                                                                             <div className="flex items-center justify-center gap-2">
-                                                                                <button onClick={(e) => { e.stopPropagation(); handleShare(record); }} className={`text-blue-500 hover:text-blue-400 transition-colors p-1.5`} title="Share"><Icon name="Share2" size={14}/></button>
-                                                                                <button onClick={(e) => { e.stopPropagation(); openEditModal(record); }} className={`text-amber-500 hover:text-amber-400 transition-colors p-1.5`} title="Edit"><Icon name="Pencil" size={14}/></button>
-                                                                                <button onClick={(e) => { e.stopPropagation(); handleDelete(record.id); }} className={`${themeClasses.textDim} hover:text-rose-600 transition-colors p-1.5`}><Icon name="Trash2" size={14}/></button>
+                                                                                <button onClick={(e) => { e.stopPropagation(); handleShare(record); }} className={`text-blue-500 hover:text-blue-400 transition-colors p-1.5 font-black`} title="Share"><Icon name="Share2" size={14}/></button>
+                                                                                <button onClick={(e) => { e.stopPropagation(); openEditModal(record); }} className={`text-amber-500 hover:text-amber-400 transition-colors p-1.5 font-black`} title="Edit"><Icon name="Pencil" size={14}/></button>
+                                                                                <button onClick={(e) => { e.stopPropagation(); handleDelete(record.id); }} className={`${themeClasses.textDim} hover:text-rose-600 transition-colors p-1.5 font-black`}><Icon name="Trash2" size={14}/></button>
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -884,7 +910,7 @@
                                         </div>
 
                                         <aside className="space-y-6">
-                                            <div className={`border p-6 rounded-[2rem] shadow-xl border-t-rose-500/20 transition-all h-full flex flex-col ${themeClasses.card} h-[520px]`}>
+                                            <div className={`border p-6 rounded-[2rem] shadow-xl border-t-rose-500/20 transition-all h-full flex flex-col ${themeClasses.card} h-[500px]`}>
                                                 <div className="flex justify-between items-start mb-4">
                                                     <div className="p-3 bg-rose-500/10 rounded-2xl text-rose-500"><Icon name="Clock" size={24} /></div>
                                                     <h3 className={`text-xl font-bold mt-1 ${themeClasses.textDim}`}>{t.timer}</h3>
@@ -892,7 +918,7 @@
                                                 <div className="flex-grow flex flex-col justify-center py-6">
                                                     <div className={`text-5xl font-black tabular-nums text-center transition-all ${themeClasses.textMain}`}>{formatTimer(timeInMs)}</div>
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-4 mt-auto font-black">
+                                                <div className="grid grid-cols-2 gap-4 mt-auto font-black font-black">
                                                     {!isTimerActive || isTimerPaused ? (
                                                         <button onClick={() => { setIsTimerActive(true); setIsTimerPaused(false); }} className="bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg"><Icon name="Play" size={14} />เริ่ม</button>
                                                     ) : (
@@ -909,10 +935,10 @@
                             
                             {/* SALE MODAL */}
                             {showSaleModal && (
-                                <div className="fixed inset-0 z-[900] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200 font-black font-black" onClick={() => setShowSaleModal(false)}>
+                                <div className="fixed inset-0 z-[900] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200 font-black font-black font-black font-black" onClick={() => setShowSaleModal(false)}>
                                     <div className={`border w-full max-w-md p-8 md:p-10 rounded-[3rem] shadow-2xl relative transition-all ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white font-black' : 'bg-white border-stone-300 font-black'}`} onClick={e => e.stopPropagation()}>
                                         <button onClick={() => setShowSaleModal(false)} className={`${themeClasses.textDim} absolute top-8 right-8 hover:text-rose-500 font-black`}><Icon name="X" size={24} /></button>
-                                        <h2 className="text-xl md:text-2xl font-black mb-8 text-emerald-500 italic uppercase flex items-center gap-2">
+                                        <h2 className="text-xl md:text-2xl font-black mb-8 text-emerald-500 italic uppercase flex items-center gap-2 font-black font-black">
                                             {saleItem === 'spell' ? <SVGs.Spell className="w-8 h-8 font-black"/> : <SVGs.Magic className="w-8 h-8 font-black"/>} 
                                             {t.sellPopup}
                                         </h2>
@@ -926,7 +952,7 @@
                                                 <p className="text-xl font-black text-emerald-500 font-black"><ZenyDisplay amount={Number(saleFormData.quantity) * Number(saleFormData.price)} /></p>
                                             </div>
                                         </div>
-                                        <div className="flex gap-4 mt-8 font-black"><button onClick={() => setShowSaleModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-xs transition-all ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white font-black' : 'bg-stone-100 hover:bg-stone-200 text-stone-600'}`}>{t.cancel}</button><button onClick={handleManualSellSubmit} className="flex-[2] bg-gradient-to-r from-emerald-500 to-green-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all">ยืนยันการขาย</button></div>
+                                        <div className="flex gap-4 mt-8 font-black"><button onClick={() => setShowSaleModal(false)} className={`flex-1 py-4 rounded-2xl font-black uppercase text-xs transition-all ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white font-black' : 'bg-stone-100 hover:bg-stone-200 text-stone-600'}`}>{t.cancel}</button><button onClick={handleManualSellSubmit} className="flex-[2] bg-gradient-to-r from-emerald-500 to-green-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all font-black">ยืนยันการขาย</button></div>
                                     </div>
                                 </div>
                             )}
@@ -973,9 +999,9 @@
                             {showDeleteAllModal && (
                                 <div className="fixed inset-0 z-[999] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 font-black font-black font-black" onClick={() => setShowDeleteAllModal(false)}>
                                     <div className={`border w-full max-sm p-10 rounded-[3rem] shadow-2xl relative transition-all text-center ${theme === 'dark' ? 'bg-slate-900 border-slate-800 font-black' : 'bg-white border-stone-300 font-black'}`} onClick={e => e.stopPropagation()}>
-                                        <div className="mx-auto w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center text-rose-500 mb-8 font-black font-black font-black"><Icon name="Trash2" size={40} /></div>
+                                        <div className="mx-auto w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center text-rose-500 mb-8 font-black"><Icon name="Trash2" size={40} /></div>
                                         <h3 className={`text-xl md:text-2xl font-black uppercase mb-5 ${themeClasses.textMain} font-black`}>{t.confirmDeleteAll}</h3>
-                                        <p className={`text-sm font-medium mb-10 leading-relaxed ${themeClasses.textDim} font-black`}>{t.deleteWarn}</p>
+                                        <p className={`text-sm font-medium mb-10 leading-relaxed ${themeClasses.textDim}`}>{t.deleteWarn}</p>
                                         <div className="flex gap-4 font-black">
                                             <button onClick={() => setShowDeleteAllModal(false)} className={`flex-1 py-5 rounded-2xl font-black uppercase text-xs transition-all ${theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-stone-100 hover:bg-stone-200 text-stone-600'}`}>{t.cancel}</button>
                                             <button onClick={handleClearAllHistory} className="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-5 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all font-black">ยืนยันการลบ</button>
