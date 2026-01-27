@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Item Manager - GitHub Edition</title>
-    <!-- External Libraries for Image Tracing -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/potrace/1.1.2/potrace.min.js"></script>
+    <title>Magic Item Manager - GitHub Edition (AI SVG)</title>
+    
+    <!-- External Libraries (Optional - System has fallback) -->
+    <script src="https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer.min.js"></script>
+
     <style>
         :root {
             --sidebar-width: 260px;
@@ -17,6 +19,7 @@
             --danger-color: #ef4444;
             --success-color: #10b981;
             --warning-color: #f59e0b;
+            --ai-color: #a855f7;
         }
 
         body {
@@ -106,13 +109,13 @@
             border-left-color: var(--accent-color);
         }
 
-        .menu-item.drag-over {
+        .menu-item.drag-over-cat {
             background: rgba(78, 234, 246, 0.1);
             border-left-color: var(--warp-blue);
             transform: translateX(5px);
         }
 
-        /* Main Display Area */
+        /* Main Content Display */
         .main-content {
             flex: 1;
             margin-left: var(--sidebar-width);
@@ -137,7 +140,7 @@
             gap: 25px;
         }
 
-        /* Card Component */
+        /* Card Elements */
         .item-card {
             background: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -169,12 +172,29 @@
             margin-bottom: 20px;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
+            overflow: hidden;
         }
 
-        .svg-display svg { max-width: 100%; max-height: 100%; }
+        .svg-display svg { 
+            width: 100% !important; 
+            height: 100% !important; 
+            max-width: 100%; 
+            max-height: 100%;
+            object-fit: contain;
+        }
         .svg-display.flipped { transform: scaleX(-1); }
 
-        .item-card h3 { margin: 0 0 15px 0; font-size: 17px; color: #eee; text-align: center; pointer-events: none; }
+        .item-card h3 { 
+            margin: 0 0 15px 0; 
+            font-size: 17px; 
+            color: #eee; 
+            text-align: center; 
+            pointer-events: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
 
         .btn-row { display: flex; gap: 8px; width: 100%; margin-top: 5px; }
         
@@ -190,32 +210,32 @@
             align-items: center;
             justify-content: center;
             gap: 5px;
+            position: relative;
         }
 
         .btn-copy-main { flex: 1; background: var(--accent-color); color: white; }
-        .btn-flip { width: 45px; background: rgba(255,255,255,0.1); color: white; }
-        .btn-delete { width: 45px; background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+        .btn-flip { width: 40px; background: rgba(255,255,255,0.1); color: white; }
+        .btn-edit { width: 40px; background: rgba(255,255,255,0.1); color: #fbbf24; }
+        .btn-delete { width: 40px; background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+        
         .btn-delete:hover { background: var(--danger-color); color: white; }
+        .btn-edit:hover { background: #fbbf24; color: #1a1635; }
 
-        .btn-restore { background: var(--success-color); color: white; flex: 1; }
+        .btn-restore-action { background: var(--success-color); color: white; flex: 1; }
         .btn-permanent { background: var(--danger-color); color: white; flex: 1; }
-        .btn-warning { background: var(--warning-color); color: white; flex: 1; }
+        .btn-ai-gen { background: var(--ai-color); color: white; flex: 2; }
+        .btn-cancel-ai { background: rgba(255,255,255,0.1); color: white; flex: 1; min-width: 80px; }
 
-        /* Import Section Styles */
+        /* Import Section */
         .import-dropzone {
             border: 2px dashed rgba(255,255,255,0.1);
-            padding: 40px;
+            padding: 60px 40px;
             text-align: center;
             border-radius: 20px;
             cursor: pointer;
             background: rgba(255,255,255,0.02);
             transition: 0.3s;
             margin-bottom: 20px;
-        }
-
-        .import-dropzone:hover {
-            border-color: var(--accent-color);
-            background: rgba(124, 92, 219, 0.05);
         }
 
         .preview-container {
@@ -230,12 +250,15 @@
             border-radius: 15px;
             padding: 15px;
             text-align: center;
+            position: relative;
+            min-height: 200px;
         }
 
         .preview-box img, .preview-box svg {
             max-width: 100%;
-            max-height: 200px;
+            max-height: 180px;
             margin-top: 10px;
+            object-fit: contain;
         }
 
         .mode-toggle {
@@ -263,7 +286,42 @@
             color: white;
         }
 
-        /* Toast Notification */
+        .import-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-gen { background: var(--warp-blue); color: #003344; flex: 2; min-width: 150px; }
+        .btn-rbg { background: #6366f1; color: white; flex: 1; min-width: 120px; }
+        .btn-cancel-import { background: rgba(255,255,255,0.1); color: white; flex: 1; min-width: 100px; }
+
+        /* AI SVG Gen Styles */
+        .ai-gen-box {
+            background: rgba(168, 85, 247, 0.05);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .ai-loading-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-top: 15px;
+            overflow: hidden;
+            display: none;
+        }
+        .ai-loading-progress {
+            height: 100%;
+            background: var(--ai-color);
+            width: 50%;
+            animation: loadingScan 1.5s infinite ease-in-out;
+        }
+        @keyframes loadingScan { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+
+        /* Toast & Modals */
         .msg-toast {
             position: fixed;
             bottom: 20px;
@@ -279,13 +337,11 @@
         }
         .msg-toast.show { opacity: 1; transform: translateY(-10px); }
 
-        /* Modal Overlay */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-content { background: #1a1635; padding: 30px; border-radius: 20px; width: 450px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
 
         .hidden { display: none; }
 
-        /* Input Elements */
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; color: rgba(255,255,255,0.6); font-size: 14px; }
         .form-group input, .form-group textarea, .form-group select {
@@ -309,7 +365,7 @@
 </head>
 <body>
 
-    <!-- Modal: Add Category -->
+    <!-- Modals -->
     <div id="modal-category" class="modal-overlay">
         <div class="modal-content">
             <h3 id="modal-cat-title">สร้างหมวดหมู่ใหม่</h3>
@@ -328,17 +384,16 @@
         </div>
     </div>
 
-    <!-- Modal: Restore System -->
     <div id="modal-restore" class="modal-overlay">
         <div class="modal-content">
-            <h3 id="modal-restore-title">กู้คืนข้อมูลระบบ (Restore)</h3>
-            <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 15px;" id="restore-warn">คำเตือน: การกู้คืนจะเขียนทับข้อมูลไอเทมและหมวดหมู่ทั้งหมดที่คุณมีในปัจจุบัน</p>
+            <h3 id="modal-restore-title">กู้คืนข้อมูล</h3>
+            <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 15px;" id="restore-warn">คำเตือน: ข้อมูลจะถูกนำมารวมกับข้อมูลที่มีอยู่ (Merge)</p>
             <div class="form-group">
-                <label id="lbl-restore-json">วางรหัส Backup JSON ที่นี่</label>
+                <label id="lbl-restore-json">วางรหัส Backup JSON</label>
                 <textarea id="restore-input" style="height: 150px; font-family: monospace;" placeholder='{"categories": [...], "items": [...]}'></textarea>
             </div>
             <div class="btn-row">
-                <button class="btn-action btn-warning" onclick="processRestore()" id="btn-do-restore">เริ่มการกู้คืนข้อมูล</button>
+                <button class="btn-action btn-warning" onclick="processRestore()" id="btn-do-restore">กู้คืน</button>
                 <button class="btn-action btn-flip" onclick="closeModal('modal-restore')" id="btn-close-restore">ปิด</button>
             </div>
         </div>
@@ -359,20 +414,22 @@
                     <span id="label-categories">หมวดหมู่</span>
                     <span class="btn-add-cat" onclick="openModal('modal-category')" title="Add Category">⊕</span>
                 </div>
-                <div id="sidebar-categories">
-                    <!-- Dynamic Categories -->
-                </div>
+                <div id="sidebar-categories"></div>
             </div>
 
             <div class="menu-group">
                 <div class="menu-label" id="label-manage">จัดการไอเทม</div>
                 <div class="menu-item" onclick="showSection('add-item', this)">
                     <span>➕</span>
-                    <span class="label-text" id="menu-add-item">เพิ่มไอเทมใหม่</span>
+                    <span class="label-text" id="menu-add-item">เพิ่มไอเทม</span>
                 </div>
                 <div class="menu-item" onclick="showSection('import-image', this)">
                     <span>🖼️</span>
                     <span class="label-text" id="menu-import">นำเข้าไอคอน/รูปภาพ</span>
+                </div>
+                <div class="menu-item" onclick="showSection('ai-gen', this)">
+                    <span>✨</span>
+                    <span class="label-text" id="menu-aigen">AI SVG Creator</span>
                 </div>
                 <div class="menu-item" onclick="showSection('trash-bin', this)">
                     <span>🗑️</span>
@@ -384,233 +441,422 @@
                 <div class="menu-label" id="label-backup">ระบบสำรองข้อมูล</div>
                 <div class="menu-item" onclick="backupAll()">
                     <span>💾</span>
-                    <span class="label-text" id="menu-backup">Backup (คัดลอกทั้งหมด)</span>
+                    <span class="label-text" id="menu-backup">Backup</span>
                 </div>
                 <div class="menu-item" onclick="openModal('modal-restore')">
                     <span>🔄</span>
-                    <span class="label-text" id="menu-restore">Restore ข้อมูล</span>
+                    <span class="label-text" id="menu-restore">Restore</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
+    <!-- Main -->
     <div class="main-content">
-        
-        <!-- Category View Section -->
         <div id="section-category-view" class="content-section">
-            <div class="section-title">
-                <h1 id="view-title">รายการไอเทม</h1>
-            </div>
-            <div class="item-grid" id="items-display-grid">
-                <!-- Items injected here -->
-            </div>
+            <div class="section-title"><h1 id="view-title">รายการไอเทม</h1></div>
+            <div class="item-grid" id="items-display-grid"></div>
         </div>
 
-        <!-- Add New Item Section (Manual) -->
         <div id="section-add-item" class="hidden content-section">
-            <div class="section-title"><h1 id="title-add-new">เพิ่มไอเทมเวทมนตร์ใหม่</h1></div>
+            <div class="section-title"><h1 id="title-add-new">เพิ่มไอเทมใหม่</h1></div>
             <div style="max-width: 600px; background: rgba(255,255,255,0.03); padding: 30px; border-radius: 20px;">
                 <div class="form-group">
                     <label id="lbl-item-name">ชื่อไอเทม</label>
                     <input type="text" id="new-item-name" placeholder="...">
                 </div>
                 <div class="form-group">
-                    <label id="lbl-item-cat">เลือกหมวดหมู่</label>
-                    <select id="new-item-category">
-                        <!-- Categories injected here -->
-                    </select>
-                </div>
-                <div class="form-group">
                     <label id="lbl-item-svg">โค้ด SVG</label>
                     <textarea id="new-item-svg" style="height: 150px; font-family: monospace;" placeholder="<svg>...</svg>"></textarea>
                 </div>
-                <button class="btn-action btn-copy-main" onclick="createNewItem()" id="btn-save-item">✨ บันทึกไอเทม</button>
+                <button class="btn-action btn-copy-main" onclick="createNewItem()" id="btn-save-item">✨ บันทึก</button>
             </div>
         </div>
 
-        <!-- Import Image Section -->
+        <!-- Import Section -->
         <div id="section-import-image" class="hidden content-section">
             <div class="section-title"><h1 id="title-import">นำเข้าไอคอน/รูปภาพ</h1></div>
             <div style="max-width: 800px; background: rgba(255,255,255,0.03); padding: 30px; border-radius: 20px;">
-                
                 <div class="mode-toggle">
-                    <button class="mode-btn active" id="mode-embed" onclick="setImportMode('embed')">Embed (รักษาสีต้นฉบับ)</button>
-                    <button class="mode-btn" id="mode-trace" onclick="setImportMode('trace')">Trace (แปลงเป็นเส้น Vector)</button>
+                    <button class="mode-btn active" id="mode-embed" onclick="setImportMode('embed')">Embed (รักษาสี)</button>
+                    <button class="mode-btn" id="mode-trace" onclick="setImportMode('trace')">Trace (Vector)</button>
                 </div>
 
-                <div class="import-dropzone" onclick="document.getElementById('file-input').click()">
-                    <p id="dropzone-text">คลิก, วางไฟล์ภาพ หรือกด Ctrl+V ที่นี่ (PNG, JPG, SVG)</p>
+                <div class="import-dropzone" id="import-dropzone" onclick="document.getElementById('file-input').click()" 
+                     ondragover="handleImportDragOver(event)" ondragleave="handleImportDragLeave(event)" ondrop="handleImportDrop(event)">
+                    <p id="dropzone-text">คลิก, ลากไฟล์รูปมาวาง หรือกด Ctrl+V ที่นี่</p>
                     <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleFileSelect(event)">
                 </div>
 
                 <div id="import-preview-area" class="hidden">
                     <div class="preview-container">
                         <div class="preview-box">
-                            <label>Original Preview</label>
-                            <img id="img-preview" src="">
+                            <label id="lbl-orig-preview">ต้นฉบับ</label>
+                            <div style="display: flex; align-items: center; justify-content: center; height: 180px;">
+                                <img id="img-preview" src="">
+                            </div>
                         </div>
                         <div class="preview-box">
-                            <label>Generated SVG</label>
-                            <div id="svg-preview-cont"></div>
+                            <label id="lbl-gen-preview">ผลลัพธ์ SVG</label>
+                            <div id="svg-preview-cont" style="display: flex; align-items: center; justify-content: center; height: 180px;"></div>
                         </div>
                     </div>
 
-                    <div style="margin-top: 20px;">
+                    <div class="import-controls">
+                        <button class="btn-action btn-rbg" onclick="removeBackgroundSimple()" id="btn-remove-bg">✂️ ลบพื้นหลัง (สีขาว)</button>
+                        <button class="btn-action btn-gen" onclick="generateSVG()" id="btn-generate">🔨 Generate SVG</button>
+                        <button class="btn-action btn-cancel-import" onclick="resetImport()" id="btn-cancel-import">❌ ยกเลิก</button>
+                    </div>
+
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                         <div class="form-group">
                             <label id="lbl-import-name">ชื่อไอเทม</label>
                             <input type="text" id="import-item-name" placeholder="...">
                         </div>
-                        <div class="form-group">
-                            <label id="lbl-import-cat">หมวดหมู่</label>
-                            <select id="import-item-category"></select>
-                        </div>
-                        <button class="btn-action btn-copy-main" onclick="saveImportedItem()">✨ บันทึกไอเทมที่นำเข้า</button>
+                        <button class="btn-action btn-copy-main" onclick="saveImportedItem()" id="btn-save-imported">✅ บันทึก</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Trash Bin Section -->
-        <div id="section-trash-bin" class="hidden content-section">
-            <div class="section-title"><h1 id="title-trash">ถังขยะ</h1></div>
-            <div class="item-grid" id="trash-display-grid">
-                <!-- Trash items injected here -->
+        <!-- AI SVG Generator Section -->
+        <div id="section-ai-gen" class="hidden content-section">
+            <div class="section-title"><h1 id="title-aigen">AI SVG Creator</h1></div>
+            <div style="max-width: 800px; background: rgba(255,255,255,0.03); padding: 30px; border-radius: 20px;">
+                <div class="ai-gen-box">
+                    <div class="form-group">
+                        <label id="lbl-ai-prompt">คำสั่ง (Prompt)</label>
+                        <textarea id="ai-prompt-input" rows="3" placeholder="เช่น ดาบวิเศษสีฟ้าด้ามทอง, ยาขวดสีแดงมีฟอง..."></textarea>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn-action btn-ai-gen" onclick="generateAiSvg()" id="btn-run-ai">✨ สร้างรูป SVG ด้วย AI</button>
+                        <button class="btn-action btn-cancel-ai" onclick="resetAiGen()" id="btn-cancel-ai">❌ ยกเลิก</button>
+                    </div>
+                    
+                    <div id="ai-loading" class="ai-loading-bar">
+                        <div class="ai-loading-progress"></div>
+                    </div>
+                </div>
+
+                <div id="ai-result-area" class="hidden">
+                    <div class="preview-box" style="margin-bottom: 20px;">
+                        <label>AI Result</label>
+                        <div id="ai-svg-output" style="display: flex; align-items: center; justify-content: center; height: 200px;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="lbl-ai-item-name">ชื่อไอเทม</label>
+                        <input type="text" id="ai-item-name" placeholder="...">
+                    </div>
+                    <button class="btn-action btn-copy-main" onclick="saveAiItem()" id="btn-save-ai">✅ บันทึกลงคลัง</button>
+                </div>
             </div>
         </div>
 
+        <div id="section-trash-bin" class="hidden content-section">
+            <div class="section-title"><h1 id="title-trash">ถังขยะ</h1></div>
+            <div class="item-grid" id="trash-display-grid"></div>
+        </div>
     </div>
 
-    <!-- Toast Message -->
-    <div id="toast" class="msg-toast">ดำเนินการสำเร็จ!</div>
+    <div id="toast" class="msg-toast">สำเร็จ!</div>
 
     <script>
+        // API Key Pool
+        const _pool = [
+            { k1: "AIzaSyCGlXcUwyk5tHZ0cwcn", k2: "-98aw19R2XuiF_Y" },
+            { k1: "AIzaSyBmYB-nlMaFNkPxI-BWRQ8k", k2: "n02wbE5ybB8" }
+        ];
+        let activeKeyIndex = 0;
+
         const translations = {
             th: {
-                categories: "หมวดหมู่", manage: "จัดการไอเทม", addItem: "เพิ่มไอเทมใหม่",
-                trash: "ถังขยะ", backup: "ระบบสำรองข้อมูล", backupBtn: "Backup (คัดลอกทั้งหมด)",
-                restoreBtn: "Restore ข้อมูล", viewTitle: "รายการไอเทม", noItems: "ยังไม่มีไอเทมในหมวดหมู่นี้",
-                trashEmpty: "ถังขยะว่างเปล่า", addTitle: "เพิ่มไอเทมเวทมนตร์ใหม่", restoreTitle: "กู้คืนข้อมูลระบบ",
-                restoreWarn: "คำเตือน: การกู้คืนจะเขียนทับข้อมูลทั้งหมดที่คุณมี", save: "บันทึก", cancel: "ยกเลิก",
-                close: "ปิด", restoreDo: "เริ่มการกู้คืนข้อมูล", lblItemName: "ชื่อไอเทม", lblItemCat: "เลือกหมวดหมู่",
-                lblItemSvg: "โค้ด SVG", lblCatName: "ชื่อหมวดหมู่", lblCatIcon: "ไอคอน (Emoji)",
-                lblRestoreJson: "วางรหัส Backup JSON ที่นี่", copy: "คัดลอก", restore: "กู้คืน",
-                delForever: "ลบถาวร", toastSuccess: "ดำเนินการสำเร็จ!", toastCopy: "คัดลอก SVG แล้ว!",
-                toastBackup: "สำรองข้อมูลลง Clipboard แล้ว!", toastRestore: "กู้คืนข้อมูลสำเร็จ!",
-                toastRestoreErr: "ข้อมูลผิดรูปแบบ!", toastMovedTrash: "ย้ายไปที่ถังขยะแล้ว",
-                toastItemAdded: "เพิ่มไอเทมสำเร็จ!", toastCatAdded: "เพิ่มหมวดหมู่ใหม่แล้ว!",
-                moveSuccess: "ย้ายหมวดหมู่สำเร็จ!", import: "นำเข้าไอคอน/รูปภาพ",
-                dropzone: "คลิก, วางไฟล์ภาพ หรือกด Ctrl+V ที่นี่ (PNG, JPG, SVG)", lblImportName: "ชื่อไอเทม", lblImportCat: "หมวดหมู่"
+                categories: "หมวดหมู่", manage: "จัดการไอเทม", addItem: "เพิ่มไอเทม", trash: "ถังขยะ", backup: "ระบบสำรองข้อมูล",
+                viewTitle: "รายการไอเทม", noItems: "ยังไม่มีไอเทม", trashEmpty: "ถังขยะว่างเปล่า", addTitle: "เพิ่มไอเทมใหม่",
+                restoreTitle: "กู้คืนข้อมูล", restoreWarn: "คำเตือน: ข้อมูลจะถูกนำมารวมกับข้อมูลที่มีอยู่ (Merge)", save: "บันทึก", cancel: "ยกเลิก", close: "ปิด",
+                lblItemName: "ชื่อไอเทม", lblItemSvg: "โค้ด SVG", lblCatName: "ชื่อหมวดหมู่", lblCatIcon: "ไอคอน (Emoji)",
+                lblRestoreJson: "วางรหัส Backup JSON", copy: "คัดลอก", restore: "กู้คืน", delForever: "ลบถาวร", toastSuccess: "สำเร็จ!",
+                toastCopy: "คัดลอก SVG แล้ว!", toastBackup: "สำรองข้อมูลแล้ว!", toastRestore: "กู้คืนสำเร็จ!", toastRestoreErr: "ข้อมูลผิดรูปแบบ!",
+                toastMovedTrash: "ย้ายลงถังขยะ", toastItemAdded: "เพิ่มไอเทมสำเร็จ!", toastCatAdded: "เพิ่มหมวดหมู่แล้ว!",
+                moveSuccess: "ย้ายหมวดหมู่แล้ว!", import: "นำเข้าไอคอน/รูปภาพ", dropzone: "คลิก, ลากไฟล์รูปมาวาง หรือกด Ctrl+V ที่นี่",
+                lblImportName: "ชื่อไอเทม", btnGen: "🔨 Generate SVG", btnRbg: "✂️ ลบพื้นหลัง (สีขาว)",
+                lblOrig: "ต้นฉบับ", lblGen: "ผลลัพธ์ SVG", toastGenerating: "กำลังประมวลผล...", toastRbgSuccess: "ลบพื้นหลังสำเร็จ!",
+                menuAiGen: "AI SVG Creator", titleAiGen: "AI SVG Creator", lblAiPrompt: "คำสั่ง (Prompt)", btnRunAi: "✨ สร้างรูป SVG ด้วย AI",
+                toastAiGenStart: "AI กำลังวาดรูปให้คุณ...", toastAiGenSuccess: "AI วาดเสร็จแล้ว!", backupBtn: "Backup (คัดลอกทั้งหมด)",
+                restoreBtn: "Restore ข้อมูล", btnCancelAi: "❌ ยกเลิก", fallbackTrace: "ImageTracer ไม่โหลด ใช้โหมด Pixel Art แทน",
+                btnEdit: "✏️", toastNameUpdated: "แก้ไขชื่อเรียบร้อย"
             },
             en: {
-                categories: "Categories", manage: "Management", addItem: "Add New Item",
-                trash: "Trash Bin", backup: "Backup System", backupBtn: "Backup All (Copy)",
-                restoreBtn: "Restore System", viewTitle: "Item List", noItems: "No items in this category",
-                trashEmpty: "Trash bin is empty", addTitle: "Add New Magic Item", restoreTitle: "Restore Data System",
-                restoreWarn: "Warning: Restore will overwrite all current data", save: "Save", cancel: "Cancel",
-                close: "Close", restoreDo: "Process Restore", lblItemName: "Item Name", lblItemCat: "Select Category",
-                lblItemSvg: "SVG Code", lblCatName: "Category Name", lblCatIcon: "Icon (Emoji)",
-                lblRestoreJson: "Paste Backup JSON here", copy: "Copy", restore: "Restore",
-                delForever: "Delete Forever", toastSuccess: "Success!", toastCopy: "SVG Copied!",
-                toastBackup: "Backup copied to clipboard!", toastRestore: "Restore successful!",
-                toastRestoreErr: "Invalid JSON format!", toastMovedTrash: "Moved to trash",
-                toastItemAdded: "Item added successfully!", toastCatAdded: "New category added!",
-                moveSuccess: "Item moved!", import: "Import Icon/Image",
-                dropzone: "Click, Drop image or Ctrl+V here (PNG, JPG, SVG)", lblImportName: "Item Name", lblImportCat: "Category"
+                categories: "Categories", manage: "Management", addItem: "Add Item", trash: "Trash Bin", backup: "Backup System",
+                viewTitle: "Item List", noItems: "No items", trashEmpty: "Trash empty", addTitle: "Add New Item",
+                restoreTitle: "Restore", restoreWarn: "Warning: Data will be merged with existing data", save: "Save", cancel: "Cancel", close: "Close",
+                lblItemName: "Name", lblItemSvg: "SVG Code", lblCatName: "Name", lblCatIcon: "Icon",
+                lblRestoreJson: "Paste JSON Backup", copy: "Copy", restore: "Restore", delForever: "Delete Forever", toastSuccess: "Success!",
+                toastCopy: "SVG Copied!", toastBackup: "Backup copied!", toastRestore: "Restore success!", toastRestoreErr: "Invalid format!",
+                toastMovedTrash: "Moved to trash", toastItemAdded: "Added!", toastCatAdded: "Category added!",
+                moveSuccess: "Moved!", import: "Import Icon/Image", dropzone: "Click, Drop or Paste (Ctrl+V) image here",
+                lblImportName: "Name", btnGen: "🔨 Generate SVG", btnRbg: "✂️ Remove BG (Simple)",
+                lblOrig: "Original", lblGen: "Generated SVG", toastGenerating: "Processing...", toastRbgSuccess: "Background removed!",
+                menuAiGen: "AI SVG Creator", titleAiGen: "AI SVG Creator", lblAiPrompt: "Prompt", btnRunAi: "✨ Generate SVG with AI",
+                toastAiGenStart: "AI is drawing...", toastAiGenSuccess: "AI Finished!", backupBtn: "Backup All (Copy)",
+                restoreBtn: "Restore System", btnCancelAi: "❌ Cancel", fallbackTrace: "ImageTracer failed. Using Pixel Mode.",
+                btnEdit: "✏️", toastNameUpdated: "Name updated"
             }
         };
 
         let currentLang = 'th';
         let categories = [
-            { id: 'cat-consumables', name: 'ไอเทมกดใช้', icon: '📦' },
+            { id: 'cat-ai-gen', name: 'AI Gen', icon: '✨' },
+            { id: 'cat-import-code', name: 'Import Code', icon: '💻' },
+            { id: 'cat-import-img', name: 'Import Img', icon: '🖼️' },
+            { id: 'cat-restore', name: 'Restore', icon: '♻️' }, // New Restore Category
+            { id: 'cat-consumables', name: 'ไอเทมกดใช้', icon: '📦' }, 
             { id: 'cat-treasures', name: 'สมบัติล้ำค่า', icon: '💎' }
         ];
         let items = [];
         let trash = [];
-        let currentCatId = 'cat-consumables';
+        let currentCatId = 'cat-ai-gen';
         let draggedItemId = null;
         let importMode = 'embed';
         let currentGeneratedSvg = '';
-
-        // --- Init ---
+        let originalImgData = '';
+        let currentAiSvg = '';
 
         function init() {
             applyLanguage();
             renderSidebar();
-            renderCategorySelect();
             renderItems();
             setupPasteListener();
         }
 
-        function setupPasteListener() {
-            window.addEventListener('paste', (e) => {
-                // Check if the import section is visible
-                const importSection = document.getElementById('section-import-image');
-                if (importSection.classList.contains('hidden')) return;
+        function normalizeSVG(svgString) {
+            if (!svgString) return '';
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgString, "image/svg+xml");
+                const svg = doc.querySelector("svg");
+                if (!svg) return svgString;
+                if (!svg.hasAttribute("viewBox")) {
+                    const w = svg.getAttribute("width") || 100;
+                    const h = svg.getAttribute("height") || 100;
+                    svg.setAttribute("viewBox", `0 0 ${parseFloat(w)} ${parseFloat(h)}`);
+                }
+                svg.setAttribute("width", "100%");
+                svg.setAttribute("height", "100%");
+                svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+                svg.style.width = ""; svg.style.height = ""; svg.style.maxWidth = ""; svg.style.maxHeight = "";
+                return new XMLSerializer().serializeToString(svg);
+            } catch (e) {
+                return svgString;
+            }
+        }
 
-                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                for (let index in items) {
-                    const item = items[index];
-                    if (item.kind === 'file' && item.type.indexOf('image') !== -1) {
-                        const blob = item.getAsFile();
-                        const reader = new FileReader();
-                        reader.onload = (re) => {
-                            const dataUrl = re.target.result;
-                            document.getElementById('img-preview').src = dataUrl;
-                            document.getElementById('import-preview-area').classList.remove('hidden');
-                            processFile(dataUrl);
-                        };
-                        reader.readAsDataURL(blob);
-                        break;
+        async function fetchWithRetry(url, options, maxRetries = 5) {
+            let lastResponse;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    lastResponse = await fetch(url, options);
+                    if (lastResponse.ok) return lastResponse;
+                    if (lastResponse.status === 429 || lastResponse.status === 403 || lastResponse.status === 400) return lastResponse;
+                    await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000));
+                } catch (e) {
+                    if (i === maxRetries - 1) throw e;
+                    await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000));
+                }
+            }
+            return lastResponse;
+        }
+
+        async function generateAiSvg(isRetry = false) {
+            const prompt = document.getElementById('ai-prompt-input').value;
+            if(!prompt) { toast("กรุณาใส่คำสั่ง"); return; }
+            const loader = document.getElementById('ai-loading');
+            loader.style.display = 'block';
+            if(!isRetry) toast(translations[currentLang].toastAiGenStart);
+            const currentKey = _pool[activeKeyIndex].k1 + _pool[activeKeyIndex].k2;
+            const systemPrompt = "Create a clean, simple, single-object game icon SVG. Return ONLY <svg> code.";
+            const payload = { contents: [{ parts: [{ text: systemPrompt + "\nPrompt: " + prompt }] }] };
+            try {
+                let response = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${currentKey}`, {
+                    method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' }
+                });
+                if (response.status === 429 || response.status === 403) {
+                    if (activeKeyIndex < _pool.length - 1) { activeKeyIndex++; return generateAiSvg(true); }
+                    else throw new Error("Quota Exceeded");
+                }
+                let result = await response.json();
+                let text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if(text) {
+                    text = text.replace(/```xml/g, '').replace(/```svg/g, '').replace(/```/g, '');
+                    const start = text.indexOf('<svg'); const end = text.lastIndexOf('</svg>') + 6;
+                    if(start !== -1 && end !== -1) {
+                        currentAiSvg = normalizeSVG(text.substring(start, end));
+                        document.getElementById('ai-svg-output').innerHTML = currentAiSvg;
+                        document.getElementById('ai-result-area').classList.remove('hidden');
+                        toast(translations[currentLang].toastAiGenSuccess);
                     }
                 }
+            } catch(e) { toast("AI Error: " + e.message); } finally { loader.style.display = 'none'; }
+        }
+
+        function saveAiItem() {
+            const name = document.getElementById('ai-item-name').value || "AI Item";
+            if(!currentAiSvg) return;
+            items.push({ id: 'item-' + Date.now(), catId: 'cat-ai-gen', name, svg: currentAiSvg });
+            toast(translations[currentLang].toastItemAdded);
+            resetAiGen(); init();
+        }
+
+        function resetAiGen() {
+            document.getElementById('ai-prompt-input').value = '';
+            document.getElementById('ai-result-area').classList.add('hidden');
+            document.getElementById('ai-svg-output').innerHTML = '';
+            document.getElementById('ai-loading').style.display = 'none';
+            currentAiSvg = '';
+        }
+
+        function removeBackgroundSimple() {
+            const img = document.getElementById('img-preview');
+            if (!img.src || img.src === '') return;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] > 230 && data[i+1] > 230 && data[i+2] > 230) data[i+3] = 0;
+            }
+            ctx.putImageData(imageData, 0, 0);
+            originalImgData = canvas.toDataURL();
+            img.src = originalImgData;
+            toast(translations[currentLang].toastRbgSuccess);
+        }
+
+        function generateSVG() {
+            if (!originalImgData) return;
+            toast(translations[currentLang].toastGenerating);
+            if (importMode === 'embed') {
+                currentGeneratedSvg = normalizeSVG(`<svg width="200" height="200"><image href="${originalImgData}" width="100%" height="100%" /></svg>`);
+                document.getElementById('svg-preview-cont').innerHTML = currentGeneratedSvg;
+            } else {
+                if (typeof ImageTracer !== 'undefined') {
+                    ImageTracer.imageToSVG(originalImgData, function(svgstr) {
+                        currentGeneratedSvg = normalizeSVG(svgstr);
+                        document.getElementById('svg-preview-cont').innerHTML = currentGeneratedSvg;
+                        toast(translations[currentLang].toastSuccess);
+                    }, { ltres:1, qtres:1 });
+                } else {
+                    toast(translations[currentLang].fallbackTrace);
+                }
+            }
+        }
+
+        function saveImportedItem() {
+            const name = document.getElementById('import-item-name').value;
+            if (!name || !currentGeneratedSvg) return;
+            items.push({ id: 'item-' + Date.now(), catId: 'cat-import-img', name, svg: currentGeneratedSvg });
+            toast(translations[currentLang].toastItemAdded);
+            resetImport(); init();
+        }
+
+        function createNewItem() {
+            const name = document.getElementById('new-item-name').value;
+            const svg = document.getElementById('new-item-svg').value;
+            if(!name || !svg) return;
+            items.push({ id: 'item-' + Date.now(), catId: 'cat-import-code', name, svg: normalizeSVG(svg) });
+            document.getElementById('new-item-name').value = '';
+            document.getElementById('new-item-svg').value = '';
+            toast(translations[currentLang].toastItemAdded); init();
+        }
+
+        function processRestore() {
+            try {
+                const data = JSON.parse(document.getElementById('restore-input').value);
+                if(data.items) {
+                    const currentItemIds = new Set(items.map(i => i.id));
+                    let addedCount = 0;
+                    data.items.forEach(item => {
+                        if (!currentItemIds.has(item.id)) {
+                            item.catId = 'cat-restore'; // Force to Restore Category
+                            item.svg = normalizeSVG(item.svg);
+                            items.push(item);
+                            addedCount++;
+                        }
+                    });
+                    renderItems();
+                    closeModal('modal-restore'); 
+                    toast(translations[currentLang].toastRestore + ` (+${addedCount})`);
+                }
+            } catch (e) { toast(translations[currentLang].toastRestoreErr); }
+        }
+
+        function setupPasteListener() {
+            window.addEventListener('paste', (e) => {
+                if (document.getElementById('section-import-image').classList.contains('hidden')) return;
+                const clipItems = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let i of clipItems) if (i.type.indexOf('image') !== -1) { handleImageFile(i.getAsFile()); break; }
             });
+        }
+
+        function handleImportDragOver(e) { e.preventDefault(); }
+        function handleImportDrop(e) { e.preventDefault(); if (e.dataTransfer.files[0]) handleImageFile(e.dataTransfer.files[0]); }
+        function handleFileSelect(e) { if (e.target.files[0]) handleImageFile(e.target.files[0]); }
+        function handleImageFile(file) {
+            const reader = new FileReader();
+            reader.onload = (re) => {
+                originalImgData = re.target.result;
+                document.getElementById('img-preview').src = originalImgData;
+                document.getElementById('import-preview-area').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetImport() {
+            document.getElementById('import-preview-area').classList.add('hidden');
+            document.getElementById('img-preview').src = '';
+            document.getElementById('svg-preview-cont').innerHTML = '';
+            originalImgData = ''; currentGeneratedSvg = '';
+        }
+
+        function applyLanguage() {
+            const t = translations[currentLang];
+            const ids = {
+                'label-categories': t.categories, 'label-manage': t.manage, 'menu-add-item': t.addItem,
+                'menu-import': t.import, 'menu-trash': t.trash, 'label-backup': t.backup,
+                'menu-backup': t.backupBtn, 'menu-restore': t.restoreBtn, 'title-add-new': t.addTitle,
+                'title-import': t.import, 'title-trash': t.trash, 'lbl-item-name': t.lblItemName,
+                'lbl-item-svg': t.lblItemSvg, 'btn-save-item': "✨ " + t.save,
+                'modal-cat-title': t.categories, 'lbl-cat-name': t.lblCatName, 'lbl-cat-icon': t.lblCatIcon,
+                'btn-save-cat': t.save, 'btn-cancel-cat': t.cancel, 'modal-restore-title': t.restoreTitle,
+                'restore-warn': t.restoreWarn, 'lbl-restore-json': t.lblRestoreJson, 'btn-do-restore': t.restoreDo,
+                'btn-close-restore': t.close, 'dropzone-text': t.dropzone, 'lbl-import-name': t.lblItemName,
+                'btn-generate': t.btnGen, 'btn-remove-bg': t.btnRbg,
+                'lbl-orig-preview': t.lblOrig, 'lbl-gen-preview': t.lblGen, 'btn-save-imported': "✅ " + t.save,
+                'menu-aigen': t.menuAiGen, 'title-aigen': t.titleAiGen, 'lbl-ai-prompt': t.lblAiPrompt,
+                'btn-run-ai': t.btnRunAi, 'btn-save-ai': "✅ " + t.save, 'btn-cancel-ai': t.btnCancelAi
+            };
+            for (let id in ids) if (document.getElementById(id)) document.getElementById(id).innerText = ids[id];
         }
 
         function setLanguage(lang) {
             currentLang = lang;
             document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`lang-${lang}`).classList.add('active');
-            applyLanguage();
-            renderSidebar();
-            renderItems();
+            init();
         }
-
-        function applyLanguage() {
-            const t = translations[currentLang];
-            const ids = {
-                'label-categories': t.categories, 'label-manage': t.manage,
-                'menu-add-item': t.addItem, 'menu-import': t.import, 'menu-trash': t.trash,
-                'label-backup': t.backup, 'menu-backup': t.backupBtn, 'menu-restore': t.restoreBtn,
-                'title-add-new': t.addTitle, 'title-import': t.import, 'title-trash': t.trash,
-                'lbl-item-name': t.lblItemName, 'lbl-item-cat': t.lblItemCat, 'lbl-item-svg': t.lblItemSvg,
-                'btn-save-item': "✨ " + t.save, 'modal-cat-title': t.categories,
-                'lbl-cat-name': t.lblCatName, 'lbl-cat-icon': t.lblCatIcon,
-                'btn-save-cat': t.save, 'btn-cancel-cat': t.cancel, 'modal-restore-title': t.restoreTitle,
-                'restore-warn': t.restoreWarn, 'lbl-restore-json': t.lblRestoreJson,
-                'btn-do-restore': t.restoreDo, 'btn-close-restore': t.close,
-                'dropzone-text': t.dropzone, 'lbl-import-name': t.lblImportName, 'lbl-import-cat': t.lblImportCat
-            };
-            for (let id in ids) if (document.getElementById(id)) document.getElementById(id).innerText = ids[id];
-        }
-
-        // --- Sidebar & Section Switch ---
 
         function renderSidebar() {
             const container = document.getElementById('sidebar-categories');
             container.innerHTML = categories.map(cat => `
-                <div class="menu-item ${cat.id === currentCatId ? 'active' : ''}" 
-                     onclick="selectCategory('${cat.id}', this)"
-                     ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${cat.id}')">
-                    <span>${cat.icon}</span>
-                    <span class="label-text">${cat.name}</span>
+                <div class="menu-item ${cat.id === currentCatId ? 'active' : ''}" onclick="selectCategory('${cat.id}', this)">
+                    <span>${cat.icon}</span><span class="label-text">${cat.name}</span>
                 </div>
             `).join('');
         }
 
         function selectCategory(id, el) {
-            currentCatId = id;
-            showSection('category-view', el);
+            currentCatId = id; showSection('category-view', el);
             const cat = categories.find(c => c.id === id);
             document.getElementById('view-title').innerText = cat ? `${cat.icon} ${cat.name}` : translations[currentLang].viewTitle;
             renderItems();
@@ -626,79 +872,6 @@
             if(name === 'trash-bin') renderTrash();
         }
 
-        // --- Image Import System ---
-
-        function setImportMode(mode) {
-            importMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`mode-${mode}`).classList.add('active');
-            const img = document.getElementById('img-preview');
-            if (img.src && img.src.length > 0) processFile(img.src);
-        }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (re) => {
-                const dataUrl = re.target.result;
-                document.getElementById('img-preview').src = dataUrl;
-                document.getElementById('import-preview-area').classList.remove('hidden');
-                processFile(dataUrl);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function processFile(dataUrl) {
-            if (importMode === 'embed') {
-                currentGeneratedSvg = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                    <image href="${dataUrl}" x="0" y="0" width="200" height="200" preserveAspectRatio="xMidYMid meet" />
-                </svg>`;
-                document.getElementById('svg-preview-cont').innerHTML = currentGeneratedSvg;
-            } else {
-                const img = new Image();
-                img.src = dataUrl;
-                img.onload = () => {
-                    Potrace.loadImage(img);
-                    Potrace.process(() => {
-                        currentGeneratedSvg = Potrace.getSVG();
-                        document.getElementById('svg-preview-cont').innerHTML = currentGeneratedSvg;
-                    });
-                };
-            }
-        }
-
-        function saveImportedItem() {
-            const name = document.getElementById('import-item-name').value;
-            const catId = document.getElementById('import-item-category').value;
-            if (!name || !currentGeneratedSvg) return;
-            const newItem = { id: 'item-' + Date.now(), catId, name, svg: currentGeneratedSvg };
-            items.push(newItem);
-            toast(translations[currentLang].toastItemAdded);
-            document.getElementById('import-preview-area').classList.add('hidden');
-            document.getElementById('import-item-name').value = '';
-            document.getElementById('img-preview').src = '';
-            init();
-        }
-
-        // --- Core Item Logic & Drag & Drop ---
-
-        function handleDragStart(e, id) { draggedItemId = id; e.target.classList.add('dragging'); }
-        function handleDragEnd(e) { e.target.classList.remove('dragging'); draggedItemId = null; }
-        function handleDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
-        function handleDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
-        function handleDrop(e, catId) {
-            e.preventDefault(); e.currentTarget.classList.remove('drag-over');
-            if (draggedItemId) {
-                const item = items.find(i => i.id === draggedItemId);
-                if (item && item.catId !== catId) {
-                    item.catId = catId;
-                    toast(translations[currentLang].moveSuccess);
-                    renderItems(); renderSidebar();
-                }
-            }
-        }
-
         function renderItems() {
             const grid = document.getElementById('items-display-grid');
             const filtered = items.filter(i => i.catId === currentCatId);
@@ -706,11 +879,11 @@
             if (filtered.length === 0) { grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.3; padding: 40px;">${t.noItems}</div>`; return; }
             grid.innerHTML = filtered.map(item => `
                 <div class="item-card" draggable="true" ondragstart="handleDragStart(event, '${item.id}')" ondragend="handleDragEnd(event)">
-                    <h3>${item.name}</h3>
-                    <div class="svg-display" id="svg-cont-${item.id}">${item.svg}</div>
+                    <h3>${item.name}</h3><div class="svg-display" id="svg-cont-${item.id}">${item.svg}</div>
                     <div class="btn-row">
                         <button class="btn-action btn-copy-main" onclick="copySVG('${item.id}')">${t.copy}</button>
                         <button class="btn-action btn-flip" onclick="flipItem('${item.id}')">↔️</button>
+                        <button class="btn-action btn-edit" onclick="editItemName('${item.id}')">✏️</button>
                         <button class="btn-action btn-delete" onclick="moveToTrash('${item.id}')">🗑️</button>
                     </div>
                 </div>
@@ -725,48 +898,38 @@
                 <div class="item-card">
                     <h3>${item.name}</h3><div class="svg-display">${item.svg}</div>
                     <div class="btn-row">
-                        <button class="btn-action btn-restore" onclick="restoreFromTrash('${item.id}')">${t.restore}</button>
+                        <button class="btn-action btn-restore-action" onclick="restoreFromTrash('${item.id}')">${t.restore}</button>
                         <button class="btn-action btn-permanent" onclick="permanentDelete('${item.id}')">${t.delForever}</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function renderCategorySelect() {
-            const html = categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
-            document.getElementById('new-item-category').innerHTML = html;
-            document.getElementById('import-item-category').innerHTML = html;
+        function handleDragStart(e, id) { draggedItemId = id; e.target.classList.add('dragging'); }
+        function handleDragEnd(e) { e.target.classList.remove('dragging'); draggedItemId = null; }
+        function editItemName(id) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                const newName = prompt("Edit Item Name:", item.name);
+                if (newName) { item.name = newName; renderItems(); toast(translations[currentLang].toastNameUpdated); }
+            }
         }
 
-        function createNewItem() {
-            const name = document.getElementById('new-item-name').value;
-            const catId = document.getElementById('new-item-category').value;
-            const svg = document.getElementById('new-item-svg').value;
-            if(!name || !svg) return;
-            items.push({ id: 'item-' + Date.now(), catId, name, svg });
-            document.getElementById('new-item-name').value = '';
-            document.getElementById('new-item-svg').value = '';
-            toast(translations[currentLang].toastItemAdded);
-            init();
+        function moveToTrash(id) { 
+            const idx = items.findIndex(i => i.id === id);
+            if (idx !== -1) { trash.push(items.splice(idx, 1)[0]); renderItems(); toast(translations[currentLang].toastMovedTrash); }
         }
-
-        function moveToTrash(id) { trash.push(items.splice(items.findIndex(i => i.id === id), 1)[0]); renderItems(); toast(translations[currentLang].toastMovedTrash); }
-        function restoreFromTrash(id) { items.push(trash.splice(trash.findIndex(i => i.id === id), 1)[0]); renderTrash(); toast(translations[currentLang].toastSuccess); }
-        function permanentDelete(id) { trash.splice(trash.findIndex(i => i.id === id), 1); renderTrash(); toast(translations[currentLang].toastSuccess); }
-        function flipItem(id) { document.getElementById(`svg-cont-${id}`).classList.toggle('flipped'); }
-        function copySVG(id) { copyToClipboard(document.getElementById(`svg-cont-${id}`).innerHTML.trim()); toast(translations[currentLang].toastCopy); }
-
+        function restoreFromTrash(id) { 
+            const idx = trash.findIndex(i => i.id === id);
+            if (idx !== -1) { items.push(trash.splice(idx, 1)[0]); renderTrash(); toast(translations[currentLang].toastSuccess); }
+        }
+        function permanentDelete(id) { 
+            const idx = trash.findIndex(i => i.id === id);
+            if (idx !== -1) { trash.splice(idx, 1); renderTrash(); toast(translations[currentLang].toastSuccess); }
+        }
+        function flipItem(id) { const el = document.getElementById(`svg-cont-${id}`); if (el) el.classList.toggle('flipped'); }
+        function copySVG(id) { const el = document.getElementById(`svg-cont-${id}`); if (el) { copyToClipboard(el.innerHTML.trim()); toast(translations[currentLang].toastCopy); } }
         function backupAll() { copyToClipboard(JSON.stringify({ categories, items })); toast(translations[currentLang].toastBackup); }
-        function processRestore() {
-            try {
-                const data = JSON.parse(document.getElementById('restore-input').value);
-                if(data.categories && data.items) {
-                    categories = data.categories; items = data.items; trash = []; currentCatId = categories[0].id;
-                    init(); closeModal('modal-restore'); toast(translations[currentLang].toastRestore);
-                }
-            } catch (e) { toast(translations[currentLang].toastRestoreErr); }
-        }
-
         function copyToClipboard(text) { const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); }
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -775,10 +938,10 @@
             const icon = document.getElementById('cat-icon-input').value || '📁';
             if(!name) return;
             categories.push({ id: 'cat-' + Date.now(), name, icon });
-            document.getElementById('cat-name-input').value = '';
-            init(); closeModal('modal-category'); toast(translations[currentLang].toastCatAdded);
+            document.getElementById('cat-name-input').value = ''; init(); closeModal('modal-category'); toast(translations[currentLang].toastCatAdded);
         }
         function toast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+        function setImportMode(mode) { importMode = mode; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(`mode-${mode}`).classList.add('active'); }
 
         window.onload = init;
     </script>
