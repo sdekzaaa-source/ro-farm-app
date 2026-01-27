@@ -18,7 +18,7 @@
         
         :root {
             --app-bg: #0f172a;
-            --glass-bg: rgba(30, 41, 59, 0.95); /* เพิ่มความทึบให้เมนูอ่านง่ายขึ้น */
+            --glass-bg: rgba(30, 41, 59, 0.95);
         }
 
         body { 
@@ -60,7 +60,10 @@
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .animate-pop-in { animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-        /* Hide Scrollbar */
+        /* Hugin Animation */
+        @keyframes huginFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        .animate-hugin { animation: huginFloat 3s ease-in-out infinite; }
+
         ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
@@ -77,12 +80,12 @@
         import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, getDocs, limit } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
         // --- Configuration & Constants ---
-        const APP_VERSION = "Ver.2.12.3 (Final Fix)";
+        const APP_VERSION = "Ver.2.13.3 (Hugin's Quest)";
         
         const CHANGELOGS = [
-            { ver: "2.12.3", date: "Latest", desc: "แก้ไข CSS เมนูบาร์บังเนื้อหา และย้ายปุ่ม AI ให้ลอยเหนือทุกหน้าอย่างถูกต้อง" },
-            { ver: "2.12.2", date: "Previous", desc: "แก้ไข Layout ให้เมนูไม่บังเนื้อหา และย้ายปุ่ม AI ให้แสดงทุกหน้า" },
-            { ver: "2.12.0", date: "Old", desc: "ปรับปรุง UI เมนูบาร์ใหม่, เปลี่ยน AI เป็นปุ่มลอย" }
+            { ver: "2.13.3", date: "Latest", desc: "เพิ่มเงื่อนไขปลดล็อค AI (ต้องบันทึก 5 รอบ), ปรับปรุงปุ่ม Reset UID เป็นลิงก์เล็กๆ และจัดเรียงเมนูใหม่" },
+            { ver: "2.13.2", date: "Previous", desc: "เพิ่มระบบตรวจสอบ UID ก่อนกู้คืน (ป้องกันการกรอกผิด) และปรับปุ่ม Restore ให้ Interactive" },
+            { ver: "2.13.0", date: "Old", desc: "เพิ่ม NPC Hugin สำหรับวิเคราะห์ข้อมูล" }
         ];
 
         const MANUAL_FIREBASE_CONFIG = {
@@ -128,6 +131,29 @@
 
         // --- SVGs & Icons ---
         const SVGs = {
+            Hugin: ({className}) => (
+                <svg viewBox="0 0 120 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M35,45 Q30,80 60,95 Q90,80 85,45" fill="#f5d0a9" stroke="#5a3a29" strokeWidth="2.5" />
+                    <path d="M30,60 Q25,65 32,70" fill="#f5d0a9" stroke="#5a3a29" strokeWidth="2" />
+                    <path d="M90,60 Q95,65 88,70" fill="#f5d0a9" stroke="#5a3a29" strokeWidth="2" />
+                    <path d="M25,50 C10,20 110,20 95,50 C100,30 90,10 60,10 C30,10 20,30 25,50" fill="#fbbf24" stroke="#92400e" strokeWidth="2.5" />
+                    <path d="M35,15 Q60,5 85,15" fill="none" stroke="#fbbf24" strokeWidth="2" opacity="0.6"/>
+                    <path d="M60,10 Q60,25 50,30" fill="none" stroke="#b45309" strokeWidth="2" />
+                    <path d="M60,10 Q65,25 75,28" fill="none" stroke="#b45309" strokeWidth="2" />
+                    <path d="M45,55 Q50,53 55,55" stroke="#3e2723" strokeWidth="2" fill="none" />
+                    <path d="M65,55 Q70,53 75,55" stroke="#3e2723" strokeWidth="2" fill="none" />
+                    <circle cx="50" cy="58" r="2.5" fill="#1e293b" />
+                    <circle cx="70" cy="58" r="2.5" fill="#1e293b" />
+                    <path d="M42,65 Q50,68 58,65" stroke="#d4a373" strokeWidth="1" fill="none" opacity="0.6" />
+                    <path d="M35,58 Q40,62 42,60" stroke="#d4a373" strokeWidth="1" fill="none" opacity="0.6" />
+                    <path d="M78,60 Q80,62 85,58" stroke="#d4a373" strokeWidth="1" fill="none" opacity="0.6" />
+                    <path d="M60,60 L58,72 L62,72 Z" fill="#e0b084" />
+                    <path d="M52,82 Q60,85 68,82" stroke="#5a3a29" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    <circle cx="50" cy="58" r="8" stroke="#94a3b8" strokeWidth="1.5" fill="none" opacity="0.4"/>
+                    <circle cx="70" cy="58" r="8" stroke="#94a3b8" strokeWidth="1.5" fill="none" opacity="0.4"/>
+                    <line x1="58" y1="58" x2="62" y2="58" stroke="#94a3b8" strokeWidth="1.5" opacity="0.4"/>
+                </svg>
+            ),
             Spell: ({className}) => (
                 <svg viewBox="0 0 100 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
                     <polygon points="50,5 92,30 92,90 50,115 8,90 8,30" fill="#4b3a8a"></polygon>
@@ -231,7 +257,7 @@
                 Home: <><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></>,
                 History: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
                 Box: <><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></>,
-                Settings: <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0 2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1 2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>,
+                Settings: <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0 2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>,
                 Plus: <><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
                 Trash: <><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></>,
                 TrendingUp: <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>,
@@ -246,7 +272,9 @@
                 X: <><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></>,
                 Save: <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></>,
                 ToggleOn: <><rect x="1" y="5" width="22" height="14" rx="7" fill="#4ade80"/><circle cx="16" cy="12" r="5" fill="white"/></>,
-                ToggleOff: <><rect x="1" y="5" width="22" height="14" rx="7" fill="#475569"/><circle cx="8" cy="12" r="5" fill="white"/></>
+                ToggleOff: <><rect x="1" y="5" width="22" height="14" rx="7" fill="#475569"/><circle cx="8" cy="12" r="5" fill="white"/></>,
+                Warp: <><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" opacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10 10 10 0 0 1-10-10A10 10 0 0 1 12 2m0 2a8 8 0 0 0-8 8 8 8 0 0 0 8 8 8 8 0 0 0 8-8 8 8 0 0 0-8-8z"/><path d="M12 8a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 2a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2z"/></>,
+                Lock: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>
             };
             return (
                 <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -340,12 +368,13 @@
         const AiAnalysisModal = ({ onClose, analysisResult }) => (
             <Modal onClose={onClose}>
                 <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce shadow-lg shadow-indigo-500/50">
-                        <Icon name="Sparkles" size={32} className="text-white"/>
+                    <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-yellow-500 shadow-xl overflow-hidden relative">
+                         <div className="absolute inset-0 bg-yellow-500/10"></div>
+                         <SVGs.Hugin className="w-16 h-16"/>
                     </div>
-                    <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-4">AI Assistant</h3>
-                    <div className="bg-slate-800/50 p-4 rounded-2xl text-left border border-indigo-500/20 max-h-60 overflow-y-auto">
-                         <p className="text-sm leading-relaxed opacity-90 text-slate-200 whitespace-pre-wrap">{analysisResult}</p>
+                    <h3 className="text-xl font-black text-amber-400 mb-2">Hugin's Report</h3>
+                    <div className="bg-slate-800/50 p-4 rounded-2xl text-left border border-slate-700 max-h-60 overflow-y-auto">
+                         <p className="text-sm leading-relaxed opacity-90 text-slate-200 whitespace-pre-wrap font-medium">{analysisResult}</p>
                     </div>
                     <button onClick={onClose} className="mt-6 w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-xs transition-colors">Close</button>
                 </div>
@@ -379,7 +408,7 @@
             
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
-                systemInstruction: { parts: [{ text: "คุณเป็นพ่อค้าในเกม Ragnarok Online ชื่อ OGHza ที่เชี่ยวชาญการวิเคราะห์ข้อมูลการฟาร์ม ให้คำแนะนำสั้นๆ กวนๆ แต่เป็นประโยชน์ ใช้ภาษาไทยเป็นหลัก เน้นวิเคราะห์ดวงและความคุ้มค่า" }] }
+                systemInstruction: { parts: [{ text: "You are Hugin, the researcher NPC from Ragnarok Online's Old Glast Heim instance. You speak Thai. You analyze player's loot data. Your tone is knowledgeable, slightly mysterious but helpful. Keep it short." }] }
             };
 
             for (let i = 0; i < 5; i++) {
@@ -398,13 +427,13 @@
                          throw new Error(data.error.message);
                     }
 
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "ดวงไม่ดีเลย ติดต่อ AI ไม่ได้...";
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Hugin กำลังยุ่ง...";
                 } catch (e) {
                     if (i === 4) return `Error: ${e.message}`;
                     await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
                 }
             }
-            return "Server Busy! พักผ่อนบ้างนะนักรบ";
+            return "Server Busy! Hugin ไม่ว่างคุย";
         };
 
         // --- Application Views ---
@@ -669,6 +698,15 @@
                             <span className="text-xs font-bold opacity-50 uppercase mb-2 block">Memo</span>
                             <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} className="w-full bg-slate-800 rounded-xl p-3 text-xs outline-none h-20 resize-none" placeholder="Notes..."></textarea>
                         </div>
+                        
+                        {/* Restore Save Button */}
+                        <button 
+                            type="submit"
+                            disabled={isSaving || !form.trashAmount} 
+                            className="w-full py-4 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-2xl font-black text-lg shadow-xl shadow-purple-500/20 active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                            {isSaving ? <Icon name="Loader" className="animate-spin" size={24}/> : "SAVE RECORD"}
+                        </button>
                     </form>
                 </div>
             );
@@ -788,6 +826,7 @@
             const [showChangelog, setShowChangelog] = useState(false);
             const [isDeleting, setIsDeleting] = useState(false);
             const [isSavingKey, setIsSavingKey] = useState(false);
+            const [isRestoring, setIsRestoring] = useState(false);
 
             const savePrices = async () => {
                 setIsSaving(true);
@@ -812,20 +851,36 @@
             };
 
             const handleRestore = async () => {
-                if (restoreInput.length < 5) return alert("UID สั้นเกินไป");
+                if (!restoreInput.trim()) return;
+                if (restoreInput.length < 5) {
+                    alert("UID สั้นเกินไป กรุณาตรวจสอบอีกครั้ง");
+                    return;
+                }
+                
+                setIsRestoring(true);
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'oghza-tracker';
                 try {
-                    const checkRef = doc(db, 'artifacts', appId, 'users', restoreInput, 'gamification', 'stats');
-                    const statSnap = await getDoc(checkRef);
-                    if (!statSnap.exists()) {
-                        if(!confirm(`ไม่พบข้อมูลสำหรับ UID: ${restoreInput}\nคุณต้องการใช้ UID นี้เพื่อเริ่มเล่นใหม่หรือไม่?`)) return;
+                    // Check for existence
+                    const statsRef = doc(db, 'artifacts', appId, 'users', restoreInput, 'gamification', 'stats');
+                    const statsSnap = await getDoc(statsRef);
+                    
+                    if (!statsSnap.exists()) {
+                        // Not found - strict validation
+                        alert("❌ ไม่พบ UID นี้ในระบบ\nกรุณาตรวจสอบว่าพิมพ์ถูกต้องหรือไม่");
                     } else {
-                        if(!confirm(`พบข้อมูลของ UID: ${restoreInput}\nต้องการกู้คืนข้อมูลใช่หรือไม่?`)) return;
+                        // Found
+                        const userData = statsSnap.data();
+                        const confirmMsg = `✅ ค้นพบข้อมูล!\nClass: ${userData.jobClass || 'Novice'}\nCoins: ${userData.coins || 0}\n\nต้องการกู้คืนข้อมูลนี้ใช่หรือไม่?`;
+                        
+                        if(confirm(confirmMsg)) {
+                            onRestoreUid(restoreInput);
+                            setRestoreInput("");
+                        }
                     }
-                    onRestoreUid(restoreInput);
-                    setRestoreInput("");
                 } catch (e) {
-                    alert("เกิดข้อผิดพลาดในการตรวจสอบ UID: " + e.message);
+                    alert("Error: " + e.message);
+                } finally {
+                    setIsRestoring(false);
                 }
             };
 
@@ -872,16 +927,36 @@
                             <button onClick={() => { copyToClipboard(uid); if(showToast) showToast("คัดลอก UID แล้ว"); }} className="p-2 bg-white/5 rounded-lg active:scale-95">
                                 <Icon name="Copy" size={14}/>
                             </button>
+                            {/* NEW: Small text link for resetting UID */}
+                        </div>
+                        <div className="text-right">
+                             <button onClick={onResetUid} className="text-[10px] text-slate-400 hover:text-white underline">กลับสู่ UID เดิมของเครื่องนี้</button>
                         </div>
                         <div className="flex gap-2">
-                            <input type="text" value={restoreInput} onChange={e => setRestoreInput(e.target.value)} placeholder="Input Old UID..." className="flex-1 bg-slate-800 rounded-xl px-4 text-xs outline-none" />
-                            <button onClick={handleRestore} className="bg-blue-600 px-4 py-2 rounded-xl text-xs font-bold"><Icon name="Refresh" size={16}/></button>
+                            <input 
+                                type="text" 
+                                value={restoreInput} 
+                                onChange={e => setRestoreInput(e.target.value)} 
+                                placeholder="ระบุ UID เพื่อกู้คืน..." 
+                                className="flex-1 bg-slate-800 rounded-xl px-4 text-xs outline-none focus:ring-2 focus:ring-blue-500/50 transition-all" 
+                            />
+                            <button 
+                                onClick={handleRestore} 
+                                disabled={isRestoring || !restoreInput}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                                    isRestoring || !restoreInput 
+                                    ? 'bg-slate-700 text-slate-500 cursor-not-allowed' 
+                                    : 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 active:scale-95 hover:bg-blue-500'
+                                }`}
+                            >
+                                {isRestoring ? <Icon name="Loader" className="animate-spin" size={16}/> : <><Icon name="Refresh" size={16}/> Restore</>}
+                            </button>
                         </div>
                     </div>
 
                     <div className="glass-panel p-5 rounded-3xl space-y-4">
                         <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold uppercase opacity-50">Gemini AI</span>
+                            <span className="text-xs font-bold uppercase opacity-50">Hugin's Service (AI)</span>
                             <button onClick={() => setShowAiFab(!showAiFab)} className="text-indigo-400">
                                 {showAiFab ? <Icon name="ToggleOn" size={28}/> : <Icon name="ToggleOff" size={28}/>}
                             </button>
@@ -957,7 +1032,7 @@
             const [toast, setToast] = useState(null);
             const [isSaving, setIsSaving] = useState(false);
             const [rewardData, setRewardData] = useState(null);
-            const [showAiFab, setShowAiFab] = useState(true);
+            const [showAiFab, setShowAiFab] = useState(false); // Default OFF
             const [aiResult, setAiResult] = useState(null);
             const [isAnalysing, setIsAnalysing] = useState(false);
 
@@ -1005,7 +1080,31 @@
             }, [targetUid]);
 
             const triggerAiAnalysis = async () => {
+                // Check if user has recorded at least 5 times (QUEST)
+                if (records.length < 5) {
+                    showToast(`🔒 ยังไม่ปลดล็อค: ต้องบันทึกข้อมูลให้ครบ 5 รอบ (ขาดอีก ${5 - records.length} รอบ)`);
+                    return;
+                }
+
+                if (stats.coins < 1) {
+                    showToast("ไม่สามารถวิเคราะห์ได้: Coins ไม่พอ (ต้องการ 1 Coin)");
+                    return;
+                }
+
                 setIsAnalysing(true);
+                
+                // Deduct Coin
+                try {
+                    await setDoc(doc(dbRef.current, 'artifacts', appId, 'users', targetUid, 'gamification', 'stats'), {
+                        ...stats,
+                        coins: stats.coins - 1
+                    });
+                } catch (e) {
+                    console.error("Coin deduction failed", e);
+                    setIsAnalysing(false);
+                    return;
+                }
+
                 // Calculate Stock Data
                 const totalSpells = records.reduce((acc, r) => acc + (parseInt(r.purpleStoneCount) || 0), 0);
                 const totalMagics = records.reduce((acc, r) => acc + (parseInt(r.contMagicCount) || 0), 0);
@@ -1021,11 +1120,12 @@
                     - ราคากลาง: หินม่วง ${prices.purpleStonePrice}, หินแดง ${prices.contMagicPrice}
                     - ประวัติ 5 รอบล่าสุด: ${JSON.stringify(recentRuns)}
                     
-                    ช่วยวิเคราะห์:
-                    1. ดวงช่วงนี้เป็นยังไง (ดูจากประวัติ)?
-                    2. ความคุ้มค่าในการฟาร์ม (Efficiency)?
-                    3. คำแนะนำการขาย (ควรขายหรือดอง)?
-                    ตอบสั้นๆ กระชับ กวนๆ ได้ เป็นกันเอง ภาษาไทย
+                    สวมบทบาทเป็น Hugin (NPC นักวิจัยหน้าดัน OGH):
+                    1. ทักทายแบบนักวิจัยลึกลับ
+                    2. วิเคราะห์ดวงจากประวัติล่าสุด (เกลือ/เทพ)
+                    3. แนะนำการขายของ (ช่วงนี้ควรรีบขายหรือดองไว้)
+                    4. ทิ้งท้ายกวนๆ
+                    (ตอบสั้นๆ ไม่เกิน 3 ย่อหน้า ภาษาไทย)
                 `;
                 
                 const result = await callGemini(prompt);
@@ -1079,6 +1179,8 @@
                 }
             };
 
+            const isAiLocked = records.length < 5;
+
             return (
                 <div className="max-w-md mx-auto relative min-h-screen">
                     {toast && <Toast message={toast} onClose={() => setToast(null)} />}
@@ -1090,27 +1192,27 @@
                         <button 
                             onClick={triggerAiAnalysis}
                             disabled={isAnalysing}
-                            className="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-lg shadow-indigo-500/40 flex items-center justify-center animate-bounce active:scale-90 transition-transform z-50"
+                            className={`fixed bottom-24 right-6 w-16 h-16 rounded-full shadow-lg flex items-center justify-center animate-hugin active:scale-90 transition-transform z-50 border-2 border-white/20 ${isAiLocked ? 'bg-slate-700 grayscale' : 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-orange-500/40'}`}
                         >
-                            {isAnalysing ? <Icon name="Loader" className="animate-spin text-white" size={24}/> : <Icon name="Sparkles" className="text-white" size={24}/>}
+                            {isAnalysing ? <Icon name="Loader" className="animate-spin text-white" size={28}/> : (isAiLocked ? <Icon name="Lock" className="text-white/50" size={24}/> : <SVGs.Hugin className="w-10 h-10"/>)}
                         </button>
                     )}
 
                     {renderContent()}
 
-                    {/* New Standard Tab Bar */}
+                    {/* New Standard Tab Bar - Reordered */}
                     <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass-panel border-t border-white/5 nav-bar-padding pt-2 px-2 flex justify-between items-end z-40 rounded-t-[2rem]">
-                        <button onClick={() => setActiveTab('add')} className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all ${activeTab === 'add' ? 'text-purple-400' : 'opacity-40'}`}>
-                            <Icon name="Pen" size={24}/>
-                            <span className="text-[9px] font-bold uppercase">Record</span>
-                        </button>
-                        <button onClick={() => setActiveTab('history')} className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all ${activeTab === 'history' ? 'text-purple-400' : 'opacity-40'}`}>
-                            <Icon name="History" size={24}/>
-                            <span className="text-[9px] font-bold uppercase">Logs</span>
-                        </button>
                         <button onClick={() => setActiveTab('home')} className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all ${activeTab === 'home' ? 'text-purple-400' : 'opacity-40'}`}>
                             <Icon name="Home" size={24}/>
                             <span className="text-[9px] font-bold uppercase">Home</span>
+                        </button>
+                        <button onClick={() => setActiveTab('add')} className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all ${activeTab === 'add' ? 'text-purple-400' : 'opacity-40'}`}>
+                            <Icon name="Warp" size={24}/>
+                            <span className="text-[9px] font-bold uppercase">Dungeon</span>
+                        </button>
+                        <button onClick={() => setActiveTab('history')} className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all ${activeTab === 'history' ? 'text-purple-400' : 'opacity-40'}`}>
+                            <Icon name="History" size={24}/>
+                            <span className="text-[9px] font-bold uppercase">History</span>
                         </button>
                         <button onClick={() => setActiveTab('inventory')} className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all ${activeTab === 'inventory' ? 'text-purple-400' : 'opacity-40'}`}>
                             <Icon name="Box" size={24}/>
@@ -1118,7 +1220,7 @@
                         </button>
                         <button onClick={() => setActiveTab('settings')} className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all ${activeTab === 'settings' ? 'text-purple-400' : 'opacity-40'}`}>
                             <Icon name="Settings" size={24}/>
-                            <span className="text-[9px] font-bold uppercase">Tools</span>
+                            <span className="text-[9px] font-bold uppercase">Setting</span>
                         </button>
                     </nav>
                 </div>
