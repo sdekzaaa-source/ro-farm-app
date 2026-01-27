@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Item Collection with Sidebar</title>
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --bg-dark: #121026;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --accent-color: #7c5cdb;
+            --warp-blue: #4eeaf6;
+            --inv-bg: #b99d7f; 
+            --inv-border: #715842;
+            --input-bg: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Style */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #1a1635;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+
+        .menu-group {
+            padding: 15px 0;
+        }
+
+        .menu-label {
+            padding: 10px 25px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .menu-item {
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(124, 92, 219, 0.1);
+            color: white;
+            border-left-color: var(--accent-color);
+        }
+
+        /* Main Content Style */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            transition: all 0.3s;
+        }
+
+        .section-title {
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title h1 { margin: 0; font-size: 28px; }
+
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        /* Item Card Style */
+        .item-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s, background 0.3s;
+            position: relative;
+        }
+
+        .item-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(124, 92, 219, 0.3);
+        }
+
+        .svg-display {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .item-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 17px;
+            color: #eee;
+        }
+
+        .btn-copy {
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-copy:active { transform: scale(0.98); }
+
+        /* เฉดสีปุ่ม */
+        .btn-green { background: #8cc63f; color: #1a3300; }
+        .btn-purple { background: #b392f0; color: #2e1a4a; }
+        .btn-blue { background: #72c1f0; color: #0a2d45; }
+        .btn-dark-p { background: #7c5cdb; color: white; }
+        .btn-red { background: #d13d3d; color: white; }
+        .btn-gold { background: #d4af37; color: #332200; }
+        .btn-pink { background: #ff9aa2; color: #4a0010; }
+        .btn-warp { background: var(--warp-blue); color: #003344; box-shadow: 0 0 15px rgba(78, 234, 246, 0.4); }
+        .btn-brown { background: #96714c; color: white; }
+
+        .msg-toast {
+            font-size: 12px;
+            color: #4ade80;
+            margin-top: 10px;
+            height: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .msg-toast.show { opacity: 1; }
+
+        .hidden { display: none; }
+
+        /* --- Add Item Form Style --- */
+        .form-container {
+            max-width: 600px;
+            background: rgba(255,255,255,0.03);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: rgba(255,255,255,0.6); font-size: 14px; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .form-group textarea { height: 150px; resize: vertical; font-family: 'Courier New', Courier, monospace; font-size: 12px; }
+
+        .preview-area {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- Inventory Components Styles --- */
+        .inventory-preview {
+            background: #e9d5b7;
+            padding: 15px;
+            border-radius: 12px;
+            border: 4px solid #6d4c31;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
+        }
+
+        .inv-slot {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            background: #b99d7f;
+            border: 2px solid #715842;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .inv-count {
+            position: absolute;
+            bottom: 2px;
+            right: 4px;
+            font-size: 11px;
+            color: #4a3424;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+            pointer-events: none;
+        }
+
+        /* Animation for Warp */
+        @keyframes rotateWarp {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulseWarp {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        .warp-rotate { animation: rotateWarp 10s linear infinite; transform-origin: center; }
+        .warp-pulse { animation: pulseWarp 3s ease-in-out infinite; }
+        
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; }
+            .sidebar-header h2, .menu-label, .menu-item .label-text { display: none; }
+            .main-content { margin-left: 70px; padding: 20px; }
+            .menu-item { justify-content: center; padding: 15px; font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>ITEM DB</h2>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">Categories</div>
+            <div class="menu-item active" onclick="showSection('consumables', this)">
+                <span>📦</span>
+                <span class="label-text">Consumables</span>
+            </div>
+            <div class="menu-item" onclick="showSection('treasures', this)">
+                <span>💎</span>
+                <span class="label-text">Treasures</span>
+            </div>
+            <div class="menu-item" onclick="showSection('user-items', this)">
+                <span>⭐</span>
+                <span class="label-text">User Collection</span>
+            </div>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">Manager</div>
+            <div class="menu-item" onclick="showSection('add-item', this)">
+                <span>➕</span>
+                <span class="label-text">Add New Item</span>
+            </div>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">Assets</div>
+            <div class="menu-item" onclick="showSection('icons', this)">
+                <span>🎨</span>
+                <span class="label-text">Icons & Utils</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <!-- Consumables -->
+        <div id="section-consumables" class="content-section">
+            <div class="section-title"><h1>Consumables</h1></div>
+            <div class="item-grid">
+                <!-- Silvervine HD -->
+                <div class="item-card">
+                    <h3>Silvervine Fruit</h3>
+                    <div class="svg-display" id="svg-silvervine">
+                        <svg width="100" height="115" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M60,10 L60,25" stroke="#4a7729" stroke-width="4" stroke-linecap="round"></path>
+                            <path d="M60,25 Q40,15 35,25" fill="none" stroke="#6aa329" stroke-width="3" stroke-linecap="round"></path>
+                            <path d="M60,25 Q80,15 85,25" fill="none" stroke="#6aa329" stroke-width="3" stroke-linecap="round"></path>
+                            <path d="M60,25 C75,25 75,45 75,60 C75,80 95,90 95,115 C95,145 75,155 60,155 C45,155 25,145 25,115 C25,90 45,80 45,60 C45,45 45,25 60,25 Z" fill="#8cc63f"></path>
+                            <path d="M60,25 C60,25 70,45 70,60 C70,80 88,90 88,115 C88,138 75,148 60,148 L60,155 C75,155 95,145 95,115 C95,90 75,80 75,60 C75,45 75,25 60,25" fill="#6aa329" opacity="0.6"></path>
+                            <path d="M48,40 Q40,50 40,65" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.4" fill="none"></path>
+                            <ellipse cx="45" cy="100" rx="4" ry="12" fill="white" opacity="0.3" transform="rotate(-10, 45, 100)"></ellipse>
+                        </svg>
+                    </div>
+                    <button class="btn-copy btn-green" onclick="copyCode('svg-silvervine', 'msg-silvervine')">Copy SVG</button>
+                    <div id="msg-silvervine" class="msg-toast">คัดลอกสำเร็จ!</div>
+                </div>
+
+                <!-- Bubble Gum HD -->
+                <div class="item-card">
+                    <h3>Bubble Gum</h3>
+                    <div class="svg-display" id="svg-bubblegum">
+                        <svg width="120" height="120" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                            <g transform="rotate(15, 80, 100)">
+                                <rect x="30" y="80" width="100" height="35" rx="3" fill="#ffb38a" stroke="#d18a66" stroke-width="1.5"></rect>
+                                <rect x="35" y="83" width="90" height="29" rx="2" fill="#ffe0cf"></rect>
+                                <circle cx="50" cy="97" r="6" fill="#ff7da1"></circle>
+                            </g>
+                            <g transform="rotate(-30, 80, 70)">
+                                <rect x="30" y="45" width="100" height="35" rx="3" fill="#a0d8f5" stroke="#6ba8cc" stroke-width="1.5"></rect>
+                                <rect x="35" y="48" width="90" height="29" rx="2" fill="#def4ff"></rect>
+                                <circle cx="55" cy="62" r="5" fill="#ff9aa2"></circle>
+                                <circle cx="70" cy="58" r="6" fill="#fff5ba"></circle>
+                                <rect x="95" y="55" width="12" height="15" rx="1" fill="#4d3b2c" opacity="0.8"></rect>
+                            </g>
+                        </svg>
+                    </div>
+                    <button class="btn-copy btn-pink" onclick="copyCode('svg-bubblegum', 'msg-bubblegum')">Copy SVG</button>
+                    <div id="msg-bubblegum" class="msg-toast">คัดลอกสำเร็จ!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Treasures -->
+        <div id="section-treasures" class="content-section hidden">
+            <div class="section-title"><h1>Treasures</h1></div>
+            <div class="item-grid">
+                <!-- Purple Crystal HD -->
+                <div class="item-card">
+                    <h3>Purple Crystal</h3>
+                    <div class="svg-display" id="svg-crystal-purple">
+                        <svg width="120" height="145" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="50,5 92,30 92,90 50,115 8,90 8,30" fill="#4b3a8a"></polygon>
+                            <polygon points="50,5 8,30 8,90 50,115 50,60" fill="#6a4eb3"></polygon>
+                            <polygon points="50,5 92,30 92,90 50,115 50,60" fill="#8464d1"></polygon>
+                            <polygon points="50,20 80,40 80,80 50,100 20,80 20,40" fill="#a68af0"></polygon>
+                            <g stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.3">
+                                <line x1="50" y1="5" x2="50" y2="20"></line><line x1="8" y1="30" x2="20" y2="40"></line>
+                                <line x1="92" y1="30" x2="80" y2="40"></line><line x1="8" y1="90" x2="20" y2="80"></line>
+                                <line x1="92" y1="90" x2="80" y2="80"></line><line x1="50" y1="115" x2="50" y2="100"></line>
+                            </g>
+                            <rect x="30" y="35" width="8" height="8" fill="white" opacity="0.6" rx="1"></rect>
+                            <polygon points="50,5 92,30 92,90 50,115 8,90 8,30" fill="none" stroke="#9d81e1" stroke-width="2" stroke-linejoin="round"></polygon>
+                        </svg>
+                    </div>
+                    <button class="btn-copy btn-dark-p" onclick="copyCode('svg-crystal-purple', 'msg-crystal-purple')">Copy SVG</button>
+                    <div id="msg-crystal-purple" class="msg-toast">คัดลอกสำเร็จ!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add New Item -->
+        <div id="section-add-item" class="content-section hidden">
+            <div class="section-title"><h1>Add New Magic Item</h1></div>
+            <div class="form-container">
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" id="new-item-name" placeholder="เช่น Dragon Soul, Phoenix Feather...">
+                </div>
+                <div class="form-group">
+                    <label>SVG Code</label>
+                    <textarea id="new-item-svg" placeholder="วางโค้ด <svg>...</svg> ที่นี่" oninput="updatePreview()"></textarea>
+                </div>
+                <div class="preview-area" id="item-preview">
+                    <span style="color: rgba(255,255,255,0.3)">SVG Preview will appear here</span>
+                </div>
+                <div style="margin-top: 25px;">
+                    <button class="btn-copy btn-dark-p" onclick="saveCustomItem()">
+                        <span>✨</span> Add to Collection
+                    </button>
+                </div>
+                <div id="msg-form" class="msg-toast" style="text-align: center;">เพิ่มไอเทมสำเร็จ! ไปดูที่ User Collection</div>
+            </div>
+        </div>
+
+        <!-- User Collection -->
+        <div id="section-user-items" class="content-section hidden">
+            <div class="section-title">
+                <h1>User Collection</h1>
+                <span style="font-size: 14px; color: var(--accent-color);">Your custom assets</span>
+            </div>
+            <div class="item-grid" id="user-items-grid">
+                <!-- Custom items will be injected here -->
+                <div style="grid-column: 1/-1; text-align: center; padding: 50px; opacity: 0.3;">
+                    <p>ยังไม่มีไอเทมที่สร้างเอง... ลองเพิ่มที่เมนู Add New Item ดูสิ!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assets & Utils -->
+        <div id="section-icons" class="content-section hidden">
+            <div class="section-title"><h1>Assets & Utilities</h1></div>
+            <div class="item-grid">
+                <div class="item-card">
+                    <h3>RPG Inventory Slot (SVG)</h3>
+                    <div class="svg-display" id="svg-inv-slot">
+                        <svg width="100" height="100" viewBox="0 0 100 100">
+                            <rect x="5" y="5" width="90" height="90" rx="10" fill="#b99d7f" stroke="#715842" stroke-width="3"/>
+                            <rect x="10" y="10" width="80" height="80" rx="6" fill="none" stroke="black" stroke-opacity="0.2" stroke-width="4"/>
+                        </svg>
+                    </div>
+                    <button class="btn-copy btn-brown" onclick="copyCode('svg-inv-slot', 'msg-inv-slot')">Copy Slot SVG</button>
+                    <div id="msg-inv-slot" class="msg-toast">คัดลอกสำเร็จ!</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const userItems = [];
+
+        function showSection(sectionName, menuItem) {
+            document.querySelectorAll('.content-section').forEach(section => { section.classList.add('hidden'); });
+            document.getElementById('section-' + sectionName).classList.remove('hidden');
+            document.querySelectorAll('.menu-item').forEach(item => { item.classList.remove('active'); });
+            menuItem.classList.add('active');
+        }
+
+        function updatePreview() {
+            const svgCode = document.getElementById('new-item-svg').value;
+            const previewArea = document.getElementById('item-preview');
+            if(svgCode.trim() === "") {
+                previewArea.innerHTML = '<span style="color: rgba(255,255,255,0.3)">SVG Preview will appear here</span>';
+                return;
+            }
+            previewArea.innerHTML = svgCode;
+        }
+
+        function saveCustomItem() {
+            const name = document.getElementById('new-item-name').value;
+            const svg = document.getElementById('new-item-svg').value;
+            const msg = document.getElementById('msg-form');
+
+            if(!name || !svg) {
+                alert("กรุณากรอกชื่อและวางโค้ด SVG");
+                return;
+            }
+
+            const newItem = {
+                id: 'user-item-' + Date.now(),
+                name: name,
+                svg: svg
+            };
+
+            userItems.push(newItem);
+            renderUserItems();
+
+            // Clear form
+            document.getElementById('new-item-name').value = '';
+            document.getElementById('new-item-svg').value = '';
+            document.getElementById('item-preview').innerHTML = '<span style="color: rgba(255,255,255,0.3)">SVG Preview will appear here</span>';
+
+            msg.classList.add('show');
+            setTimeout(() => msg.classList.remove('show'), 3000);
+        }
+
+        function renderUserItems() {
+            const grid = document.getElementById('user-items-grid');
+            if(userItems.length === 0) return;
+
+            grid.innerHTML = userItems.map(item => `
+                <div class="item-card">
+                    <h3>${item.name}</h3>
+                    <div class="svg-display" id="${item.id}">
+                        ${item.svg}
+                    </div>
+                    <button class="btn-copy btn-purple" onclick="copyCode('${item.id}', 'msg-${item.id}')">Copy SVG</button>
+                    <div id="msg-${item.id}" class="msg-toast">คัดลอกสำเร็จ!</div>
+                </div>
+            `).join('');
+        }
+
+        function copyCode(elementId, msgId) {
+            const content = document.getElementById(elementId).innerHTML;
+            const cleanContent = content.replace(/^\s+|\s+$/g, '');
+            const el = document.createElement('textarea');
+            el.value = cleanContent;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            const msg = document.getElementById(msgId);
+            if(msg) {
+                msg.classList.add('show');
+                setTimeout(() => msg.classList.remove('show'), 2000);
+            }
+        }
+    </script>
+</body>
+</html>
