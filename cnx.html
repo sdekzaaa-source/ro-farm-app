@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทริปเชียงใหม่ 4-6 ก.พ. | Premium Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-input: #f1f5f9;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --accent-color: #2563eb;
+        }
+
+        [data-theme='dark'] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --nav-bg: rgba(30, 41, 59, 0.8);
+            --accent-color: #3b82f6;
+        }
+
+        [data-theme='muji'] {
+            --bg-body: #f4f1ea;
+            --bg-card: #faf9f6;
+            --bg-input: #efede7;
+            --text-main: #4a4238;
+            --text-muted: #8c7e6d;
+            --border-color: #e2ddd3;
+            --nav-bg: rgba(244, 241, 234, 0.8);
+            --accent-color: #8c7e6d;
+        }
+
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .day-card { display: none; }
+        .day-card.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .nav-btn.active { background-color: var(--accent-color); color: white; }
+
+        .bg-card { background-color: var(--bg-card); border: 1px solid var(--border-color); }
+        .bg-input { background-color: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); }
+        .text-main { color: var(--text-main); }
+        .text-muted { color: var(--text-muted); }
+        .accent-bg { background-color: var(--accent-color); }
+
+        /* Dropdown Animation */
+        .detail-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; opacity: 0; }
+        .detail-content.show { max-height: 1200px; opacity: 1; transition: max-height 0.5s ease-in, opacity 0.3s ease-in; }
+        .rotate-icon { transition: transform 0.3s ease; }
+        .rotate-icon.active { transform: rotate(180deg); }
+
+        /* Modal Summary & Forms */
+        .modal-view { display: none; position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.6); z-index: 60; backdrop-filter: blur(4px); flex-direction: column; justify-content: flex-end; }
+        .modal-view.active { display: flex; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        /* Floating Action Button */
+        .fab { position: fixed; bottom: 100px; right: 24px; z-index: 45; }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- Header -->
+    <header id="app-header" class="accent-bg text-white p-6 rounded-b-3xl shadow-lg sticky top-0 z-50 transition-all duration-500">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="w-10"></div>
+            <div class="text-center">
+                <h1 class="text-xl font-bold">เชียงใหม่ 3 วัน 2 คืน</h1>
+                <p class="text-white/80 text-xs">4 - 6 กุมภาพันธ์ | ม่อนแจ่ม - ตัวเมือง</p>
+            </div>
+            <button onclick="cycleTheme()" class="w-10 h-10 flex items-center justify-center bg-white/20 rounded-full text-white">
+                <i id="theme-icon" class="fas fa-sun"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="flex justify-around p-4 sticky top-20 z-40 bg-transparent backdrop-blur-sm">
+        <div class="bg-card rounded-full shadow-md p-1 flex w-full max-w-md mx-auto">
+            <button onclick="showDay(1)" id="btn-1" class="nav-btn active flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all duration-300">4 ก.พ.</button>
+            <button onclick="showDay(2)" id="btn-2" class="nav-btn flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all duration-300">5 ก.พ.</button>
+            <button onclick="showDay(3)" id="btn-3" class="nav-btn flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all duration-300">6 ก.พ.</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-md mx-auto px-4" id="main-content">
+        <section id="day-1" class="day-card active space-y-4"></section>
+        <section id="day-2" class="day-card space-y-4"></section>
+        <section id="day-3" class="day-card space-y-4"></section>
+    </main>
+
+    <!-- Floating Action Button (FAB) -->
+    <div class="fab">
+        <button id="fab-btn" onclick="openAddPlanModal(currentDay)" class="w-14 h-14 accent-bg text-white rounded-full shadow-2xl flex items-center justify-center text-2xl active:scale-90 transition-transform">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+
+    <!-- Modal: Add Custom Plan -->
+    <div id="add-plan-modal" class="modal-view">
+        <div class="bg-card w-full max-w-md mx-auto rounded-t-[2.5rem] p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">✨ แทรกแผนใหม่ (วันที่ <span id="target-day-display">1</span>)</h2>
+                <button onclick="toggleModal('add-plan-modal', false)" class="w-10 h-10 flex items-center justify-center bg-input rounded-full"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-bold opacity-50 mb-1 uppercase tracking-widest">เวลา (ย่อย 5 นาที)</label>
+                        <!-- step="300" allows 5 minute increments (5 * 60 seconds) -->
+                        <input type="time" id="new-plan-time" step="300" class="w-full p-3 bg-input rounded-xl outline-none border-none">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-bold opacity-50 mb-1 uppercase tracking-widest">ประเภท</label>
+                        <select id="new-plan-icon" class="w-full p-3 bg-input rounded-xl outline-none border-none">
+                            <option value="map-marker-alt">📍 ทั่วไป</option>
+                            <option value="utensils">🍴 ร้านอาหาร</option>
+                            <option value="coffee">☕ คาเฟ่</option>
+                            <option value="bed">🛏️ ที่พัก</option>
+                            <option value="gas-pump">⛽ เติมน้ำมัน</option>
+                            <option value="camera">📷 ถ่ายรูป</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold opacity-50 mb-1 uppercase tracking-widest">สถานที่ / กิจกรรม</label>
+                    <input type="text" id="new-plan-title" placeholder="เช่น แวะจุดพักรถ" class="w-full p-3 bg-input rounded-xl outline-none border-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold opacity-50 mb-1 uppercase tracking-widest">รายละเอียด</label>
+                    <textarea id="new-plan-details" placeholder="ระบุสิ่งที่ต้องทำ" class="w-full p-3 bg-input rounded-xl outline-none border-none h-24"></textarea>
+                </div>
+                <button onclick="saveCustomPlan()" class="w-full py-4 accent-bg text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-transform">
+                    เพิ่มลงในแผนการเดินทาง
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Confirmation Delete -->
+    <div id="delete-confirm-modal" class="modal-view">
+        <div class="bg-card w-full max-w-md mx-auto rounded-t-[2.5rem] p-8 shadow-2xl text-center">
+            <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">ยืนยันการลบ</h3>
+            <p class="text-muted mb-8 text-sm">ข้อมูลที่ลบแล้วจะไม่สามารถกู้คืนได้ คุณแน่ใจใช่ไหม?</p>
+            <div class="flex gap-4">
+                <button onclick="toggleModal('delete-confirm-modal', false)" class="flex-1 py-4 bg-input text-muted rounded-2xl font-bold">ยกเลิก</button>
+                <button id="confirm-delete-btn" class="flex-1 py-4 bg-red-500 text-white rounded-2xl font-bold">ลบข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Expense Summary & Fuel Log -->
+    <div id="summary-view" class="modal-view">
+        <div class="bg-card w-full max-w-md mx-auto rounded-t-[2.5rem] p-6 h-[85vh] overflow-y-auto shadow-2xl border-none">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">📊 สรุปรายจ่าย & ค่าน้ำมัน</h2>
+                <button onclick="toggleModal('summary-view', false)" class="w-10 h-10 flex items-center justify-center bg-input rounded-full"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Total Card -->
+            <div id="total-card" class="accent-bg rounded-3xl p-6 text-white mb-6 shadow-lg">
+                <p class="text-white/80 text-sm mb-1">ยอดรวมรายจ่ายทั้งหมด</p>
+                <h3 class="text-4xl font-bold" id="total-trip-amount">฿0.00</h3>
+                <div class="mt-4 pt-4 border-t border-white/20 flex justify-between">
+                    <div>
+                        <p class="text-[10px] opacity-70 uppercase tracking-widest">ค่าน้ำมันรวม</p>
+                        <p class="font-bold" id="total-fuel-amount">฿0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fuel Entry Section (Theme Fixed) -->
+            <div class="bg-input rounded-2xl p-5 mb-6 border-none">
+                <h4 class="text-xs font-bold uppercase tracking-widest mb-4 opacity-70"><i class="fas fa-gas-pump mr-1"></i> บันทึกการเติมน้ำมัน</h4>
+                <div class="flex gap-2 mb-3">
+                    <input type="time" id="fuel-time" step="300" class="w-24 text-sm p-3 rounded-xl border-none bg-card outline-none">
+                    <input type="number" id="fuel-price" placeholder="ยอดเงิน (บาท)" min="0" class="flex-1 text-sm p-3 rounded-xl border-none bg-card outline-none">
+                    <button onclick="addFuelRecord()" id="fuel-save-btn" class="accent-bg text-white px-4 rounded-xl text-xs font-bold shadow-sm">บันทึก</button>
+                </div>
+                <div id="fuel-list" class="space-y-2">
+                    <!-- Fuel items injected here -->
+                </div>
+            </div>
+
+            <div id="summary-details" class="space-y-6"></div>
+            
+            <button onclick="clearAllData()" class="w-full mt-8 py-4 text-red-500 text-sm font-medium border border-red-100 rounded-2xl hover:bg-red-50 transition-colors">
+                <i class="fas fa-history mr-2"></i> ล้างข้อมูลและรีเซ็ตทริป
+            </button>
+        </div>
+    </div>
+
+    <!-- Version Info -->
+    <footer class="mt-8 mb-4 text-center">
+        <p class="text-slate-400 text-[10px]">Version v1.7.3 (5-min Step Time)</p>
+    </footer>
+
+    <!-- Bottom Menu -->
+    <nav style="background-color: var(--nav-bg);" class="fixed bottom-0 left-0 right-0 backdrop-blur-md border-t border-slate-200 px-6 py-3 flex justify-between items-center z-50">
+        <div onclick="toggleModal('summary-view', false)" class="flex flex-col items-center cursor-pointer" style="color: var(--accent-color);">
+            <i class="fas fa-calendar-day text-lg"></i>
+            <span class="text-[10px] mt-1 font-bold">แผนเที่ยว</span>
+        </div>
+        <div onclick="toggleModal('summary-view', true)" class="flex flex-col items-center text-slate-400 cursor-pointer">
+            <i class="fas fa-wallet text-lg"></i>
+            <span class="text-[10px] mt-1 font-bold">สรุปรายจ่าย</span>
+        </div>
+        <div class="flex flex-col items-center text-slate-400 opacity-50">
+            <i class="fas fa-user text-lg"></i>
+            <span class="text-[10px] mt-1 font-bold">โปรไฟล์</span>
+        </div>
+    </nav>
+
+    <script>
+        const defaultLocations = [
+            { id: '1-1', day: 1, time: '08:15', title: 'สนามบินเชียงใหม่', travel: '', details: 'รับรถเช่าที่จุดนัดพบ (แนะนำให้ตรวจเช็ครอยรอบคันและปริมาณน้ำมันก่อนเซ็นรับ)', tips: 'เตรียมใบขับขี่และบัตรประชาชนให้พร้อม', type: 'plane' },
+            { id: '1-2', day: 1, time: '09:30', title: 'ร้านไม้เฮือน 60', travel: '🚗 20-30 นาที', details: 'ทานอาหารเช้า/ควบเที่ยง ท่ามกลางบรรยากาศบ้านไม้เก่าที่ตกแต่งด้วยกล้วยไม้และพรรณไม้หายาก', menu: 'แกงเผ็ดเป็ดย่าง, ออร์เดิร์ฟเมือง, กาแฟสดไม้เฮือน', photo: 'โซนสวนกล้วยไม้ด้านในที่มีละอองหมอก', type: 'utensils' },
+            { id: '1-3', day: 1, time: '11:30', title: 'โป่งแยง จังเกิ้ล โคสเตอร์', travel: '🚗 45-60 นาที', details: 'สัมผัสความตื่นเต้นกับ Jungle Coaster (รถรางเลื่อนไม้) ที่วิ่งผ่านป่าและน้ำตก', tips: 'จิบกาแฟที่ "Jungle De Cafe" ชมวิวน้ำตกได้', type: 'mountain' },
+            { id: '1-4', day: 1, time: '13:30', title: 'ไอนารา คาเฟ่', travel: '🚗 15-20 นาที', details: 'คาเฟ่สไตล์ญี่ปุ่นกลางทุ่งนาแม่ริม มีสะพานไม้ไผ่เดินทอดผ่านทุ่งนา', photo: 'มุมบ้านไม้สไตล์ญี่ปุ่น และที่นั่งริมทุ่งนา', type: 'coffee' },
+            { id: '1-5', day: 1, time: '15:00', title: 'ม่อนลมหนาว โฮมสเตย์', travel: '🚗 15 นาที', details: 'เช็คอินเข้าที่พัก พักผ่อนรับลมเย็นๆ ณ ที่พักยอดฮิตบนม่อนแจ่ม', highlight: 'นั่งชมสายหมอกและวิวภูเขาจากระเบียงห้องพัก', type: 'bed' },
+            { id: '1-6', day: 1, time: '16:30', title: 'ยอดดอยม่อนแจ่ม', travel: '🚗 5-10 นาที', details: 'เดินชมทุ่งดอกไม้เมืองหนาว (เช่น ดอกเวอร์บีน่า หรือดอกคอสมอส)', tips: 'มีบริการเช่าชุดชนเผ่าถ่ายรูป ราคา 50-100 บาท', type: 'camera' },
+            { id: '1-7', day: 1, time: '18:30', title: 'ที่พัก (ม่อนลมหนาว)', travel: '', details: 'ทานหมูกระทะรับลมหนาวหน้าห้องพัก', type: 'fire' },
+            { id: '2-1', day: 2, time: '10:30', title: 'วัดป่าดาราภิรมย์', travel: '🚗 45-50 นาที', details: 'ชมพระอุโบสถและวิหารศิลปะล้านนาชั้นสูงที่งดงาม', tips: 'แต่งกายสุภาพ งดขาสั้นเหนือเข่า', type: 'vihara' },
+            { id: '2-2', day: 2, time: '12:00', title: 'มื้อเที่ยง: ข้าวซอย', travel: '🚗 20-30 นาที', details: 'ร้านแนะนำ: ข้าวซอยแม่สาย (ย่านสันติธรรม) หรือ ข้าวซอยนิมมาน', menu: 'ข้าวซอยเนื้อ/ไก่, ขนมจีนน้ำเงี้ยว, ไส้อั่ว', type: 'utensils' },
+            { id: '2-3', day: 2, time: '14:00', title: 'One Nimman / นิมมานฯ', travel: '🚗 5-10 นาที', details: 'เดินช้อปปิ้งแบรนด์ดีไซน์เนอร์ไทย และถ่ายรูปสถาปัตยกรรมอิฐแดง', type: 'store' },
+            { id: '2-4', day: 2, time: '16:30', title: 'วัดเจดีย์หลวง', travel: '🚗 15-20 นาที', details: 'ชมเจดีย์ที่ใหญ่ที่สุดในเชียงใหม่สมัยโบราณ ซึ่งปัจจุบันเหลือเพียงส่วนฐานแต่ยังคงความน่าเกรงขาม', type: 'vihara' },
+            { id: '2-5', day: 2, time: '19:30', title: 'เชียงใหม่ไนท์บาซาร์', travel: '🚗 10-15 นาที', details: 'เดินตลาดกลางคืนโซน "Ploen Ruedee" ฟังดนตรีสด', type: 'moon' },
+            { id: '3-1', day: 3, time: '10:00', title: 'จริงใจมาร์เก็ต', travel: '🚗 15-20 นาที', details: 'เดินตลาดร่มรื่นใต้ต้นไม้ใหญ่ ชมงานคราฟต์ งานทำมือ', type: 'leaf' },
+            { id: '3-2', day: 3, time: '12:00', title: 'ชมคาเฟ่ (Chom Cafe)', travel: '🚗 20-25 นาที', details: 'ทานอาหารในร้านที่จำลองป่าหิมพานต์ มีมอสสีเขียวและไอน้ำ', type: 'utensils' },
+            { id: '3-3', day: 3, time: '14:00', title: 'มีใจให้มัทฉะ (Magokoro)', travel: '🚗 15-20 นาที', details: 'ดื่มด่ำกับชามัทฉะเกรดพิธีการ ในบรรยากาศบ้านไม้ญี่ปุ่น', type: 'mug-hot' },
+            { id: '3-4', day: 3, time: '16:30', title: 'ย่านนิมมานฯ (ส่งท้าย)', travel: '🚗 15-20 นาที', details: 'นั่ง Rooftop ชมดอยสุเทพยามพระอาทิตย์ตก', type: 'glass-cheers' },
+            { id: '3-5', day: 3, time: '19:30', title: 'สนามบินเชียงใหม่', travel: '🚗 15-20 นาที', details: 'Check-in เตรียมตัวเดินทางกลับ (21:50 น.)', type: 'plane-departure' }
+        ];
+
+        let userPlans = JSON.parse(localStorage.getItem('cm_custom_plans')) || [];
+        let expenses = JSON.parse(localStorage.getItem('cm_trip_expenses')) || [];
+        let fuelLogs = JSON.parse(localStorage.getItem('cm_fuel_logs')) || [];
+        let currentDay = 1;
+        let planToDelete = null;
+        let currentTheme = localStorage.getItem('cm_theme') || 'light';
+
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        function cycleTheme() {
+            const themes = ['light', 'dark', 'muji'];
+            let nextIndex = (themes.indexOf(currentTheme) + 1) % themes.length;
+            currentTheme = themes[nextIndex];
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('cm_theme', currentTheme);
+            updateThemeUI();
+        }
+
+        function updateThemeUI() {
+            const icon = document.getElementById('theme-icon');
+            const root = document.documentElement;
+            
+            if (currentTheme === 'dark') {
+                icon.className = 'fas fa-moon';
+            } else if (currentTheme === 'muji') {
+                icon.className = 'fas fa-leaf';
+            } else {
+                icon.className = 'fas fa-sun';
+            }
+            
+            showDay(currentDay);
+            updateUI();
+        }
+
+        function addFuelRecord() {
+            const time = document.getElementById('fuel-time').value;
+            const price = document.getElementById('fuel-price').value;
+            if (!time || !price || parseFloat(price) < 0) return;
+
+            fuelLogs.push({ id: Date.now(), day: currentDay, time, price: parseFloat(price) });
+            localStorage.setItem('cm_fuel_logs', JSON.stringify(fuelLogs));
+            document.getElementById('fuel-price').value = '';
+            updateUI();
+        }
+
+        function deleteFuel(id) {
+            fuelLogs = fuelLogs.filter(f => f.id !== id);
+            localStorage.setItem('cm_fuel_logs', JSON.stringify(fuelLogs));
+            updateUI();
+        }
+
+        function renderAll() {
+            [1, 2, 3].forEach(day => {
+                const container = document.getElementById('day-' + day);
+                const dayLocs = [...defaultLocations, ...userPlans]
+                    .filter(l => l.day === day)
+                    .sort((a, b) => a.time.localeCompare(b.time));
+
+                let html = `<div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent pt-4">`;
+
+                dayLocs.forEach(loc => {
+                    const isCustom = userPlans.some(up => up.id === loc.id);
+                    html += `
+                        <div class="relative flex items-start group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-[var(--bg-body)] accent-bg text-white shadow-sm shrink-0 z-10">
+                                <i class="fas fa-${loc.type} text-[10px]"></i>
+                            </div>
+                            <div class="w-[calc(100%-3rem)] bg-card p-4 rounded-2xl shadow-sm ml-4 cursor-pointer" onclick="toggleDetail('${loc.id}')">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[10px] font-bold tracking-wider opacity-60 uppercase">${loc.time}</span>
+                                    <div class="flex gap-3 items-center">
+                                        ${isCustom ? `<button onclick="event.stopPropagation(); requestDeletePlan('${loc.id}')" class="text-red-400 text-xs"><i class="fas fa-trash-alt"></i></button>` : ''}
+                                        <i class="fas fa-chevron-down text-[10px] opacity-20 rotate-icon" id="icon-${loc.id}"></i>
+                                    </div>
+                                </div>
+                                <h3 class="font-bold text-sm">${loc.title}</h3>
+                                ${loc.travel ? `<p class="text-[10px] opacity-60 mt-1 italic">${loc.travel}</p>` : ''}
+                                
+                                <div id="detail-${loc.id}" class="detail-content mt-3 text-xs border-t border-[var(--border-color)] pt-3 space-y-3" onclick="event.stopPropagation()">
+                                    <p class="text-muted"><strong>กิจกรรม:</strong> ${loc.details}</p>
+                                    ${loc.menu ? `<p class="text-muted"><strong>เมนูแนะนำ:</strong> ${loc.menu}</p>` : ''}
+                                    ${loc.highlight ? `<p class="font-bold" style="color: var(--accent-color);"><strong>ไฮไลท์:</strong> ${loc.highlight}</p>` : ''}
+                                    
+                                    <div class="mt-4 bg-[var(--bg-input)] p-3 rounded-xl">
+                                        <p class="text-[9px] font-bold opacity-40 uppercase mb-2 tracking-widest">บันทึกรายจ่าย</p>
+                                        <div class="flex gap-2">
+                                            <input type="text" id="exp-item-${loc.id}" placeholder="รายการ" class="flex-1 text-[11px] p-2 rounded-lg bg-card outline-none border-none">
+                                            <input type="number" id="exp-price-${loc.id}" placeholder="ราคา" min="0" class="w-16 text-[11px] p-2 rounded-lg bg-card outline-none border-none">
+                                            <button onclick="addExpense('${loc.id}', '${loc.title}', ${day})" class="accent-bg text-white w-8 h-8 rounded-lg flex items-center justify-center"><i class="fas fa-plus"></i></button>
+                                        </div>
+                                        <div id="exp-list-${loc.id}" class="mt-2 space-y-1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+            });
+            updateUI();
+            updateThemeUI();
+        }
+
+        function toggleDetail(id) {
+            const content = document.getElementById('detail-' + id);
+            const icon = document.getElementById('icon-' + id);
+            if(content) content.classList.toggle('show');
+            if(icon) icon.classList.toggle('active');
+        }
+
+        function showDay(day) {
+            currentDay = day;
+            document.querySelectorAll('.day-card').forEach(card => card.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            const dayElem = document.getElementById('day-' + day);
+            const btnElem = document.getElementById('btn-' + day);
+            if(dayElem) dayElem.classList.add('active');
+            if(btnElem) btnElem.classList.add('active');
+            
+            const root = document.documentElement;
+            const header = document.getElementById('app-header');
+
+            if (currentTheme === 'light') {
+                let color = '#2563eb';
+                if (day === 2) color = '#f97316';
+                if (day === 3) color = '#0d9488';
+                root.style.setProperty('--accent-color', color);
+            } else if (currentTheme === 'muji') {
+                root.style.setProperty('--accent-color', '#8c7e6d');
+            } else {
+                root.style.setProperty('--accent-color', '#3b82f6');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openAddPlanModal(day) {
+            const display = document.getElementById('target-day-display');
+            if(display) display.innerText = day;
+            toggleModal('add-plan-modal', true);
+        }
+
+        function saveCustomPlan() {
+            const time = document.getElementById('new-plan-time').value;
+            const title = document.getElementById('new-plan-title').value;
+            const details = document.getElementById('new-plan-details').value;
+            const icon = document.getElementById('new-plan-icon').value;
+            if (!time || !title) return;
+            userPlans.push({ id: 'custom-' + Date.now(), day: currentDay, time, title, details: details || '-', type: icon });
+            localStorage.setItem('cm_custom_plans', JSON.stringify(userPlans));
+            toggleModal('add-plan-modal', false);
+            renderAll();
+        }
+
+        function requestDeletePlan(id) {
+            planToDelete = id;
+            toggleModal('delete-confirm-modal', true);
+        }
+
+        function executeDeletePlan() {
+            if (planToDelete) {
+                userPlans = userPlans.filter(p => p.id !== planToDelete);
+                expenses = expenses.filter(e => e.locId !== planToDelete);
+                localStorage.setItem('cm_custom_plans', JSON.stringify(userPlans));
+                localStorage.setItem('cm_trip_expenses', JSON.stringify(expenses));
+                planToDelete = null;
+                toggleModal('delete-confirm-modal', false);
+                renderAll();
+            }
+        }
+
+        function addExpense(locId, locTitle, day) {
+            const item = document.getElementById(`exp-item-${locId}`);
+            const price = document.getElementById(`exp-price-${locId}`);
+            const priceVal = parseFloat(price.value);
+            if (!item.value || isNaN(priceVal) || priceVal < 0) return;
+            expenses.push({ id: Date.now(), locId, locTitle, day, item: item.value, price: priceVal });
+            localStorage.setItem('cm_trip_expenses', JSON.stringify(expenses));
+            item.value = ''; price.value = '';
+            updateUI();
+        }
+
+        function deleteExp(id) {
+            expenses = expenses.filter(e => e.id !== id);
+            localStorage.setItem('cm_trip_expenses', JSON.stringify(expenses));
+            updateUI();
+        }
+
+        function updateUI() {
+            const allLocs = [...defaultLocations, ...userPlans];
+            allLocs.forEach(loc => {
+                const list = document.getElementById(`exp-list-${loc.id}`);
+                if (list) {
+                    list.innerHTML = expenses.filter(e => e.locId === loc.id).map(e => `
+                        <div class="flex justify-between items-center text-[10px] bg-card p-2 rounded-lg shadow-sm">
+                            <span class="opacity-70">${e.item}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold">฿${e.price.toLocaleString()}</span>
+                                <button onclick="deleteExp(${e.id})" class="opacity-20"><i class="fas fa-times-circle"></i></button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            });
+
+            const fuelListElem = document.getElementById('fuel-list');
+            if(fuelListElem) {
+                fuelListElem.innerHTML = fuelLogs.map(f => `
+                    <div class="flex justify-between items-center text-xs bg-card p-3 rounded-xl shadow-sm">
+                        <span class="font-medium">${f.time} น.</span>
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-orange-500">฿${f.price.toLocaleString()}</span>
+                            <button onclick="deleteFuel(${f.id})" class="opacity-30"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const totalExp = expenses.reduce((s, e) => s + e.price, 0);
+            const totalFuel = fuelLogs.reduce((s, f) => s + f.price, 0);
+            const totalTripElem = document.getElementById('total-trip-amount');
+            const totalFuelElem = document.getElementById('total-fuel-amount');
+            if(totalTripElem) totalTripElem.innerText = '฿' + (totalExp + totalFuel).toLocaleString();
+            if(totalFuelElem) totalFuelElem.innerText = '฿' + totalFuel.toLocaleString();
+            
+            let summaryHtml = '';
+            [1, 2, 3].forEach(day => {
+                const dayExps = expenses.filter(e => e.day === day);
+                const dayTotal = dayExps.reduce((s, e) => s + e.price, 0);
+                if (dayExps.length > 0) {
+                    summaryHtml += `
+                        <div class="border-b border-[var(--border-color)] pb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-bold text-xs opacity-60">วันที่ ${day} (${day + 3} ก.พ.)</h4>
+                                <span class="font-bold text-sm">฿${dayTotal.toLocaleString()}</span>
+                            </div>
+                            <div class="space-y-1">
+                                ${dayExps.map(e => `<div class="flex justify-between text-[11px] opacity-70"><span>${e.item} (${e.locTitle})</span><span>฿${e.price.toLocaleString()}</span></div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            const summaryDetailsElem = document.getElementById('summary-details');
+            if(summaryDetailsElem) summaryDetailsElem.innerHTML = summaryHtml || '<p class="text-center text-slate-400 py-10 font-light text-xs">ยังไม่มีบันทึกรายจ่าย</p>';
+        }
+
+        function toggleModal(id, show) {
+            const modal = document.getElementById(id);
+            if(modal) {
+                if(show) modal.classList.add('active');
+                else modal.classList.remove('active');
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('คำเตือน! ข้อมูลทั้งหมดจะถูกลบถาวร')) {
+                localStorage.clear();
+                window.location.reload();
+            }
+        }
+
+        document.getElementById('confirm-delete-btn').onclick = executeDeletePlan;
+        window.onload = renderAll;
+    </script>
+</body>
+</html>
