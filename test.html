@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OGHza Tracker V4.9.22</title>
+    <title>OGHza Tracker V4.9.26</title>
     
     <!-- App Icon -->
     <link rel="icon" href="icon.png" type="image/png">
@@ -142,16 +142,15 @@
 
         const { useState, useEffect, useMemo, useRef } = React;
 
-        const APP_VERSION = "Ver.4.9.22";
+        const APP_VERSION = "Ver.4.9.26";
         const VERSION_HISTORY = [
-            { ver: "Ver.4.9.22", changes: ["Enabled Mobile Native Share", "Smart Share fallback logic"] },
-            { ver: "Ver.4.9.21", changes: ["Refactored Icon component to fix Syntax Errors", "Restored correct SVGs for Clover and Reward"] },
-            { ver: "Ver.4.9.20", changes: ["Smart Share Button (Share > Copy > Save)", "Fixed SVG Syntax"] },
-            { ver: "Ver.4.9.19", changes: ["Fixed SVG Syntax (Fragment)", "Finalized Share Card"] },
+            { ver: "Ver.4.9.26", changes: ["Added Scrollbar to Character List (Max 3 rows)", "Fixed Share/Delete button alignment"] },
+            { ver: "Ver.4.9.25", changes: ["Added Quick Character Switch in Adventure"] },
+            { ver: "Ver.4.9.24", changes: ["Reset Daily at 04:00 AM", "Show Character Name in History"] },
         ];
         
         const MANUAL_FIREBASE_CONFIG = { apiKey: "AIzaSyAbWzr8o_OhkjGbEetBYq_nzYmVZ2fTf40", authDomain: "rocogh-88a38.firebaseapp.com", projectId: "rocogh-88a38", storageBucket: "rocogh-88a38.firebasestorage.app", messagingSenderId: "1025971309206", appId: "1:1025971309206:web:d4f9e0ab6bb016dde590b7" };
-        const INITIAL_STATS = { baseLv: 1, baseExp: 0, jobLv: 1, jobExp: 0, jobClass: 'Novice', coins: 0, zeny: 0, unlockedTitles: ['Novice'] };
+        const INITIAL_STATS = { baseLv: 1, baseExp: 0, jobLv: 1, jobExp: 0, jobClass: 'Novice', coins: 0, zeny: 0, unlockedTitles: ['Novice'], savingsGoal: 0 };
         const SHOP_ITEMS = [ { id: 'premium_box', name: 'Premium Service Box', duration: 30, type: 'buff_box', icon: 'Premium', desc: 'กล่องพรีเมียม 30 วัน', rarity: 'Rare', category: 'Consumable' }, { id: 'kafra_box', name: 'Kafra Buff (7d)', duration: 7, type: 'buff_box', icon: 'Kafra', desc: 'บัฟคลังคาฟร่า 7 วัน', rarity: 'Uncommon', category: 'Consumable' }, { id: 'silvervine_box', name: 'Silvervine Box (10ea)', qty: 10, type: 'consumable_box', subType: 'silvervine', icon: 'SilvervineBox', desc: 'กล่องผลไม้แมว 10 ชิ้น', rarity: 'Uncommon', category: 'Consumable' }, { id: 'gum_box', name: 'Bubble Gum Box (10ea)', qty: 10, type: 'consumable_box', subType: 'gum', icon: 'GumBox', desc: 'กล่องหมากฝรั่ง 10 ชิ้น', rarity: 'Common', category: 'Consumable' }, { id: 'he_gum_box', name: 'HE Bubble Gum Box (5ea)', qty: 5, type: 'consumable_box', subType: 'he_gum', icon: 'HeGumBox', desc: 'กล่องหมากฝรั่ง HE 5 ชิ้น', rarity: 'Rare', category: 'Consumable' } ];
         const DEK_TITLES = [ { id: 'richman', name: 'Richman', cost: 100, icon: '💰' }, { id: 'lucky', name: 'Lucky Guy', cost: 200, icon: '🍀' }, { id: 'slayer', name: 'Dragon Slayer', cost: 500, icon: '⚔️' }, { id: 'god', name: 'RNG God', cost: 1000, icon: '👑' }, { id: 'whale', name: 'The Whale', cost: 5000, icon: '🐳' } ];
         const ITEM_DETAILS = { 'spell': { name: 'Coagulated Spell', desc: 'ผลึกเวทมนตร์สีม่วง', type: 'Etc', rarity: 'Common', category: 'Etc' }, 'magic': { name: 'Contaminated Magic', desc: 'ผลึกเวทมนตร์สีแดง', type: 'Etc', rarity: 'Uncommon', category: 'Etc' }, 'gum': { name: 'Bubble Gum', desc: 'เพิ่ม drop rate 100%', type: 'Consumable', rarity: 'Common', category: 'Consumable' }, 'he_gum': { name: 'HE Bubble Gum', desc: 'เพิ่ม drop rate 200%', type: 'Consumable', rarity: 'Rare', category: 'Consumable' }, 'silvervine': { name: 'Silvervine', desc: 'ผลไม้แมว', type: 'Etc', rarity: 'Common', category: 'Etc' }, 'premium_staff': { name: 'Premium Staff', desc: 'คฑา VIP', type: 'Tool', rarity: 'Legendary', category: 'Consumable' }, 'premium_box': { name: 'Premium Service Box', desc: 'VIP 30 วัน', type: 'Consumable', rarity: 'Rare', category: 'Consumable' } };
@@ -164,6 +163,17 @@
         const getItemInfo = (id) => { if (ITEM_DETAILS[id]) return { ...ITEM_DETAILS[id], icon: id }; const dropItem = DROP_TABLE.find(d => d.id === id); if (dropItem) return dropItem; const shopItem = SHOP_ITEMS.find(s => s.id === id); if (shopItem) return { ...shopItem, type: 'Box', rarity: shopItem.rarity || 'Common', category: shopItem.category || 'Consumable' }; if (id === 'premium_staff') return { ...ITEM_DETAILS['premium_staff'], icon: 'PremiumStaff' }; if (id === 'he_gum') return { ...ITEM_DETAILS['he_gum'], icon: 'HeGum' }; if (id === 'spell') return { ...ITEM_DETAILS['spell'], icon: 'Spell' }; if (id === 'magic') return { ...ITEM_DETAILS['magic'], icon: 'Magic' }; return { name: 'Unknown Item', desc: 'No description.', type: 'Etc', rarity: 'Common', icon: 'Box', category: 'Etc' }; };
         const getRankInfo = (profit, averageProfit) => { if (profit < 0) return { rank: 'F', css: 'rank-f', text: 'LOSS' }; if (!averageProfit || averageProfit === 0) return { rank: 'B', css: 'rank-b', text: 'NORMAL' }; const diff = (profit - averageProfit) / averageProfit; if (diff >= 0.5) return { rank: 'S', css: 'rank-s', text: 'LUCKY' }; if (diff >= 0.3) return { rank: 'A', css: 'rank-a', text: 'GOOD' }; if (diff >= -0.1) return { rank: 'B', css: 'rank-b', text: 'NORMAL' }; if (diff >= -0.3) return { rank: 'C', css: 'rank-c', text: 'BAD' }; if (diff >= -0.5) return { rank: 'D', css: 'rank-d', text: 'POOR' }; return { rank: 'E', css: 'rank-e', text: 'AWFUL' }; };
         const SmartIcon = ({ name, className }) => { const [error, setError] = useState(false); const BASE_URL = "https://sdekzaaa-source.github.io/ro-farm-app/"; const imgMap = { 'Spell': 'Coagulated Spell.png', 'Magic': 'Contaminated Magic.png', 'Gum': 'Bubble Gum.png', 'HeGum': 'HE Bubble Gum.png', 'Silvervine': 'Silvervine Fruit.png', 'GumBox': 'Bubble Gum Box.png', 'HeGumBox': 'HE Bubble Gum Box.png', 'SilvervineBox': 'Silvervine Box.png', 'Premium': 'Premium Box.png', 'Kafra': 'Kafra Buff.png', 'PremiumStaff': 'Premium Service Staff.png', 'Elunium': 'Elunium.png', 'Oridecon': 'Oridecon.png', 'Card': 'Card.png', 'Zeny': 'Zeny.png', 'DEK': 'DEK.png', 'OGH_BOSS': 'OGH BOSS.png', 'AOGH_BOSS': 'AOGH BOSS.png' }; const finalName = imgMap[name] ? name : (Object.keys(imgMap).find(k => k.toLowerCase() === name?.toLowerCase()) || 'Box'); if (finalName === 'GumBox') return (<div className={`relative ${className}`}><img crossOrigin="anonymous" src={`${BASE_URL}Bubble Gum Box.png`} className="w-full h-full object-contain" /><img crossOrigin="anonymous" src={`${BASE_URL}Bubble Gum.png`} className="absolute bottom-0 right-0 w-1/2 h-1/2 object-contain filter drop-shadow-md" /></div>); if (finalName === 'HeGumBox') return (<div className={`relative ${className}`}><img crossOrigin="anonymous" src={`${BASE_URL}Bubble Gum Box.png`} className="w-full h-full object-contain filter hue-rotate-15" /><img crossOrigin="anonymous" src={`${BASE_URL}HE Bubble Gum.png`} className="absolute bottom-0 right-0 w-1/2 h-1/2 object-contain filter drop-shadow-md" /></div>); if (!error && imgMap[finalName]) return <img crossOrigin="anonymous" src={`${BASE_URL}${imgMap[finalName]}`} className={`object-contain ${className}`} onError={() => setError(true)} />; return <div className={`w-full h-full bg-zinc-700 rounded-md flex items-center justify-center ${className}`}><span className="text-[8px] text-zinc-500">?</span></div>; };
+
+        // Helper to determine the current "Game Day" (Resets at 04:00 AM)
+        const getGameDate = () => {
+            const now = new Date();
+            // Shift back 4 hours to align with 4AM reset
+            now.setHours(now.getHours() - 4);
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
 
         // --- CUSTOM SVG ICONS ---
         const Icon = ({ name, size = 20, className }) => {
@@ -236,7 +246,7 @@
                                 <g><path style={{fill:"#7AA82D"}} d="M435.662,512c-0.17,0-0.339-0.002-0.51-0.007c-10.765-0.276-19.266-9.227-18.99-19.991 c2.645-102.938-61.414-150.431-62.062-150.899c-8.729-6.306-10.693-18.494-4.387-27.222c6.307-8.728,18.494-10.691,27.222-4.387 c3.325,2.402,81.375,60.235,78.208,183.509C454.87,503.597,446.197,512,435.662,512z"/></g>
                                 <g><path style={{fill:"#729B23"}} d="M455.144,493.004c-0.278,10.59-8.952,18.996-19.481,18.996c-0.175,0-0.34,0-0.515-0.01 c-2.843-0.072-5.522-0.752-7.932-1.906c6.377-3.07,10.858-9.519,11.054-17.081c3.163-123.272-74.884-181.106-78.211-183.506 c-0.958-0.69-1.957-1.288-2.988-1.772c6.233-2.987,13.866-2.565,19.862,1.772C380.261,311.898,458.307,369.732,455.144,493.004z"/></g>
                                 <g>
-                                    <g><path style={{fill:"#BDEB73"}} d="M264.333,31.37L256,39.707l-21.48-21.48C222.365,6.072,206.433,0,190.501,0 c-15.932,0-31.864,6.072-44.019,18.227c-24.31,24.31-24.31,63.727,0,88.037l29.28,62.28L256,215.782l8.333-8.333V31.37z"/><path style={{fill:"#A4E540"}} d="M365.518,106.264L256,215.782l-12.467-12.467l97.039-97.051c24.31-24.31-24.31-63.727,0-88.037 c-8.969-8.969-19.987-14.628-31.552-16.968C313.132,0.412,317.31,0,321.499,0c15.932,0,31.863,6.072,44.019,18.227 C389.827,42.537,389.827,81.954,365.518,106.264z"/><path style={{fill:"#A4E540"}} d="M365.518,106.264L256,215.782V39.707l21.469-21.48c8.969-8.969,19.987-14.628,31.552-16.968 C313.132,0.412,317.31,0,321.499,0c15.932,0,31.863,6.072,44.019,18.227C389.827,42.537,389.827,81.954,365.518,106.264z"/><path style={{fill:"#8EC737"}} d="M365.518,106.264L256,215.782v-24.934l84.572-84.584c24.31-24.31,24.31-63.727,0-88.037 c-8.969-8.969-19.987-14.628-31.552-16.968C313.132,0.412,317.31,0,321.499,0c15.932,0,31.863,6.072,44.019,18.227 C389.827,42.537,389.827,81.954,365.518,106.264z"/></g>
+                                    <g><path style={{fill:"#BDEB73"}} d="M264.333,31.37L256,39.707l-21.48-21.48C222.365,6.072,206.433,0,190.501,0 c-15.932,0-31.864,6.072-44.019,18.227c-24.31,24.31-24.31,63.727,0,88.037l29.28,62.28L256,215.782l8.333-8.333V31.37z"/><path style={{fill:"#A4E540"}} d="M365.518,106.264L256,215.782l-12.467-12.467l97.039-97.051c24.31-24.31-24.31-63.727,0-88.037 c-8.969-8.969-19.987-14.628-31.552-16.968C313.132,0.412,317.31,0,321.499,0c15.932,0,31.863,6.072,44.019,18.227 C389.827,42.537,389.827,81.954,365.518,106.264z"/><path style={{fill:"#A4E540"}} d="M365.518,106.264L256,215.782V39.707l21.469-21.48c8.969-8.969,19.987-14.628,31.552-16.968 C313.132,0.412,317.31,0,321.499,0c15.932,0,31.863,6.072,44.019,18.227C389.827,42.537,389.827,81.954,365.518,106.264z"/><path style={{fill:"#8EC737"}} d="M365.518,106.264L256,215.782v-24.934l84.572-84.584c24.31-24.31-24.31-63.727,0-88.037 c-8.969-8.969-19.987-14.628-31.552-16.968C313.132,0.412,317.31,0,321.499,0c15.932,0,31.863,6.072,44.019,18.227 C389.827,42.537,389.827,81.954,365.518,106.264z"/></g>
                                     <g><path style={{fill:"#BDEB73"}} d="M365.517,325.299l-44.7-65.7L256,215.782l-11,11v176.08l11-11.005l21.48,21.48 c12.155,12.155,28.087,18.227,44.019,18.227s31.864-6.072,44.019-18.227C389.827,389.026,389.827,349.609,365.517,325.299z"/><path style={{fill:"#A4E540"}} d="M146.482,325.299L256,215.782l12.467,12.467l-97.039,97.051c-24.31,24.31-24.31,63.727,0,88.037 c8.969,8.969,19.987,14.628,31.551,16.968c-4.111,0.847-8.289,1.259-12.478,1.259c-15.932,0-31.863-6.072-44.019-18.227 C122.173,389.026,122.173,349.609,146.482,325.299z"/><path style={{fill:"#A4E540"}} d="M146.482,325.299L256,215.782v176.075l-21.469,21.48c-8.969,8.969-19.987,14.628-31.552,16.968 c-4.111,0.847-8.289,1.259-12.478,1.259c-15.932,0-31.863-6.072-44.019-18.227C122.173,389.026,122.173,349.609,146.482,325.299 z"/><path style={{fill:"#8EC737"}} d="M146.482,325.299L256,215.782v24.934l-84.572,84.584c-24.31,24.31-24.31,63.727,0,88.037 c8.969,8.969,19.987,14.628,31.551,16.968c-4.111,0.847-8.289,1.259-12.478,1.259c-15.932,0-31.863-6.072-44.019-18.227 C122.173,389.026,122.173,349.609,146.482,325.299z"/></g>
                                     <g><path style={{fill:"#A4E540"}} d="M365.517,325.299L256,215.782l12.467-12.467l97.051,97.039c24.31,24.31,63.727,24.31,88.037,0 c8.969-8.969,14.628-19.987,16.968-31.552c0.847,4.111,1.259,8.289,1.259,12.478c0,15.932-6.072,31.863-18.227,44.019 C429.245,349.609,389.827,349.609,365.517,325.299z"/><path style={{fill:"#A4E540"}} d="M365.517,325.299L256,215.782h176.075l21.48,21.469c8.969,8.969,14.628,19.987,16.968,31.552 c0.847,4.111,1.259,8.289,1.259,12.478c0,15.932-6.072,31.863-18.227,44.019C429.245,349.609,389.827,349.609,365.517,325.299z" /><path style={{fill:"#8EC737"}} d="M365.517,325.299L256,215.782h24.934l84.584,84.572c24.31,24.31,63.727,24.31,88.037,0 c8.969-8.969,14.628-19.987,16.968-31.552c0.847,4.111,1.259,8.289,1.259,12.478c0,15.932-6.072,31.863-18.227,44.019 C429.245,349.609,389.827,349.609,365.517,325.299z"/></g>
                                     <g><path style={{fill:"#A4E540"}} d="M146.483,106.264L256,215.782l-12.467,12.467l-97.051-97.039c-24.31,24.31-63.727-24.31-88.037,0 c-8.969,8.969-14.628,19.987-16.968,31.552c-0.847-4.111-1.259-8.289-1.259-12.478c0-15.932,6.072-31.863,18.227-44.019 C82.755,81.954,122.173,81.954,146.483,106.264z"/><path style={{fill:"#A4E540"}} d="M146.483,106.264L256,215.782H79.925l-21.48-21.469c-8.969-8.969-14.628-19.987-16.968-31.552 c-0.847-4.111-1.259-8.289-1.259-12.478c0-15.932,6.072-31.863,18.227-44.019C82.755,81.954,122.173,81.954,146.483,106.264z"/><path style={{fill:"#8EC737"}} d="M146.483,106.264L256,215.782h-24.934l-84.584-84.572c-24.31-24.31-63.727-24.31-88.037,0 c-8.969,8.969-14.628,19.987-16.968,31.552c-0.847-4.111-1.259-8.289-1.259-12.478c0-15.932,6.072-31.863,18.227-44.019 C82.755,81.954,122.173,81.954,146.483,106.264z"/></g>
@@ -262,7 +272,7 @@
                         </g>
                     );
                     break;
-                case 'Settings': content = <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>; break;
+                case 'Settings': content = <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>; break;
                 case 'Trash': content = <><polyline points="3 6 5 6 21 6" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none" stroke="currentColor" strokeWidth="2"/><line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" strokeWidth="2"/><line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" strokeWidth="2"/></>; break;
                 case 'Plus': content = <><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" strokeWidth="2"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" strokeWidth="2"/></>; break;
                 case 'X': content = <><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2"/></>; break;
@@ -297,7 +307,7 @@
         };
 
         // --- Shared Components ---
-        function CurrencyHeader({ stats, activeBuffs }) {
+        function CurrencyHeader({ stats, activeBuffs, selectedCharId }) {
             const [now, setNow] = useState(new Date());
             useEffect(() => { const interval = setInterval(() => setNow(new Date()), 60000); return () => clearInterval(interval); }, []);
 
@@ -307,7 +317,18 @@
                         {activeBuffs.map(b => {
                             const end = new Date(b.endDate);
                             if (end < now) return null;
-                            let icon = 'Check'; if(b.itemId === 'premium_box') icon = 'Premium'; if(b.itemId === 'kafra_box') icon = 'Kafra'; if(b.itemId === 'silvervine_24h') icon = 'Silvervine';
+                            
+                            // BUFF SCOPE FILTERING
+                            const isAccountWide = b.isAccountWide === true;
+                            const isMyChar = b.characterId === selectedCharId;
+                            
+                            if (!isAccountWide && !isMyChar) return null; // Don't show other char's buffs
+
+                            let icon = 'Check'; 
+                            if(b.itemId === 'premium_box') icon = 'Premium'; 
+                            if(b.itemId === 'kafra_box') icon = 'Kafra'; 
+                            if(b.itemId === 'silvervine_24h') icon = 'Silvervine';
+                            
                             return (
                                 <div key={b.uid} className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex-shrink-0 flex items-center justify-center relative group">
                                     <SmartIcon name={icon} className="w-6 h-6"/>
@@ -319,7 +340,18 @@
                 </div>
             );
         }
-        function DeleteButton({ onDelete, duration = 750 }) { const [isDeleting, setIsDeleting] = useState(false); const timerRef = useRef(null); const startDelete = () => { setIsDeleting(true); timerRef.current = setTimeout(() => { onDelete(); setIsDeleting(false); }, 750); }; const cancelDelete = () => { clearTimeout(timerRef.current); setIsDeleting(false); }; return (<div className="relative w-full h-8 bg-zinc-800 rounded-lg overflow-hidden cursor-pointer border border-rose-900/30 select-none touch-none mt-2" onMouseDown={startDelete} onMouseUp={cancelDelete} onMouseLeave={cancelDelete} onTouchStart={(e) => { e.preventDefault(); startDelete(); }} onTouchEnd={(e) => { e.preventDefault(); cancelDelete(); }}><div className={`absolute top-0 left-0 h-full bg-rose-600 delete-progress ${isDeleting ? 'w-full duration-[750ms]' : 'w-0 duration-100'}`}></div><div className="absolute inset-0 flex items-center justify-center pointer-events-none"><span className={`text-[10px] font-bold uppercase tracking-widest ${isDeleting ? 'text-white animate-pulse' : 'text-rose-400'}`}>{isDeleting ? "DELETING..." : "Hold Delete"}</span></div></div>); }
+        function DeleteButton({ onDelete, duration = 750, className = "w-full mt-2" }) { 
+            const [isDeleting, setIsDeleting] = useState(false); 
+            const timerRef = useRef(null); 
+            const startDelete = () => { setIsDeleting(true); timerRef.current = setTimeout(() => { onDelete(); setIsDeleting(false); }, 750); }; 
+            const cancelDelete = () => { clearTimeout(timerRef.current); setIsDeleting(false); }; 
+            return (
+                <div className={`relative h-8 bg-zinc-800 rounded-lg overflow-hidden cursor-pointer border border-rose-900/30 select-none touch-none ${className}`} onMouseDown={startDelete} onMouseUp={cancelDelete} onMouseLeave={cancelDelete} onTouchStart={(e) => { e.preventDefault(); startDelete(); }} onTouchEnd={(e) => { e.preventDefault(); cancelDelete(); }}>
+                    <div className={`absolute top-0 left-0 h-full bg-rose-600 delete-progress ${isDeleting ? 'w-full duration-[750ms]' : 'w-0 duration-100'}`}></div>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><span className={`text-[10px] font-bold uppercase tracking-widest ${isDeleting ? 'text-white animate-pulse' : 'text-rose-400'}`}>{isDeleting ? "DELETING..." : "Hold Delete"}</span></div>
+                </div>
+            ); 
+        }
         function Toast({ message }) { return (<div className="fixed top-14 left-1/2 transform -translate-x-1/2 z-[100] animate-slide-down pointer-events-none w-full max-w-sm px-4"><div className="bg-zinc-800/95 backdrop-blur-md border border-zinc-700 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 justify-center"><div className="bg-emerald-500/20 p-1 rounded-full text-emerald-400"><Icon name="Check" size={14} /></div><span className="text-xs font-bold tracking-wide">{message}</span></div></div>); }
         function Modal({ children, onClose }) { return (<div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={onClose}><div className="w-full max-w-sm bg-[#18181b] rounded-[2.5rem] p-6 relative border border-zinc-800" onClick={e => e.stopPropagation()}><button onClick={onClose} className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors"><Icon name="X" size={20}/></button>{children}</div></div>); }
         function VersionModal({ onClose }) { return (<div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm animate-fade-in" onClick={onClose}><div className="w-full max-w-xs bg-[#18181b] rounded-[2.5rem] p-6 relative border border-zinc-800" onClick={e => e.stopPropagation()}><button onClick={onClose} className="absolute top-5 right-5 text-zinc-500 hover:text-white"><Icon name="X" size={20}/></button><h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Icon name="Info" size={20}/> Update Log</h3><div className="space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">{VERSION_HISTORY.map((v, i) => (<div key={i} className="bg-zinc-900 p-3 rounded-xl border border-zinc-700/50"><h4 className="text-sm font-black text-emerald-400 mb-1">{v.ver}</h4><ul className="list-disc pl-4 text-zinc-400 text-xs space-y-1">{v.changes.map((c, j) => <li key={j}>{c}</li>)}</ul></div>))}</div></div></div>); }
@@ -331,14 +363,13 @@
 
             useEffect(() => {
                 const generate = async () => {
-                    // Slight delay to ensure fonts/images load (though mostly SVGs)
                     await new Promise(r => setTimeout(r, 500));
                     
                     if (cardRef.current && window.html2canvas) {
                         try {
                             const canvas = await window.html2canvas(cardRef.current, {
-                                backgroundColor: '#18181b', // Force background color
-                                scale: 2, // Retina quality
+                                backgroundColor: '#18181b', 
+                                scale: 2, 
                                 logging: false,
                                 useCORS: true,
                                 allowTaint: true,
@@ -357,111 +388,23 @@
             return (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl animate-fade-in" onClick={onClose}>
                     <div className="w-full max-w-sm flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
-                        
-                        {/* Title / Instructions */}
                         <div className="text-center space-y-1">
                             <h3 className="text-white font-black text-xl tracking-tighter">Share Result</h3>
                             <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">{loading ? "Generating Card..." : "Long Press Image to Save"}</p>
                         </div>
-
-                        {/* Loading State */}
-                        {loading && (
-                            <div className="w-64 h-64 flex items-center justify-center">
-                                <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                            </div>
-                        )}
-
-                        {/* Generated Image */}
-                        {!loading && imgUrl && (
-                            <div className="relative group animate-pop-in">
-                                <img src={imgUrl} alt="Result Card" className="w-full rounded-lg shadow-2xl border border-zinc-800/50" />
-                                <div className="absolute -bottom-8 left-0 right-0 text-center opacity-50 text-[10px] text-zinc-500">
-                                    Saved as PNG
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Actions */}
-                        <div className="flex gap-4">
-                            <button onClick={onClose} className="w-12 h-12 rounded-full bg-zinc-800 text-white flex items-center justify-center hover:bg-zinc-700 transition-colors border border-zinc-700">
-                                <Icon name="X" size={20}/>
-                            </button>
-                        </div>
-
-                        {/* Off-screen Source for Capture (Fixed width for consistency) */}
+                        {loading && (<div className="w-64 h-64 flex items-center justify-center"><div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>)}
+                        {!loading && imgUrl && (<div className="relative group animate-pop-in"><img src={imgUrl} alt="Result Card" className="w-full rounded-lg shadow-2xl border border-zinc-800/50" /><div className="absolute -bottom-8 left-0 right-0 text-center opacity-50 text-[10px] text-zinc-500">Saved as PNG</div></div>)}
+                        <div className="flex gap-4"><button onClick={onClose} className="w-12 h-12 rounded-full bg-zinc-800 text-white flex items-center justify-center hover:bg-zinc-700 transition-colors border border-zinc-700"><Icon name="X" size={20}/></button></div>
                         <div className="absolute top-0 left-0 pointer-events-none opacity-0" style={{ transform: 'translate(-9999px, -9999px)' }}>
                             <div ref={cardRef} className="rom-card p-6 bg-[#18181b] relative flex flex-col gap-4 !rounded-none" style={{ width: '375px' }}>
-                                {/* ... Exact content from previous ShareModal ... */}
-                                {/* Header */}
-                                <div className="text-center border-b border-zinc-700 pb-3 mb-2">
-                                     <h2 className="text-2xl font-black text-white italic tracking-tighter drop-shadow-md font-sans">OGHza <span className="text-[#eab308]">Tracker</span></h2>
-                                     <p className="text-[10px] text-zinc-500 tracking-[0.3em] uppercase font-bold mt-1">ADVENTURE REPORT</p>
-                                </div>
-                                {/* Row 1 */}
-                                <div className="flex justify-between items-center px-1">
-                                    <span className={`text-4xl font-black uppercase tracking-tighter drop-shadow-lg ${data.runMode === 'AOGH' ? 'text-rose-500' : 'text-purple-400'} font-sans`}>
-                                        {data.runMode === 'AOGH' ? 'AOGH' : 'OGH'}
-                                    </span>
-                                    <div className="flex items-center gap-1.5 text-zinc-300">
-                                         <span className="text-lg">⏱️</span>
-                                         <span className="text-lg font-bold font-sans">{data.minutesUsed}m</span>
-                                    </div>
-                                </div>
-                                {/* Row 2 Profit */}
-                                <div className="text-center py-2 flex flex-col items-center justify-center">
-                                     <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">NET PROFIT (ZENY)</p>
-                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-6xl font-black text-emerald-400 drop-shadow-lg leading-tight font-sans">
-                                            {formatMoney(data.profit)}
-                                        </span>
-                                     </div>
-                                </div>
-                                {/* Row 3 Stats */}
-                                <div className="flex justify-between items-center px-2 py-2 mb-2 w-full">
-                                    <div className="text-center flex-1">
-                                         <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">COST</p>
-                                         <p className="text-sm font-bold text-rose-400 font-sans">-{formatMoney((data.trashAmount||0) - data.profit)}</p>
-                                    </div>
-                                    <div className="w-px h-8 bg-zinc-800"></div>
-                                    <div className="text-center flex-1">
-                                         <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">SALES</p>
-                                         <p className="text-sm font-bold text-blue-400 font-sans">+{formatMoney(data.trashAmount)}</p>
-                                    </div>
-                                    <div className="w-px h-8 bg-zinc-800"></div>
-                                    <div className="text-center flex-1">
-                                         <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">RATE</p>
-                                         <p className="text-sm font-bold text-amber-400 font-sans">{formatMoney(Math.floor(data.profit / (data.minutesUsed || 1)))}/m</p>
-                                    </div>
-                                </div>
-                                {/* Row 4 Items */}
-                                <div className="rom-item-box p-4 flex justify-center gap-8 mt-2 items-end !rounded-xl">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <div className="w-8 h-8"><SmartIcon name="Spell" className="w-full h-full drop-shadow-md"/></div>
-                                        <span className="text-[10px] font-bold text-zinc-400 font-sans">x{data.purpleStoneCount}</span>
-                                    </div>
-                                    {data.runMode === 'AOGH' && (
-                                        <div className="flex flex-col items-center gap-2">
-                                            <div className="w-8 h-8"><SmartIcon name="Magic" className="w-full h-full drop-shadow-md"/></div>
-                                            <span className="text-[10px] font-bold text-zinc-400 font-sans">x{data.contMagicCount}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex flex-col items-center gap-2">
-                                        <div className="w-8 h-8"><SmartIcon name="Gum" className="w-full h-full drop-shadow-md"/></div>
-                                        <span className="text-[10px] font-bold text-zinc-400 font-sans">x{data.normalGumUsed || 0}</span>
-                                    </div>
-                                    {data.heGumUsed > 0 && (
-                                        <div className="flex flex-col items-center gap-2">
-                                            <div className="w-8 h-8"><SmartIcon name="HeGum" className="w-full h-full drop-shadow-md"/></div>
-                                            <span className="text-[10px] font-bold text-zinc-400 font-sans">x{data.heGumUsed}</span>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="text-center mt-4 opacity-30">
-                                    <p className="text-[9px] text-zinc-500 tracking-widest font-mono">created by @SDekza-Ro • {new Date().toLocaleDateString()}</p>
-                                </div>
+                                <div className="text-center border-b border-zinc-700 pb-3 mb-2"><h2 className="text-2xl font-black text-white italic tracking-tighter drop-shadow-md font-sans">OGHza <span className="text-[#eab308]">Tracker</span></h2><p className="text-[10px] text-zinc-500 tracking-[0.3em] uppercase font-bold mt-1">ADVENTURE REPORT</p></div>
+                                <div className="flex justify-between items-center px-1"><span className={`text-4xl font-black uppercase tracking-tighter drop-shadow-lg ${data.runMode === 'AOGH' ? 'text-rose-500' : 'text-purple-400'} font-sans`}>{data.runMode === 'AOGH' ? 'AOGH' : 'OGH'}</span><div className="flex items-center gap-1.5 text-zinc-300"><span className="text-lg">⏱️</span><span className="text-lg font-bold font-sans">{data.minutesUsed}m</span></div></div>
+                                <div className="text-center py-2 flex flex-col items-center justify-center"><p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">NET PROFIT (ZENY)</p><div className="flex items-baseline gap-2"><span className="text-6xl font-black text-emerald-400 drop-shadow-lg leading-tight font-sans">{formatMoney(data.profit)}</span></div></div>
+                                <div className="flex justify-between items-center px-2 py-2 mb-2 w-full"><div className="text-center flex-1"><p className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">COST</p><p className="text-sm font-bold text-rose-400 font-sans">-{formatMoney((data.trashAmount||0) - data.profit)}</p></div><div className="w-px h-8 bg-zinc-800"></div><div className="text-center flex-1"><p className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">SALES</p><p className="text-sm font-bold text-blue-400 font-sans">+{formatMoney(data.trashAmount)}</p></div><div className="w-px h-8 bg-zinc-800"></div><div className="text-center flex-1"><p className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">RATE</p><p className="text-sm font-bold text-amber-400 font-sans">{formatMoney(Math.floor(data.profit / (data.minutesUsed || 1)))}/m</p></div></div>
+                                <div className="rom-item-box p-4 flex justify-center gap-8 mt-2 items-end !rounded-xl"><div className="flex flex-col items-center gap-2"><div className="w-8 h-8"><SmartIcon name="Spell" className="w-full h-full drop-shadow-md"/></div><span className="text-[10px] font-bold text-zinc-400 font-sans">x{data.purpleStoneCount}</span></div>{data.runMode === 'AOGH' && (<div className="flex flex-col items-center gap-2"><div className="w-8 h-8"><SmartIcon name="Magic" className="w-full h-full drop-shadow-md"/></div><span className="text-[10px] font-bold text-zinc-400 font-sans">x{data.contMagicCount}</span></div>)}<div className="flex flex-col items-center gap-2"><div className="w-8 h-8"><SmartIcon name="Gum" className="w-full h-full drop-shadow-md"/></div><span className="text-[10px] font-bold text-zinc-400 font-sans">x{data.normalGumUsed || 0}</span></div>{data.heGumUsed > 0 && (<div className="flex flex-col items-center gap-2"><div className="w-8 h-8"><SmartIcon name="HeGum" className="w-full h-full drop-shadow-md"/></div><span className="text-[10px] font-bold text-zinc-400 font-sans">x{data.heGumUsed}</span></div>)}</div>
+                                <div className="text-center mt-4 opacity-30"><p className="text-[9px] text-zinc-500 tracking-widest font-mono">created by @SDekza-Ro • {new Date().toLocaleDateString()}</p></div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             );
@@ -497,22 +440,256 @@
         function ItemDetailModal({ item, onClose, onSell }) { const rColors = { Common: "text-zinc-400", Uncommon: "text-emerald-400", Rare: "text-blue-400", Legendary: "text-amber-400" }; const rBg = { Common: "bg-zinc-800/50", Uncommon: "bg-emerald-500/10", Rare: "bg-blue-500/10", Legendary: "bg-amber-500/10" }; const info = getItemInfo(item.id || item.itemId); const [sellQty, setSellQty] = useState('1'); const [sellPrice, setSellPrice] = useState(''); return (<div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm animate-fade-in" onClick={onClose}><div className="w-full max-w-xs bg-[#18181b] rounded-[2.5rem] p-6 relative border border-zinc-800" onClick={e => e.stopPropagation()}><button onClick={onClose} className="absolute top-5 right-5 text-zinc-500 hover:text-white"><Icon name="X" size={20}/></button><div className={`w-24 h-24 mx-auto rounded-3xl flex items-center justify-center mb-4 ${rBg[info.rarity]} border border-white/5 shadow-xl`}><SmartIcon name={info.icon} className="w-16 h-16" /></div><h3 className={`text-lg font-black text-center ${rColors[info.rarity]}`}>{info.name}</h3><p className="text-[10px] font-bold text-center opacity-40 uppercase tracking-widest mb-4">{info.type} • {info.rarity}</p><p className="text-xs text-center opacity-60 mb-6 italic">"{info.desc}"</p>{item.isSellable ? (<div className="bg-zinc-900 p-4 rounded-2xl mb-4 border border-zinc-800"><p className="text-[10px] font-bold opacity-40 uppercase mb-2 text-center">Sell Item</p><div className="grid grid-cols-2 gap-2 mb-2"><div><label className="text-[8px] font-bold opacity-30 uppercase ml-1">Qty</label><input type="text" inputMode="numeric" value={sellQty} onChange={e => setSellQty(e.target.value.replace(/\D/g,''))} className="w-full bg-slate-800/80 border border-white/10 p-2 rounded-xl text-center font-bold text-sm outline-none placeholder-white/20"/></div><div><label className="text-[8px] font-bold opacity-30 uppercase ml-1">Price/Unit</label><input type="text" inputMode="numeric" value={sellPrice} onChange={e => setSellPrice(e.target.value.replace(/\D/g,''))} className="w-full bg-slate-800/80 border border-white/10 p-2 rounded-xl text-center font-bold text-sm outline-none placeholder-white/20"/></div></div><button onClick={() => onSell(item, sellQty, sellPrice)} disabled={!sellQty || !sellPrice} className="w-full py-2 bg-emerald-600 rounded-xl text-xs font-black uppercase hover:bg-emerald-500 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"><Icon name="DollarSign" size={14}/> Confirm Sell</button></div>) : (<div className="text-center"><p className="text-xs font-bold opacity-50">Owned: {item.count || item.qty}</p></div>)}</div></div>); }
         const TabButton = ({ label, icon: IconName, active, onClick }) => ( <button onClick={onClick} className={`flex-1 py-2 text-[10px] font-black uppercase transition-all rounded-xl flex flex-col items-center justify-center gap-1 ${active ? 'bg-zinc-700 text-white shadow-lg ring-1 ring-zinc-600' : 'text-zinc-500 hover:text-zinc-300'}`}><Icon name={IconName} size={16} />{label}</button> );
 
+        // --- NEW: ProfileView Component ---
+        function ProfileView({ stats, uid, onResetUid, onSetUid, prices, setPrices, db, showToast, onBack, characters, setCharacters }) {
+            const [localPrices, setLocalPrices] = useState(prices);
+            const [localGoal, setLocalGoal] = useState(stats.savingsGoal || 0);
+            const [inputUid, setInputUid] = useState('');
+            const [newCharName, setNewCharName] = useState('');
+            const [newCharJob, setNewCharJob] = useState('');
+            
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'oghza-tracker';
+
+            useEffect(() => {
+                setLocalPrices(prices);
+                setLocalGoal(stats.savingsGoal || 0);
+            }, [prices, stats]);
+
+            const handleSaveConfig = async () => {
+                await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'config', 'prices'), localPrices);
+                const newStats = { ...stats, savingsGoal: parseInt(localGoal) };
+                await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'gamification', 'stats'), newStats);
+                showToast("Settings Saved!");
+            };
+
+            const copyUid = () => {
+                navigator.clipboard.writeText(uid);
+                showToast("Copied UID");
+            };
+
+            const addCharacter = async () => {
+                if (!newCharName || !newCharJob) return;
+                const newChar = { id: Date.now().toString(), name: newCharName, job: newCharJob };
+                const updatedChars = [...(characters || []), newChar];
+                await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'config', 'characters'), { list: updatedChars });
+                setNewCharName(''); setNewCharJob('');
+                showToast(`Added ${newChar.name}`);
+            };
+
+            const deleteCharacter = async (charId) => {
+                const updatedChars = characters.filter(c => c.id !== charId);
+                await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'config', 'characters'), { list: updatedChars });
+                showToast("Character Deleted");
+            };
+
+            return (
+                <div className="p-6 animate-fade-in view-content space-y-6">
+                    <div className="flex items-center gap-4 mb-4">
+                        <button onClick={onBack} className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white"><Icon name="X" size={20}/></button>
+                        <h2 className="text-2xl font-black tracking-tighter text-zinc-200">Profile & Settings</h2>
+                    </div>
+
+                    {/* Character Manager - Limited Height */}
+                    <div className="glass-panel p-4 rounded-2xl space-y-4">
+                        <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest flex items-center gap-2"><Icon name="Profile" size={12}/> Character List</p>
+                        
+                        <div className="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar pr-1">
+                            {characters && characters.length > 0 ? (
+                                characters.map(c => (
+                                    <div key={c.id} className="flex justify-between items-center bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                                        <div><p className="text-sm font-bold text-white">{c.name}</p><p className="text-[10px] text-zinc-500 uppercase">{c.job}</p></div>
+                                        <button onClick={() => deleteCharacter(c.id)} className="text-zinc-600 hover:text-rose-500"><Icon name="Trash" size={16}/></button>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-center text-zinc-600 text-xs italic py-2">No characters added yet.</p>
+                            )}
+                        </div>
+
+                        <div className="flex gap-2 pt-2 border-t border-zinc-800">
+                            <input type="text" placeholder="Name (e.g. Main)" value={newCharName} onChange={e => setNewCharName(e.target.value)} className="flex-1 bg-zinc-900 p-2 rounded-xl text-xs text-white border border-zinc-800 outline-none"/>
+                            <input type="text" placeholder="Job" value={newCharJob} onChange={e => setNewCharJob(e.target.value)} className="w-20 bg-zinc-900 p-2 rounded-xl text-xs text-white border border-zinc-800 outline-none"/>
+                            <button onClick={addCharacter} disabled={!newCharName} className="px-3 bg-zinc-800 rounded-xl text-zinc-400 hover:text-white disabled:opacity-50"><Icon name="Plus" size={16}/></button>
+                        </div>
+                    </div>
+
+                    {/* User ID Section */}
+                    <div className="glass-panel p-4 rounded-2xl space-y-3">
+                        <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Adventure ID</p>
+                        <div className="flex gap-2">
+                            <div className="flex-1 bg-zinc-900/50 p-2 rounded-xl text-xs font-mono text-zinc-400 truncate border border-zinc-800 flex items-center">{uid}</div>
+                            <button onClick={copyUid} className="p-2 bg-zinc-800 rounded-xl text-zinc-300"><Icon name="Copy" size={16}/></button>
+                        </div>
+                        <div className="flex gap-2 pt-2 border-t border-zinc-800">
+                            <input type="text" placeholder="Load other UID..." value={inputUid} onChange={e => setInputUid(e.target.value)} className="flex-1 bg-zinc-900 p-2 rounded-xl text-xs text-white border border-zinc-800 outline-none"/>
+                            <button onClick={() => { if(inputUid) onSetUid(inputUid); }} className="px-4 bg-emerald-600 rounded-xl text-[10px] font-bold text-white uppercase">Load</button>
+                            <button onClick={onResetUid} className="px-4 bg-rose-900/50 text-rose-400 border border-rose-800 rounded-xl text-[10px] font-bold uppercase">Reset</button>
+                        </div>
+                    </div>
+
+                    {/* Goal Config */}
+                    <div className="glass-panel p-4 rounded-2xl space-y-4">
+                        <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest flex items-center gap-2"><Icon name="Settings" size={12}/> Game Config</p>
+                        <div>
+                            <label className="text-[9px] font-bold text-zinc-500 uppercase mb-1 block">Savings Goal (Zeny)</label>
+                            <div className="relative">
+                                <input type="text" inputMode="numeric" value={localGoal} onChange={e => setLocalGoal(e.target.value.replace(/\D/g,''))} className="slate-input w-full p-2 pl-8 rounded-xl text-sm font-bold"/>
+                                <div className="absolute left-2 top-2.5 text-zinc-500"><SmartIcon name="Zeny" className="w-4 h-4"/></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Market Prices */}
+                    <div className="glass-panel p-4 rounded-2xl space-y-3">
+                        <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest flex items-center gap-2"><Icon name="DollarSign" size={12}/> Market Prices (For Calc)</p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="text-[8px] font-bold text-zinc-500 mb-1 block">Purple Stone</label>
+                                <input type="text" inputMode="numeric" value={localPrices.purpleStonePrice} onChange={e => setLocalPrices({...localPrices, purpleStonePrice: parseInt(e.target.value)||0})} className="slate-input w-full p-2 rounded-xl text-xs font-bold text-right"/>
+                            </div>
+                            <div>
+                                <label className="text-[8px] font-bold text-zinc-500 mb-1 block">Red Stone</label>
+                                <input type="text" inputMode="numeric" value={localPrices.contMagicPrice} onChange={e => setLocalPrices({...localPrices, contMagicPrice: parseInt(e.target.value)||0})} className="slate-input w-full p-2 rounded-xl text-xs font-bold text-right"/>
+                            </div>
+                            <div>
+                                <label className="text-[8px] font-bold text-zinc-500 mb-1 block">Gum Box (10)</label>
+                                <input type="text" inputMode="numeric" value={localPrices.gumBoxPrice} onChange={e => setLocalPrices({...localPrices, gumBoxPrice: parseInt(e.target.value)||0})} className="slate-input w-full p-2 rounded-xl text-xs font-bold text-right"/>
+                            </div>
+                            <div>
+                                <label className="text-[8px] font-bold text-zinc-500 mb-1 block">Silvervine Box</label>
+                                <input type="text" inputMode="numeric" value={localPrices.silvervineBoxPrice} onChange={e => setLocalPrices({...localPrices, silvervineBoxPrice: parseInt(e.target.value)||0})} className="slate-input w-full p-2 rounded-xl text-xs font-bold text-right"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onClick={handleSaveConfig} className="w-full py-4 bg-emerald-600 rounded-2xl font-black text-white shadow-lg hover:bg-emerald-500 active:scale-95 transition-all">SAVE SETTINGS</button>
+                    
+                    <div className="text-center pt-8">
+                        <p className="text-[9px] text-zinc-600 font-mono">OGHza Tracker {APP_VERSION}</p>
+                    </div>
+                </div>
+            );
+        }
+
         // --- VIEWS ---
-        function HomeView({ records, stats, goToTab, activeBuffs }) {
+        function HomeView({ records, stats, goToTab, activeBuffs, stock, characters, selectedCharId, setSelectedCharId }) {
              const { ResponsiveContainer, AreaChart, Area } = window.Recharts || {}; 
              const totalProfit = records.reduce((acc, r) => acc + (r.profit || 0), 0);
              const chartData = [...records].reverse().slice(-7).map((r, i) => ({ name: `Run ${i+1}`, profit: r.profit }));
              const expPercent = Math.min(100, Math.floor((stats.baseExp / getExpReq(stats.baseLv)) * 100));
              
+             const savingsGoal = stats.savingsGoal || 0;
+             const goalPercent = savingsGoal > 0 ? Math.min(100, (stats.zeny / savingsGoal) * 100) : 0;
+
+             const recentLuck = useMemo(() => {
+                 if (records.length === 0) return { text: "No Data", icon: "😐", color: "text-zinc-500" };
+                 const last5 = records.slice(0, 5);
+                 const avgProfit = records.reduce((acc, r) => acc + (r.profit || 0), 0) / (records.length || 1);
+                 
+                 let score = 0;
+                 last5.forEach(r => {
+                     const diff = (r.profit - avgProfit) / (avgProfit || 1);
+                     if (diff > 0.5) score += 2;
+                     else if (diff > 0) score += 1;
+                     else if (diff < -0.3) score -= 1;
+                 });
+                 
+                 if (score >= 4) return { text: "Super Lucky!", icon: "🍀", color: "text-emerald-400" };
+                 if (score >= 1) return { text: "Good Fortune", icon: "✨", color: "text-amber-400" };
+                 if (score >= -1) return { text: "Normal", icon: "😐", color: "text-zinc-400" };
+                 return { text: "Cursed...", icon: "💀", color: "text-rose-500" };
+             }, [records]);
+
+             const alerts = [];
+             if (stock?.gum?.qty < 5) alerts.push({ name: "Low Gum", icon: "Gum" });
+             if (stock?.silvervine?.qty < 5) alerts.push({ name: "Low SV", icon: "Silvervine" });
+
              const groupedRecords = useMemo(() => {
                 const groups = {};
                 records.forEach(r => { if (!groups[r.date]) groups[r.date] = []; groups[r.date].push(r); });
                 return Object.keys(groups).sort((a, b) => new Date(b) - new Date(a)).slice(0, 3).reduce((obj, key) => { obj[key] = groups[key]; return obj; }, {});
             }, [records]);
 
+            // Daily Checklist Logic (Uses 4AM Reset)
+            const today = getGameDate();
+            const dailyChecklist = useMemo(() => {
+                if (!characters) return [];
+                return characters.map(c => {
+                    // Check if this character has a record for 'today' (Game Day)
+                    const hasRun = records.some(r => r.date === today && r.characterId === c.id);
+                    return { ...c, hasRun };
+                });
+            }, [characters, records, today]);
+
+            // Check if user has no characters (New User)
+            const hasNoCharacters = !characters || characters.length === 0;
+
              return (
                 <div className="p-6 animate-fade-in view-content">
-                    <header className="flex justify-between items-center mb-6"><div onClick={() => goToTab('profile')} className="flex items-center gap-3 bg-zinc-800 p-2 rounded-full pr-4 cursor-pointer hover:bg-zinc-700 transition-colors border border-zinc-700 relative overflow-hidden group"><div className="w-10 h-10 rounded-full flex items-center justify-center font-black bg-zinc-600 text-white shadow-inner relative z-10 text-xl">🧙‍♂️</div><div className="relative z-10"><p className="text-[10px] font-bold uppercase tracking-tighter">LV.{stats.baseLv}</p><p className="text-xs font-black text-zinc-300">{stats.jobClass}</p></div><div className="absolute bottom-0 left-0 h-1 bg-emerald-500 transition-all duration-500" style={{width: `${expPercent}%`}}></div></div></header>
+                    <header className="flex justify-between items-center mb-6 relative">
+                        <div onClick={() => goToTab('profile')} className="flex items-center gap-3 bg-zinc-800 p-2 rounded-full pr-4 cursor-pointer hover:bg-zinc-700 transition-colors border border-zinc-700 relative overflow-hidden group z-20">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center font-black bg-zinc-600 text-white shadow-inner relative z-10 text-xl">🧙‍♂️</div>
+                            <div className="relative z-10"><p className="text-[10px] font-bold uppercase tracking-tighter">LV.{stats.baseLv}</p><p className="text-xs font-black text-zinc-300">{stats.jobClass}</p></div>
+                            <div className="absolute bottom-0 left-0 h-1 bg-emerald-500 transition-all duration-500" style={{width: `${expPercent}%`}}></div>
+                        </div>
+
+                        {/* NEW USER HINT BUBBLE */}
+                        {hasNoCharacters && (
+                            <div className="absolute top-14 left-0 z-30 animate-bounce pointer-events-none">
+                                <div className="bg-emerald-500 text-black text-[10px] font-black px-3 py-2 rounded-xl relative shadow-lg shadow-emerald-500/20 whitespace-nowrap">
+                                    👈 สร้างตัวละครตรงนี้ก่อนนะ!
+                                    <div className="absolute -top-1 left-4 w-2.5 h-2.5 bg-emerald-500 transform rotate-45"></div>
+                                </div>
+                            </div>
+                        )}
+                    </header>
+                    
+                    {/* Character Selector & Checklist */}
+                    {characters && characters.length > 0 && (
+                        <div className="mb-6">
+                            <div className="flex justify-between items-center px-1 mb-2">
+                                <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Active Character</p>
+                                <p className="text-[9px] font-bold text-zinc-500">Resets @ 04:00</p>
+                            </div>
+                            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+                                {dailyChecklist.map(c => (
+                                    <div key={c.id} onClick={() => setSelectedCharId(c.id)} className={`flex-shrink-0 min-w-[100px] p-3 rounded-2xl border transition-all cursor-pointer relative ${selectedCharId === c.id ? 'bg-zinc-800 border-emerald-500 shadow-lg shadow-emerald-900/20' : 'bg-zinc-900 border-zinc-800 opacity-60'}`}>
+                                        <p className={`text-xs font-bold ${selectedCharId === c.id ? 'text-white' : 'text-zinc-400'}`}>{c.name}</p>
+                                        <p className="text-[9px] text-zinc-500 uppercase">{c.job}</p>
+                                        {c.hasRun && <div className="absolute top-2 right-2 text-emerald-500 text-xs">✅</div>}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3 mb-6">
+                        <div className="bg-zinc-900 rounded-2xl p-3 border border-zinc-800 flex flex-col justify-center items-center relative overflow-hidden">
+                            <div className={`absolute inset-0 opacity-10 ${recentLuck.color.replace('text', 'bg')}`}></div>
+                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest z-10">Fortune</span>
+                            <div className="flex items-center gap-2 z-10 mt-1">
+                                <span className="text-2xl">{recentLuck.icon}</span>
+                                <span className={`text-xs font-black ${recentLuck.color}`}>{recentLuck.text}</span>
+                            </div>
+                        </div>
+                        <div className="bg-zinc-900 rounded-2xl p-3 border border-zinc-800 flex flex-col justify-center">
+                            <div className="flex justify-between mb-1"><span className="text-[9px] font-bold text-zinc-500 uppercase">Savings Goal</span><span className="text-[9px] font-bold text-amber-400">{Math.floor(goalPercent)}%</span></div>
+                            <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full bg-amber-500 transition-all" style={{width: `${goalPercent}%`}}></div></div>
+                            <p className="text-[8px] text-zinc-600 mt-1 text-right">{formatMoney(stats.zeny)} / {formatMoney(savingsGoal)}</p>
+                        </div>
+                    </div>
+
+                    {alerts.length > 0 && (
+                        <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide">
+                            {alerts.map((a, i) => (
+                                <div key={i} onClick={() => goToTab('shop')} className="flex items-center gap-2 bg-rose-900/20 border border-rose-500/30 px-3 py-2 rounded-xl animate-pulse cursor-pointer">
+                                    <SmartIcon name={a.icon} className="w-4 h-4"/>
+                                    <span className="text-[10px] font-bold text-rose-400 uppercase">{a.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     <div className="text-center mb-8 bg-zinc-800/50 p-6 rounded-[2.5rem] border border-zinc-700/50 relative overflow-hidden"><div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent"></div><div className="flex items-center justify-center gap-2 mb-1"><SmartIcon name="Zeny" className="w-5 h-5"/><p className="text-[10px] opacity-50 font-bold uppercase tracking-widest">Total Profit</p></div><p className="text-4xl font-black text-white drop-shadow-sm">{formatMoney(totalProfit)}</p></div>
                     {window.Recharts && (<div className="glass-panel p-4 rounded-3xl h-48 mb-6 border-zinc-700 bg-zinc-800/50"><p className="text-[10px] font-bold opacity-40 mb-2 uppercase flex items-center gap-2"><Icon name="TrendingUp" size={14}/> Profit Trend</p><ResponsiveContainer width="100%" height="90%"><AreaChart data={chartData}><Area type="monotone" dataKey="profit" stroke="#10b981" fill="#10b981" fillOpacity={0.1} strokeWidth={3} /></AreaChart></ResponsiveContainer></div>)}
                     <div className="space-y-3"><h4 className="text-[10px] font-bold opacity-40 px-2 uppercase tracking-widest flex items-center gap-2"><Icon name="Clock" size={12}/> Daily Performance (Last 3 Days)</h4>{Object.keys(groupedRecords).length === 0 && <p className="text-center text-xs text-zinc-600 py-4 italic">No recent data</p>}{Object.keys(groupedRecords).map(date => { const dailyRecords = groupedRecords[date]; const dailyOperatingProfit = dailyRecords.reduce((acc, r) => acc + (r.profit || 0), 0); let dailyFixedCost = 0; activeBuffs.forEach(buff => { const recDate = new Date(date); const start = new Date(buff.activatedAt); const end = new Date(buff.endDate); const d = new Date(recDate.getFullYear(), recDate.getMonth(), recDate.getDate()).getTime(); const s = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime(); const e = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime(); if (d >= s && d < e) dailyFixedCost += Math.round(buff.buyPrice / buff.duration); }); const dailyNetProfit = dailyOperatingProfit - dailyFixedCost; return (<div key={date} className="list-panel p-4 rounded-3xl border border-zinc-700 bg-zinc-900/50 relative overflow-hidden"><div className="flex justify-between items-center mb-2 border-b border-zinc-800 pb-2"><span className="text-xs font-bold text-zinc-300">{date}</span><span className={`text-[9px] font-black px-2 py-0.5 rounded ${dailyNetProfit >= 0 ? 'bg-emerald-900/30 text-emerald-400' : 'bg-rose-900/30 text-rose-400'}`}>{dailyNetProfit >= 0 ? 'PROFIT' : 'LOSS'}</span></div><div className="grid grid-cols-3 gap-2 text-center"><div><p className="text-[8px] text-zinc-500 uppercase">Run Profit</p><p className="text-xs font-bold text-zinc-300">{formatMoney(dailyOperatingProfit)}</p></div><div><p className="text-[8px] text-zinc-500 uppercase">Fixed Cost</p><p className="text-xs font-bold text-rose-400">-{formatMoney(dailyFixedCost)}</p></div><div><p className="text-[8px] text-zinc-500 uppercase">Net Total</p><p className={`text-sm font-black ${dailyNetProfit>=0?'text-emerald-400':'text-rose-400'}`}>{formatMoney(dailyNetProfit)}</p></div></div></div>); })}</div>
@@ -538,7 +715,7 @@
             );
         }
 
-        function InventoryView({ db, uid, showToast, records, stock, stats }) {
+        function InventoryView({ db, uid, showToast, records, stock, stats, selectedCharId }) {
             const [items, setItems] = useState([]);
             const [activeBuffs, setActiveBuffs] = useState([]);
             const [selectedBox, setSelectedBox] = useState(null);
@@ -571,12 +748,28 @@
             }, [uid]);
 
             const handleUseBox = async (item) => {
+                // Check Active Buffs (Smart Scope)
                 if (item.itemId === 'premium_box' || item.itemId === 'kafra_box') {
-                    const isActive = activeBuffs.some(b => b.itemId === item.itemId && new Date(b.endDate) > new Date());
+                    const isActive = activeBuffs.some(b => {
+                        const isTimeValid = new Date(b.endDate) > new Date();
+                        if (!isTimeValid) return false;
+                        if (item.itemId === 'premium_box') return b.itemId === 'premium_box'; // Account wide check
+                        if (item.itemId === 'kafra_box') return b.itemId === 'kafra_box' && b.characterId === selectedCharId; // Char check
+                        return false;
+                    });
                     if (isActive) { showToast("Buff is already active!"); return; }
                 }
+
                 if (item.type === 'buff_box') {
-                    await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'inventory', item.uid), { ...item, status: 'active', activatedAt: new Date().toISOString() });
+                    const buffData = { 
+                        ...item, 
+                        status: 'active', 
+                        activatedAt: new Date().toISOString(),
+                        characterId: selectedCharId // Bind to current char
+                    };
+                    if (item.itemId === 'premium_box') buffData.isAccountWide = true; // Mark as Account Bound
+                    
+                    await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'inventory', item.uid), buffData);
                     showToast(`${item.name} Activated!`);
                 } else if (item.type === 'consumable_box') {
                     const currentQty = stock[item.subType]?.qty || 0;
@@ -603,12 +796,25 @@
                 showToast(`Sold! +${earnedDek} DEK`); setViewItem(null);
             };
             const handleUseSilvervineFromStock = async () => { 
+                // Silvervine Buff Logic (Account Wide per request)
                 const isActive = activeBuffs.some(b => b.itemId === 'silvervine_24h' && new Date(b.endDate) > new Date());
                 if (isActive) { alert("Active!"); setSvUseConfirm(null); return; }
                 if ((stock.silvervine?.qty || 0) < 2) { alert("Need 2 Silvervine!"); setSvUseConfirm(null); return; }
+                
                 const newStock = { ...stock, silvervine: { ...stock.silvervine, qty: stock.silvervine.qty - 2 } };
                 await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'config', 'stock'), newStock);
-                const buffData = { itemId: 'silvervine_24h', name: 'Silvervine Buff (24h)', type: 'buff_box', duration: 1, buyPrice: (stock.silvervine?.avgCost || 0) * 2, timestamp: Date.now(), activatedAt: new Date().toISOString(), status: 'active' };
+                
+                const buffData = { 
+                    itemId: 'silvervine_24h', 
+                    name: 'Silvervine Buff (24h)', 
+                    type: 'buff_box', 
+                    duration: 1, 
+                    buyPrice: (stock.silvervine?.avgCost || 0) * 2, 
+                    timestamp: Date.now(), 
+                    activatedAt: new Date().toISOString(), 
+                    status: 'active',
+                    isAccountWide: true // Requested to be ID wide
+                };
                 await addDoc(collection(db, 'artifacts', appId, 'users', uid, 'inventory'), buffData);
                 showToast("Activated!"); setSvUseConfirm(null);
             };
@@ -621,13 +827,14 @@
                 { id: 'silvervine', category: 'Etc', iconComp: <SmartIcon name="Silvervine" className="w-full h-full"/>, count: stock.silvervine?.qty || 0, name: 'SV (Stock)', isStockAction: true },
             ];
             
-            const hasPremium = activeBuffs.some(b => b.itemId === 'premium_box' && new Date(b.endDate) > new Date());
+            // Buff Visibility Logic in Inventory (Show if active for CURRENT char OR Account)
+            const hasPremium = activeBuffs.some(b => b.itemId === 'premium_box' && new Date(b.endDate) > new Date()); // Account wide
             if (hasPremium) { allItems.push({ id: 'premium_staff', category: 'Consumable', iconComp: <SmartIcon name="PremiumStaff" className="w-full h-full"/>, count: 1, name: 'Staff' }); }
+            
             items.forEach(i => { let cat = i.category || 'Consumable'; if (i.itemId.includes('card')) cat = 'Rare'; allItems.push({ id: i.uid, category: cat, iconComp: <SmartIcon name={SHOP_ITEMS.find(s=>s.id===i.itemId)?.icon} className="w-full h-full" />, count: 1, isBox: true, data: i, name: i.name, itemId: i.itemId }); });
             Object.keys(drops).forEach(key => { const def = DROP_TABLE.find(d => d.id === key); if (def) allItems.push({ id: key, category: def.category, iconComp: <SmartIcon name={def.icon} className="w-full h-full" />, count: drops[key], name: def.name }); });
             const filteredItems = activeTab === 'All' ? allItems : allItems.filter(i => i.category === activeTab);
             
-            // CORRECT GROUPING LOGIC using Item ID (itemId) not Document ID
             const groupedDisplayItems = useMemo(() => {
                 const map = new Map();
                 filteredItems.forEach(item => {
@@ -656,17 +863,30 @@
             );
         }
 
-        function DungeonView({ db, uid, stock, activeBuffs, onSuccess, records, prices, stats }) {
+        function DungeonView({ db, uid, stock, activeBuffs, onSuccess, records, prices, stats, selectedCharId, setSelectedCharId, characters }) {
             const [form, setForm] = useState({ runMode: 'ogh', normalGumUsed: 0, heGumUsed: 0, useSilvervine: false, purpleStoneCount: 0, contMagicCount: 0, trashAmount: '', minutesUsed: 60, otherCosts: [], notes: '' });
             const [rewardData, setRewardData] = useState(null);
             const [showHeGum, setShowHeGum] = useState(false);
             
             const hasPremium = activeBuffs.some(b => b.itemId === 'premium_box' && new Date(b.endDate) > new Date());
-            const hasKafra = activeBuffs.some(b => b.itemId === 'kafra_box' && new Date(b.endDate) > new Date());
+            const hasKafra = activeBuffs.some(b => b.itemId === 'kafra_box' && b.characterId === selectedCharId && new Date(b.endDate) > new Date()); // Check Char ID
             const hasSilvervineBuff = activeBuffs.some(b => b.itemId === 'silvervine_24h' && new Date(b.endDate) > new Date());
             const hasGumStock = (stock.gum?.qty || 0) > 0;
             const hasHeGumStock = (stock.he_gum?.qty || 0) > 0; 
             
+            // Check Daily Limit (Reset @ 4AM)
+            const gameDate = getGameDate();
+            const hasRunToday = records.some(r => r.characterId === selectedCharId && r.date === gameDate);
+
+            // Filter Available Characters (Who haven't run today)
+            const availableChars = useMemo(() => {
+                if (!characters) return [];
+                return characters.filter(c => 
+                    c.id !== selectedCharId && 
+                    !records.some(r => r.date === gameDate && r.characterId === c.id)
+                );
+            }, [characters, records, gameDate, selectedCharId]);
+
             const addCost = () => setForm(p => ({...p, otherCosts: [...p.otherCosts, {id: Date.now(), name: '', amount: ''}]}));
             const updateCost = (id, field, val) => { if (field === 'amount') val = val.replace(/[^0-9]/g, ''); setForm(p => ({...p, otherCosts: p.otherCosts.map(c => c.id === id ? {...c, [field]: val} : c)})); };
             const removeCost = (id) => setForm(p => ({...p, otherCosts: p.otherCosts.filter(c => c.id !== id)}));
@@ -684,16 +904,23 @@
                 let newStock = { ...stock };
                 if (form.normalGumUsed > 0) newStock.gum.qty = Math.max(0, newStock.gum.qty - form.normalGumUsed);
                 if (form.heGumUsed > 0) { if(!newStock.he_gum) newStock.he_gum = { qty: 0, cost: 0 }; newStock.he_gum.qty = Math.max(0, newStock.he_gum.qty - form.heGumUsed); }
-                await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'config', 'stock'), newStock);
                 
                 const profit = (parseInt(form.trashAmount) || 0) - consumablesCost;
                 const earnedDek = Math.max(0, Math.floor(profit / 1000));
                 
                 const drops = simulateDrops();
-                // Ensure runMode is lowercase for consistency in DB, but we use it correctly in UI
-                const record = { ...form, runMode: form.runMode.toLowerCase(), consumablesCost, profit, drops, timestamp: Date.now(), date: new Date().toISOString().split('T')[0], costBreakdown };
-                
-                await addDoc(collection(db, 'artifacts', appId, 'users', uid, 'records'), record);
+                // Save Record with Character ID and Game Date
+                const record = { 
+                    ...form, 
+                    runMode: form.runMode.toLowerCase(), 
+                    consumablesCost, 
+                    profit, 
+                    drops, 
+                    timestamp: Date.now(), 
+                    date: getGameDate(), // Use 4AM cutoff date
+                    costBreakdown,
+                    characterId: selectedCharId // TAG RECORD
+                };
                 
                 const newStats = { ...stats };
                 newStats.coins = (newStats.coins || 0) + earnedDek;
@@ -701,12 +928,12 @@
                 const expGain = form.minutesUsed * (form.runMode === 'aogh' ? 500 : 300);
                 newStats.baseExp = (newStats.baseExp || 0) + expGain;
                 while (newStats.baseExp >= getExpReq(newStats.baseLv)) { newStats.baseExp -= getExpReq(newStats.baseLv); newStats.baseLv += 1; }
-                await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'gamification', 'stats'), newStats);
-                
-                // Pass UPPERCASE runMode for Display
+
+                // --- FIX: Set UI State FIRST (Optimistic Update) ---
+                // This prevents the screen from flashing "Daily Run Completed" before showing the reward popup.
                 setRewardData({ 
                     ...form,
-                    runMode: form.runMode.toUpperCase(), // Force Uppercase for Display
+                    runMode: form.runMode.toUpperCase(), 
                     drops, 
                     dek: earnedDek, 
                     expGain, 
@@ -716,13 +943,45 @@
                     beforeLv: prevStats.baseLv, 
                     afterLv: newStats.baseLv 
                 });
+
+                // --- Then write to DB ---
+                await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'config', 'stock'), newStock);
+                await addDoc(collection(db, 'artifacts', appId, 'users', uid, 'records'), record);
+                await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'gamification', 'stats'), newStats);
             };
 
             const closeReward = () => { setRewardData(null); /* No Toast */ setForm({ runMode: 'ogh', normalGumUsed: 0, heGumUsed: 0, useSilvervine: false, purpleStoneCount: 0, contMagicCount: 0, trashAmount: '', minutesUsed: 60, otherCosts: [], notes: '' }); };
             const isFormValid = form.trashAmount && parseInt(form.trashAmount) > 0;
-            
-            // Share Modal State
             const [shareData, setShareData] = useState(null);
+
+            // FIX: Only show "Run Completed" screen if we are NOT showing the reward popup
+            // This logic is crucial: if rewardData exists, it means we just finished a run, so show the reward regardless of hasRunToday status.
+            if (hasRunToday && !rewardData) {
+                return (
+                    <div className="p-6 animate-fade-in view-content flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                        <div className="w-24 h-24 bg-zinc-800 rounded-full flex items-center justify-center text-4xl shadow-xl border border-zinc-700">✅</div>
+                        <h3 className="text-xl font-black text-white">Daily Run Completed</h3>
+                        <p className="text-sm text-zinc-500">Character has already finished OGH for today.<br/>Reset at 04:00 AM</p>
+                        
+                        {availableChars.length > 0 && (
+                            <div className="mt-8 w-full max-w-xs">
+                                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Switch to available character</p>
+                                <div className="space-y-2">
+                                    {availableChars.map(c => (
+                                        <button key={c.id} onClick={() => setSelectedCharId(c.id)} className="w-full bg-zinc-900 hover:bg-zinc-800 p-3 rounded-xl border border-zinc-800 flex items-center justify-between group transition-all">
+                                            <div className="text-left">
+                                                <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">{c.name}</p>
+                                                <p className="text-[10px] text-zinc-500 uppercase">{c.job}</p>
+                                            </div>
+                                            <Icon name="Check" size={16} className="text-zinc-600 group-hover:text-emerald-500"/>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            }
 
             return (
                 <div className="p-6 animate-fade-in view-content space-y-6">
@@ -804,7 +1063,7 @@
         }
 
         // --- Other Views ---
-        function HistoryView({ records, db, uid, showToast, prices, activeBuffs }) {
+        function HistoryView({ records, db, uid, showToast, prices, activeBuffs, characters }) {
             const [expandedId, setExpandedId] = useState(null);
             const [showRankInfo, setShowRankInfo] = useState(false);
             const [shareData, setShareData] = useState(null); // Share State
@@ -856,6 +1115,9 @@
                                         if (!r.isSaleRecord) {
                                             rankInfo = getRankInfo(profitValue, avgProfit);
                                         }
+                                        
+                                        // Find Char Name
+                                        const charName = characters && characters.find(c => c.id === r.characterId)?.name;
 
                                         if (r.isSaleRecord) {
                                             return (
@@ -869,7 +1131,7 @@
                                         return (
                                             <div key={r.id} className={`list-panel rounded-[1.5rem] overflow-hidden transition-all border-zinc-800 ${expandedId === r.id ? 'bg-zinc-800 ring-1 ring-zinc-600' : 'bg-zinc-900'}`}>
                                                 <div onClick={() => setExpandedId(expandedId === r.id ? null : r.id)} className="p-4 flex justify-between items-center cursor-pointer">
-                                                    <div className="flex gap-3"><div className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden border border-white/5 relative bg-black`}><SmartIcon name={r.runMode === 'aogh' ? 'AOGH_BOSS' : 'OGH_BOSS'} className="w-full h-full object-cover" /></div><div><p className="font-bold text-sm text-zinc-200">{r.runMode?.toUpperCase() || 'OGH'}</p><p className="text-[10px] opacity-40 uppercase font-bold tracking-widest text-zinc-500 flex items-center gap-1"><Icon name="Clock" size={10}/> {r.minutesUsed}m</p></div></div>
+                                                    <div className="flex gap-3"><div className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden border border-white/5 relative bg-black`}><SmartIcon name={r.runMode === 'aogh' ? 'AOGH_BOSS' : 'OGH_BOSS'} className="w-full h-full object-cover" /></div><div><p className="font-bold text-sm text-zinc-200">{r.runMode?.toUpperCase() || 'OGH'} <span className="text-[10px] text-zinc-500 font-normal ml-1">by {charName || 'Unknown'}</span></p><p className="text-[10px] opacity-40 uppercase font-bold tracking-widest text-zinc-500 flex items-center gap-1"><Icon name="Clock" size={10}/> {r.minutesUsed}m</p></div></div>
                                                     <div className="text-right flex flex-col items-end"><p className={`font-black text-sm ${profitValue >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{formatMoney(profitValue)}</p><div className="flex items-center gap-1 mt-1"><Icon name="Clover" size={12} className={rankInfo.css}/><span className={`text-[10px] font-black ${rankInfo.css}`}>{rankInfo.text} : {rankInfo.rank}</span></div></div>
                                                 </div>
                                                 {expandedId === r.id && (
@@ -890,9 +1152,9 @@
                                                             {/* Memo */}
                                                             {r.notes && (<div className="col-span-2 bg-yellow-900/10 p-3 rounded-xl border border-yellow-700/30 relative mt-2"><div className="absolute -top-2.5 left-3 bg-zinc-900 px-2 py-0.5 text-[9px] text-yellow-500 font-bold border border-yellow-700/50 rounded-full flex items-center gap-1 shadow-sm"><Icon name="FileText" size={8}/> NOTE</div><p className="text-[11px] italic text-zinc-300 mt-1">"{r.notes}"</p></div>)}
                                                         </div>
-                                                        <div className="flex gap-2 justify-end">
-                                                            <button onClick={() => setShareData({...r, runMode: r.runMode === 'aogh' ? 'AOGH' : 'OGH', rank: rankInfo.rank, rankCss: rankInfo.css})} className="p-2 bg-zinc-800 rounded-lg text-zinc-400 hover:text-white"><Icon name="Share" size={14}/></button>
-                                                            <DeleteButton onDelete={() => deleteDoc(doc(db, 'artifacts', appId, 'users', uid, 'records', r.id))} />
+                                                        <div className="flex gap-2 justify-end mt-2">
+                                                            <button onClick={() => setShareData({...r, runMode: r.runMode === 'aogh' ? 'AOGH' : 'OGH', rank: rankInfo.rank, rankCss: rankInfo.css})} className="h-8 w-8 bg-zinc-800 rounded-lg text-zinc-400 hover:text-white flex items-center justify-center"><Icon name="Share" size={14}/></button>
+                                                            <DeleteButton onDelete={() => deleteDoc(doc(db, 'artifacts', appId, 'users', uid, 'records', r.id))} className="w-24" />
                                                         </div>
                                                     </div>
                                                 )}
@@ -922,6 +1184,10 @@
             const [toast, setToast] = useState(null);
             const [db, setDb] = useState(null);
             const [stock, setStock] = useState({});
+            
+            // Character System State
+            const [characters, setCharacters] = useState([]);
+            const [selectedCharId, setSelectedCharId] = useState(localStorage.getItem('ogh_selected_char_id') || 'default');
 
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'oghza-tracker';
             const showToast = (message) => { setToast(message); setTimeout(() => setToast(null), 3000); };
@@ -936,6 +1202,11 @@
                 if (authUser) setTargetUid(authUser.uid); 
                 showToast("Restored Default ID"); 
             };
+            
+            // Persist Selected Character
+            useEffect(() => {
+                if(selectedCharId) localStorage.setItem('ogh_selected_char_id', selectedCharId);
+            }, [selectedCharId]);
 
             useEffect(() => {
                 const init = async () => {
@@ -954,6 +1225,22 @@
                 const unsubRecords = onSnapshot(query(collection(db, 'artifacts', appId, 'users', targetUid, 'records'), orderBy('timestamp', 'desc')), (snap) => setRecords(snap.docs.map(d => ({ ...d.data(), id: d.id }))));
                 const unsubPrices = onSnapshot(doc(db, 'artifacts', appId, 'users', targetUid, 'config', 'prices'), d => { if (d.exists()) setPrices(d.data()); });
                 const unsubStats = onSnapshot(doc(db, 'artifacts', appId, 'users', targetUid, 'gamification', 'stats'), d => { if (d.exists()) setStats(d.data()); else setStats(INITIAL_STATS); });
+                const unsubStock = onSnapshot(doc(db, 'artifacts', appId, 'users', targetUid, 'config', 'stock'), d => { if (d.exists()) setStock(d.data()); });
+                
+                // Fetch Characters
+                const unsubChars = onSnapshot(doc(db, 'artifacts', appId, 'users', targetUid, 'config', 'characters'), d => { 
+                    if (d.exists()) {
+                        const list = d.data().list || [];
+                        setCharacters(list);
+                        // Auto select first char if current selection is invalid
+                        if (list.length > 0 && (!selectedCharId || selectedCharId === 'default' || !list.find(c => c.id === selectedCharId))) {
+                            setSelectedCharId(list[0].id);
+                        }
+                    } else {
+                        setCharacters([]);
+                    }
+                });
+
                 const qInv = query(collection(db, 'artifacts', appId, 'users', targetUid, 'inventory'));
                 const unsubBuffs = onSnapshot(qInv, snap => {
                     const buffs = snap.docs.map(d => d.data()).filter(i => i.status === 'active').map(b => {
@@ -965,21 +1252,22 @@
                     });
                     setActiveBuffs(buffs);
                 });
-                const unsubStock = onSnapshot(doc(db, 'artifacts', appId, 'users', targetUid, 'config', 'stock'), d => { if (d.exists()) setStock(d.data()); });
-                return () => { unsubRecords(); unsubPrices(); unsubStats(); unsubBuffs(); unsubStock(); };
+                
+                return () => { unsubRecords(); unsubPrices(); unsubStats(); unsubBuffs(); unsubStock(); unsubChars(); };
             }, [db, targetUid]);
 
             if (loading) return <div className="h-screen flex items-center justify-center bg-[#0f172a] text-purple-500">Loading...</div>;
 
             return (
                 <div className="max-w-md mx-auto relative min-h-screen">
-                    <CurrencyHeader stats={stats} activeBuffs={activeBuffs} />
+                    <CurrencyHeader stats={stats} activeBuffs={activeBuffs} selectedCharId={selectedCharId} />
                     {toast && <Toast message={toast} />}
-                    {activeTab === 'home' && <HomeView records={records} stats={stats} goToTab={setActiveTab} activeBuffs={activeBuffs} />}
-                    {activeTab === 'add' && <DungeonView db={db} uid={targetUid} stock={stock} activeBuffs={activeBuffs} records={records} prices={prices} stats={stats} onSuccess={() => {}} />}
-                    {activeTab === 'inventory' && <InventoryView db={db} uid={targetUid} showToast={showToast} records={records} stock={stock} stats={stats} />}
+                    {activeTab === 'home' && <HomeView records={records} stats={stats} goToTab={setActiveTab} activeBuffs={activeBuffs} stock={stock} characters={characters} selectedCharId={selectedCharId} setSelectedCharId={setSelectedCharId} />}
+                    {activeTab === 'add' && <DungeonView db={db} uid={targetUid} stock={stock} activeBuffs={activeBuffs} records={records} prices={prices} stats={stats} selectedCharId={selectedCharId} setSelectedCharId={setSelectedCharId} characters={characters} onSuccess={() => {}} />}
+                    {activeTab === 'inventory' && <InventoryView db={db} uid={targetUid} showToast={showToast} records={records} stock={stock} stats={stats} selectedCharId={selectedCharId} />}
                     {activeTab === 'shop' && <ShopView db={db} uid={targetUid} showToast={showToast}/>}
-                    {activeTab === 'history' && <HistoryView records={records} db={db} uid={targetUid} showToast={showToast} prices={prices} activeBuffs={activeBuffs} />}
+                    {activeTab === 'history' && <HistoryView records={records} db={db} uid={targetUid} showToast={showToast} prices={prices} activeBuffs={activeBuffs} characters={characters} />}
+                    {activeTab === 'profile' && <ProfileView stats={stats} uid={targetUid} onResetUid={handleResetUid} onSetUid={handleSetUid} prices={prices} setPrices={setPrices} db={db} showToast={showToast} onBack={() => setActiveTab('home')} characters={characters} setCharacters={setCharacters} />}
                     
                     {activeTab !== 'profile' && (
                         <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass-panel border-t border-white/5 nav-bar-padding pt-2 px-2 flex justify-between items-end z-40 rounded-t-[2rem]">
