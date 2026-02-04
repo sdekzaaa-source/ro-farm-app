@@ -1,239 +1,227 @@
-import React, { useState } from 'react';
-import { 
-  Plane, 
-  Car, 
-  Utensils, 
-  Coffee, 
-  Camera, 
-  Home, 
-  MapPin, 
-  Plus, 
-  Trash2, 
-  Moon, 
-  Sun, 
-  Leaf, 
-  Fuel, 
-  Save,
-  Navigation,
-  ChevronRight
-} from 'lucide-react';
-
-const App = () => {
-  const [theme, setTheme] = useState('muji');
-  const [gasTotal, setGasTotal] = useState(0);
-  const [showGasInput, setShowGasInput] = useState(false);
-  const [tempGas, setTempGas] = useState('');
-  const [flightCost, setFlightCost] = useState(0);
-  const [isEditingFlight, setIsEditingFlight] = useState(false);
-
-  const handleAddGas = () => {
-    if (tempGas && !isNaN(tempGas)) {
-      setGasTotal(prev => prev + parseFloat(tempGas));
-      setTempGas('');
-      setShowGasInput(false);
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNX Trip 2026 v1.8.2</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js for Interactivity -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { transition: background-color 0.5s, color 0.5s; }
+        .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    </style>
+</head>
+<body x-data="{ 
+    theme: 'muji', 
+    gasTotal: 0, 
+    showGasInput: false, 
+    tempGas: '', 
+    flightCost: 0, 
+    isEditingFlight: false,
+    addGas() {
+        if (this.tempGas && !isNaN(this.tempGas)) {
+            this.gasTotal += parseFloat(this.tempGas);
+            this.tempGas = '';
+            this.showGasInput = false;
+        }
     }
-  };
+}" 
+:class="{
+    'bg-slate-50 text-slate-900': theme === 'light',
+    'bg-slate-950 text-slate-100': theme === 'dark',
+    'bg-[#F4EBE1] text-[#4A4238]': theme === 'muji'
+}" class="min-h-screen pb-24">
 
-  const itinerary = [
-    {
-      date: '4 Feb 2026',
-      title: 'Day 1: มุ่งสู่ม่อนแจ่ม (อัปเดตใหม่)',
-      items: [
-        { time: '11:10', activity: 'ถึงสนามบินเชียงใหม่ (CNX)', icon: <Plane className="text-blue-500" />, location: 'Terminal 1', link: 'https://maps.google.com/?q=Chiang+Mai+International+Airport' },
-        { time: '11:45', activity: 'รับรถเช่าที่จองไว้', icon: <Car className="text-slate-500" />, location: 'Counter Car Rental', link: '' },
-        { time: '12:15', activity: 'ทานมื้อเที่ยง (เน้นเร็ว)', icon: <Utensils className="text-orange-500" />, location: 'ร้านอาหารใกล้สนามบิน', link: 'https://maps.google.com/?q=Restaurants+near+CNX' },
-        { time: '13:30', activity: 'Cafe Hopping (แม่ริม)', icon: <Coffee className="text-yellow-700" />, location: 'Chic 39 / WTF Coffee Camp', link: 'https://maps.google.com/?q=Chic+39+Chiang+Mai' },
-        { time: '15:00', activity: 'เช็คอินที่พัก', icon: <Home className="text-green-600" />, location: 'ม่อนลมหนาว โฮมสเตย์', link: 'https://maps.google.com/?q=ม่อนลมหนาว+โฮมสเตย์' },
-        { time: '16:30', activity: 'ชมวิวพระอาทิตย์ตก', icon: <Camera className="text-purple-500" />, location: 'ยิ่งยงสวนดอกไม้', link: 'https://maps.google.com/?q=ยิ่งยงสวนดอกไม้' },
-        { time: '18:30', activity: 'มื้อค่ำ: หมูกระทะ', icon: <Utensils className="text-red-500" />, location: 'หน้าห้องพัก (ม่อนลมหนาว)', link: '' },
-      ]
-    }
-  ];
-
-  const themes = {
-    light: 'bg-slate-50 text-slate-900',
-    dark: 'bg-slate-900 text-slate-100',
-    muji: 'bg-[#F4EBE1] text-[#4A4238]'
-  };
-
-  const cards = {
-    light: 'bg-white shadow-sm border border-slate-200',
-    dark: 'bg-slate-800 border border-slate-700',
-    muji: 'bg-[#FFF9F3] border border-[#DED0B6]'
-  };
-
-  return (
-    <div className={`min-h-screen transition-colors duration-500 font-sans pb-20 ${themes[theme]}`}>
-      {/* Top Navigation */}
-      <div className="max-w-md mx-auto p-6 flex justify-between items-center sticky top-0 z-10 backdrop-blur-md bg-opacity-80">
+    <!-- Header -->
+    <header class="max-w-md mx-auto p-6 flex justify-between items-center sticky top-0 z-20 backdrop-blur-md bg-opacity-80">
         <div>
-          <h1 className="text-2xl font-black tracking-tight">CNX 2026</h1>
-          <p className="text-xs font-bold opacity-50 uppercase tracking-widest">Version 1.8.2</p>
+            <h1 class="text-2xl font-black tracking-tight">CNX 2026</h1>
+            <div class="flex items-center gap-1.5 opacity-50">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <p class="text-[10px] font-bold uppercase tracking-widest">v1.8.2 Live Plan</p>
+            </div>
         </div>
-        <div className="flex bg-white/20 p-1 rounded-full backdrop-blur-sm border border-white/30 shadow-inner">
-          <button onClick={() => setTheme('light')} className={`p-2 rounded-full transition-all ${theme === 'light' ? 'bg-white text-yellow-500 shadow' : 'text-slate-400'}`}><Sun size={16}/></button>
-          <button onClick={() => setTheme('dark')} className={`p-2 rounded-full transition-all ${theme === 'dark' ? 'bg-slate-700 text-yellow-400 shadow' : 'text-slate-400'}`}><Moon size={16}/></button>
-          <button onClick={() => setTheme('muji')} className={`p-2 rounded-full transition-all ${theme === 'muji' ? 'bg-[#DED0B6] text-[#4A4238] shadow' : 'text-[#A89F91]'}`}><Leaf size={16}/></button>
-        </div>
-      </div>
-
-      <div className="max-w-md mx-auto px-6 space-y-6">
         
-        {/* Urgent Update Notification */}
-        <div className="bg-orange-500 text-white p-4 rounded-3xl shadow-lg shadow-orange-500/20 flex items-center gap-4">
-          <div className="bg-white/20 p-2 rounded-2xl">
-            <Plane className="animate-pulse" />
-          </div>
-          <div className="text-sm">
-            <p className="font-bold">Flight Missed Recovery Plan</p>
-            <p className="opacity-90">แผนใหม่เริ่ม 11:10 น. ลุยได้เลยครับ!</p>
-          </div>
-        </div>
-
-        {/* Quick Fuel Log Widget */}
-        <div className={`${cards[theme]} p-5 rounded-[2rem] shadow-sm overflow-hidden relative`}>
-          {!showGasInput ? (
-            <button 
-              onClick={() => setShowGasInput(true)}
-              className="w-full flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
-                  <Fuel size={24}/>
-                </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold opacity-60 uppercase">Quick Log</p>
-                  <p className="font-bold">บันทึกค่าน้ำมันด่วน</p>
-                </div>
-              </div>
-              <ChevronRight size={20} className="opacity-30" />
+        <!-- Theme Switcher -->
+        <div class="flex bg-white/10 p-1 rounded-full border border-white/20 shadow-lg backdrop-blur-sm">
+            <button @click="theme = 'light'" :class="theme === 'light' ? 'bg-white text-yellow-500 shadow-md' : 'text-slate-400'" class="p-2 rounded-full transition-all">
+                <i data-lucide="sun" class="w-4 h-4"></i>
             </button>
-          ) : (
-            <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
-              <div className="flex justify-between items-center">
-                <p className="text-sm font-bold flex items-center gap-2 text-blue-500">
-                  <Fuel size={16}/> ระบุจำนวนเงิน
-                </p>
-                <button onClick={() => setShowGasInput(false)} className="text-xs opacity-50">ยกเลิก</button>
-              </div>
-              <div className="flex gap-2">
-                <input 
-                  autoFocus
-                  type="number" 
-                  value={tempGas}
-                  onChange={(e) => setTempGas(e.target.value)}
-                  placeholder="เช่น 500"
-                  className="flex-1 p-3 rounded-2xl bg-black/5 border-none focus:ring-2 focus:ring-blue-400 text-lg font-mono"
-                />
-                <button 
-                  onClick={handleAddGas}
-                  className="px-6 bg-blue-500 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 active:scale-95 transition-all"
-                >
-                  <Save size={20}/>
-                </button>
-              </div>
-            </div>
-          )}
+            <button @click="theme = 'dark'" :class="theme === 'dark' ? 'bg-slate-700 text-yellow-400 shadow-md' : 'text-slate-400'" class="p-2 rounded-full transition-all">
+                <i data-lucide="moon" class="w-4 h-4"></i>
+            </button>
+            <button @click="theme = 'muji'" :class="theme === 'muji' ? 'bg-[#DED0B6] text-[#4A4238] shadow-md' : 'text-[#A89F91]'" class="p-2 rounded-full transition-all">
+                <i data-lucide="leaf" class="w-4 h-4"></i>
+            </button>
         </div>
+    </header>
 
-        {/* Itinerary Timeline */}
-        <div className="space-y-6">
-          {itinerary.map((day, idx) => (
-            <div key={idx} className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-black flex items-center gap-2">
-                  <MapPin size={22} className="text-red-500"/> {day.title}
-                </h2>
-                <span className="text-xs font-bold px-3 py-1 bg-black/5 rounded-full opacity-60">{day.date}</span>
-              </div>
-              
-              <div className="relative ml-4 space-y-6 border-l-2 border-dashed border-black/10 pl-8 pb-4">
-                {day.items.map((item, i) => (
-                  <div key={i} className="relative group">
-                    {/* Dot on line */}
-                    <div className={`absolute -left-[41px] top-2 w-4 h-4 rounded-full border-4 border-[#F4EBE1] ${theme === 'muji' ? 'bg-[#4A4238]' : 'bg-slate-400'}`}></div>
-                    
-                    <div className={`${cards[theme]} p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98]`}>
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] font-black opacity-40 uppercase tracking-tighter bg-black/5 px-2 py-0.5 rounded text-blue-600">
-                          {item.time}
-                        </span>
-                        {item.link && (
-                          <a href={item.link} target="_blank" rel="noreferrer" className="p-1 rounded bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white transition-colors">
-                            <Navigation size={14}/>
-                          </a>
-                        )}
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="mt-1 opacity-80">{item.icon}</div>
-                        <div>
-                          <h3 className="font-bold leading-tight">{item.activity}</h3>
-                          <p className="text-xs opacity-60 mt-0.5">{item.location}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+    <main class="max-w-md mx-auto px-6 space-y-6">
+        
+        <!-- Status Alert -->
+        <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-5 rounded-[2rem] shadow-xl shadow-orange-500/20 flex items-center gap-4 border border-white/20">
+            <div class="bg-white/20 p-3 rounded-2xl backdrop-blur-md">
+                <i data-lucide="plane" class="w-6 h-6 animate-bounce"></i>
             </div>
-          ))}
-        </div>
-
-        {/* Financial Summary */}
-        <div className={`${cards[theme]} p-6 rounded-[2.5rem] shadow-xl relative overflow-hidden`}>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16"></div>
-          <h3 className="font-black text-lg mb-4 flex items-center gap-2">
-             Summary Expenses
-          </h3>
-          
-          <div className="space-y-3">
-            <div className="flex justify-between items-center text-sm p-3 bg-black/5 rounded-2xl">
-              <span className="flex items-center gap-2 opacity-70"><Fuel size={16}/> ค่าน้ำมันรวม</span>
-              <span className="font-mono font-bold text-blue-600 text-lg">฿{gasTotal.toLocaleString()}</span>
-            </div>
-
-            <div className="flex justify-between items-center text-sm p-3 bg-red-500/5 rounded-2xl text-red-600 border border-red-500/10">
-              <span className="flex items-center gap-2 font-bold"><Plane size={16}/> ตั๋วเครื่องบินใหม่</span>
-              {isEditingFlight ? (
-                <div className="flex gap-2">
-                  <input 
-                    type="number"
-                    className="w-20 p-1 rounded border-b border-red-500 bg-transparent text-right font-mono"
-                    onChange={(e) => setFlightCost(parseFloat(e.target.value) || 0)}
-                    onBlur={() => setIsEditingFlight(false)}
-                    autoFocus
-                  />
-                </div>
-              ) : (
-                <span className="font-mono font-bold cursor-pointer" onClick={() => setIsEditingFlight(true)}>
-                  ฿{flightCost.toLocaleString() || '?,???' }
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-black/5 flex justify-between items-end">
             <div>
-              <p className="text-[10px] font-bold opacity-40 uppercase">Total Spent Today</p>
-              <p className="text-2xl font-black">฿{(gasTotal + flightCost).toLocaleString()}</p>
+                <p class="font-bold text-sm">Trip Recovery Active</p>
+                <p class="text-xs opacity-90">Landing 11:10 น. เริ่มลุยจากสนามบิน!</p>
             </div>
-            <div className="text-[10px] bg-green-500 text-white px-2 py-1 rounded-full font-bold uppercase animate-pulse">
-              Live Update
-            </div>
-          </div>
         </div>
 
-      </div>
+        <!-- Quick Fuel Logging -->
+        <section :class="{
+            'bg-white shadow-sm border border-slate-200': theme === 'light',
+            'bg-slate-900 border border-slate-800': theme === 'dark',
+            'bg-[#FFF9F3] border border-[#DED0B6]': theme === 'muji'
+        }" class="p-5 rounded-[2.5rem] shadow-sm relative overflow-hidden transition-all duration-300">
+            <div x-show="!showGasInput">
+                <button @click="showGasInput = true" class="w-full flex items-center justify-between group py-1">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-blue-500/10 text-blue-600 rounded-2xl group-hover:scale-105 transition-transform duration-300">
+                            <i data-lucide="fuel" class="w-6 h-6"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-[10px] font-black opacity-40 uppercase tracking-widest">Expense Tracker</p>
+                            <p class="font-black text-lg">บันทึกค่าน้ำมันด่วน</p>
+                        </div>
+                    </div>
+                    <div class="bg-blue-500/10 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i data-lucide="plus" class="w-5 h-5 text-blue-500"></i>
+                    </div>
+                </button>
+            </div>
+            <div x-show="showGasInput" x-cloak class="space-y-4 py-2">
+                <div class="flex justify-between items-center">
+                    <p class="text-xs font-black uppercase opacity-50 flex items-center gap-2">
+                        <i data-lucide="trending-up" class="w-3 h-3"></i> ระบุจำนวนเงิน (บาท)
+                    </p>
+                    <button @click="showGasInput = false" class="text-[10px] font-bold text-red-400 bg-red-400/10 px-3 py-1 rounded-full">CANCEL</button>
+                </div>
+                <div class="flex gap-2">
+                    <input type="number" x-model="tempGas" placeholder="0.00" class="flex-1 p-4 rounded-2xl bg-black/5 border-none focus:ring-2 focus:ring-blue-400 text-2xl font-mono font-bold text-black">
+                    <button @click="addGas()" class="px-6 bg-blue-600 text-white rounded-2xl font-black shadow-lg shadow-blue-600/30 active:scale-95 transition-all">
+                        <i data-lucide="save" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
 
-      {/* Bottom Floating Nav Mockup */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-xs flex justify-around items-center p-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-full border border-white/20 shadow-2xl z-50">
-        <div className="p-2 text-blue-500"><MapPin size={24}/></div>
-        <div className="p-2 opacity-30"><Plus size={24}/></div>
-        <div className="p-2 opacity-30"><Trash2 size={24}/></div>
-      </div>
-    </div>
-  );
-};
+        <!-- Timeline -->
+        <section class="space-y-6">
+            <div class="flex items-end justify-between px-2">
+                <h2 class="text-2xl font-black flex items-center gap-3 italic">
+                    <i data-lucide="map-pin" class="w-6 h-6 text-red-500 fill-red-500/20"></i> Day 1: มุ่งสู่ม่อนแจ่ม
+                </h2>
+                <span class="text-[10px] font-black px-4 py-1.5 bg-black/5 rounded-full opacity-40 uppercase tracking-widest">4 Feb 2026</span>
+            </div>
+            
+            <div class="relative ml-6 space-y-8 border-l-2 border-dashed border-black/10 pl-8 pb-4">
+                <!-- Item 1 -->
+                <div class="relative">
+                    <div class="absolute -left-[42px] top-3 w-5 h-5 rounded-full border-4" :class="theme === 'muji' ? 'bg-[#4A4238] border-[#F4EBE1]' : 'bg-slate-400 border-white'"></div>
+                    <div :class="theme === 'light' ? 'bg-white' : (theme === 'dark' ? 'bg-slate-900' : 'bg-[#FFF9F3]')" class="p-5 rounded-3xl border border-black/5 shadow-sm">
+                        <div class="flex justify-between mb-3">
+                            <span class="text-[10px] font-black px-2.5 py-1 bg-blue-500/10 text-blue-600 rounded-lg">11:10</span>
+                            <a href="https://maps.google.com/?q=Chiang+Mai+International+Airport" target="_blank" class="p-2 rounded-xl bg-slate-100 text-slate-400"><i data-lucide="navigation" class="w-4 h-4"></i></a>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <i data-lucide="plane" class="w-5 h-5 text-blue-500"></i>
+                            <div>
+                                <h3 class="font-black text-lg leading-tight">ถึงสนามบินเชียงใหม่ (CNX)</h3>
+                                <p class="text-xs opacity-50 font-medium mt-1">Terminal 1</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Item 2 -->
+                <div class="relative">
+                    <div class="absolute -left-[42px] top-3 w-5 h-5 rounded-full border-4" :class="theme === 'muji' ? 'bg-[#4A4238] border-[#F4EBE1]' : 'bg-slate-400 border-white'"></div>
+                    <div :class="theme === 'light' ? 'bg-white' : (theme === 'dark' ? 'bg-slate-900' : 'bg-[#FFF9F3]')" class="p-5 rounded-3xl border border-black/5 shadow-sm">
+                        <div class="flex justify-between mb-3">
+                            <span class="text-[10px] font-black px-2.5 py-1 bg-blue-500/10 text-blue-600 rounded-lg">11:45</span>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <i data-lucide="car" class="w-5 h-5 text-slate-500"></i>
+                            <div>
+                                <h3 class="font-black text-lg leading-tight">รับรถเช่าที่จองไว้</h3>
+                                <p class="text-xs opacity-50 font-medium mt-1">Counter Car Rental</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Item 3 -->
+                <div class="relative">
+                    <div class="absolute -left-[42px] top-3 w-5 h-5 rounded-full border-4" :class="theme === 'muji' ? 'bg-[#4A4238] border-[#F4EBE1]' : 'bg-slate-400 border-white'"></div>
+                    <div :class="theme === 'light' ? 'bg-white' : (theme === 'dark' ? 'bg-slate-900' : 'bg-[#FFF9F3]')" class="p-5 rounded-3xl border border-black/5 shadow-sm">
+                        <div class="flex justify-between mb-3">
+                            <span class="text-[10px] font-black px-2.5 py-1 bg-blue-500/10 text-blue-600 rounded-lg">12:15</span>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <i data-lucide="utensils" class="w-5 h-5 text-orange-500"></i>
+                            <div>
+                                <h3 class="font-black text-lg leading-tight">ทานมื้อเที่ยง (เน้นเร็ว)</h3>
+                                <p class="text-xs opacity-50 font-medium mt-1">ร้านอาหารใกล้สนามบิน</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- More items can be added here following same pattern -->
+            </div>
+        </section>
 
-export default App;
+        <!-- Financial Summary -->
+        <section :class="theme === 'light' ? 'bg-white' : (theme === 'dark' ? 'bg-slate-900 shadow-slate-900/50' : 'bg-[#FFF9F3]')" class="p-8 rounded-[3rem] shadow-2xl relative overflow-hidden border-2 border-black/5">
+            <h3 class="font-black text-xl mb-6 flex items-center gap-3">
+                <i data-lucide="trending-up" class="w-6 h-6 text-green-500"></i> Wallet Summary
+            </h3>
+            
+            <div class="space-y-4 font-mono">
+                <div class="flex justify-between items-center p-4 bg-black/5 rounded-[1.5rem]">
+                    <span class="flex items-center gap-3 text-sm font-bold opacity-60"><i data-lucide="fuel" class="w-4 h-4"></i> ค่าน้ำมันรวม</span>
+                    <span class="font-black text-xl text-blue-600">฿<span x-text="gasTotal.toLocaleString()"></span></span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-red-500/5 rounded-[1.5rem] text-red-600">
+                    <span class="flex items-center gap-3 text-sm font-bold"><i data-lucide="plane" class="w-4 h-4"></i> ตั๋วเครื่องบินใหม่</span>
+                    <span x-show="!isEditingFlight" @click="isEditingFlight = true" class="font-black text-xl cursor-pointer">฿<span x-text="flightCost > 0 ? flightCost.toLocaleString() : '?,???'"></span></span>
+                    <input x-show="isEditingFlight" type="number" x-model="flightCost" @blur="isEditingFlight = false" class="w-24 bg-transparent text-right font-black text-xl border-b border-red-500 outline-none">
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-black/5 flex justify-between items-end">
+                <div>
+                    <p class="text-[10px] font-black opacity-30 uppercase tracking-[0.2em]">Total Spending Today</p>
+                    <p class="text-4xl font-black tracking-tighter">
+                        <span class="text-xl mr-1 opacity-40">฿</span>
+                        <span x-text="(parseFloat(gasTotal) + parseFloat(flightCost || 0)).toLocaleString()"></span>
+                    </p>
+                </div>
+                <div class="bg-green-500 text-white text-[9px] font-black px-3 py-1.5 rounded-full animate-pulse uppercase tracking-widest">Live</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-xs flex justify-around items-center p-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 shadow-2xl z-50">
+        <button class="p-3 text-blue-600 bg-blue-500/10 rounded-2xl"><i data-lucide="map-pin" class="w-6 h-6"></i></button>
+        <button class="p-3 opacity-20"><i data-lucide="plus" class="w-6 h-6"></i></button>
+        <button class="p-3 opacity-20"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+    </nav>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+        
+        // Refresh icons when Alpine changes the DOM (optional but good for dynamic icons)
+        document.addEventListener('alpine:initialized', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
 
