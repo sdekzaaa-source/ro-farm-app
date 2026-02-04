@@ -15,7 +15,7 @@
         body {
             font-family: 'Noto Sans Thai', sans-serif;
             -webkit-tap-highlight-color: transparent;
-            background-color: #f8fafc;
+            background-color: #F4EBE1;
             overscroll-behavior-y: none;
         }
         .safe-top { padding-top: env(safe-area-inset-top); }
@@ -23,30 +23,23 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Animation for Dropdown */
-        .fade-enter {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        .fade-enter-active {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 300ms, transform 300ms;
+        /* Custom Tab Animation */
+        .tab-indicator {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
 </head>
 <body>
-    <div id="root" class="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400 font-bold safe-top safe-bottom">
-        <div class="text-center animate-pulse">Loading CNX Trip...</div>
-    </div>
+    <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useMemo } = React;
 
-        // --- ICONS ---
-        const Icon = ({ children, className, size = 24, onClick }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} onClick={onClick}>{children}</svg>
+        // --- ICONS (SVG) ---
+        const Icon = ({ children, className, size = 24, onClick, style }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} onClick={onClick} style={style}>{children}</svg>
         );
+        
         const Icons = {
             Plane: (p) => <Icon {...p}><path d="M2 22h20"/><path d="M22 2 2 22"/><path d="M2 2 22 22" opacity="0"/><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 4 6 3.2-2 2-4-1.5L1 16l7.4 1.6c.7.1 1.4-.1 1.9-.4l4.1-3.2 2.4 4.3c.3.4.7.7 1.1.8l.8.2.1-1.1z"/></Icon>,
             Car: (p) => <Icon {...p}><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></Icon>,
@@ -57,25 +50,24 @@
             MapPin: (p) => <Icon {...p}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></Icon>,
             Plus: (p) => <Icon {...p}><path d="M5 12h14"/><path d="M12 5v14"/></Icon>,
             Trash2: (p) => <Icon {...p}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></Icon>,
-            Moon: (p) => <Icon {...p}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></Icon>,
-            Sun: (p) => <Icon {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></Icon>,
             Leaf: (p) => <Icon {...p}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 6.5-2 11a7 7 0 0 1-6 7z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></Icon>,
             Fuel: (p) => <Icon {...p}><line x1="3" x2="15" y1="22" y2="22"/><line x1="4" x2="14" y1="9" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></Icon>,
             Save: (p) => <Icon {...p}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></Icon>,
             Navigation: (p) => <Icon {...p}><polygon points="3 11 22 2 13 21 11 13 3 11"/></Icon>,
             ChevronDown: (p) => <Icon {...p}><path d="m6 9 6 6 6-6"/></Icon>,
-            ChevronUp: (p) => <Icon {...p}><path d="m18 15-6-6-6 6"/></Icon>,
-            Coins: (p) => <Icon {...p}><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></Icon>
+            Coins: (p) => <Icon {...p}><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></Icon>,
+            Edit: (p) => <Icon {...p}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></Icon>,
+            Wallet: (p) => <Icon {...p}><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></Icon>,
+            Map: (p) => <Icon {...p}><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></Icon>
         };
 
-        // --- COMPONENTS ---
-
-        // Component สำหรับรายการย่อยในแต่ละวัน (แยกออกมาเพื่อความสะอาดของโค้ด)
+        // --- SUB-COMPONENT: CARD ---
         const ItineraryItem = ({ item, dayIndex, itemIndex, onToggle, onAddExpense, onDeleteExpense }) => {
             const [expenseNote, setExpenseNote] = useState('');
             const [expenseAmount, setExpenseAmount] = useState('');
 
-            const handleAdd = () => {
+            const handleAdd = (e) => {
+                e.stopPropagation();
                 if (expenseNote && expenseAmount) {
                     onAddExpense(dayIndex, itemIndex, expenseNote, parseFloat(expenseAmount));
                     setExpenseNote('');
@@ -86,88 +78,47 @@
             const totalItemCost = item.expenses ? item.expenses.reduce((sum, ex) => sum + ex.amount, 0) : 0;
 
             return (
-                <div className="relative group">
-                     {/* Timeline Dot */}
-                    <div className="absolute -left-[41px] top-2 w-4 h-4 rounded-full border-4 border-[#F4EBE1] bg-[#4A4238] z-10"></div>
-                    
-                    {/* Card */}
-                    <div className={`bg-[#FFF9F3] border border-[#DED0B6] rounded-2xl transition-all overflow-hidden ${item.isOpen ? 'shadow-md ring-1 ring-[#DED0B6]' : 'hover:scale-[1.01]'}`}>
-                        
-                        {/* Header (Click to Toggle) */}
-                        <div className="p-4 cursor-pointer" onClick={() => onToggle(dayIndex, itemIndex)}>
+                <div className="relative pl-6">
+                    <div className="absolute left-0 top-6 w-4 h-4 -ml-[9px] rounded-full border-4 border-[#F4EBE1] bg-[#4A4238] z-10"></div>
+                    <div className={`bg-[#FFF9F3] border border-[#DED0B6] rounded-2xl transition-all duration-300 overflow-hidden mb-4 ${item.isOpen ? 'shadow-lg ring-1 ring-[#DED0B6]' : 'shadow-sm active:scale-[0.99]'}`}>
+                        <div className="p-4 cursor-pointer select-none" onClick={() => onToggle(dayIndex, itemIndex)}>
                             <div className="flex justify-between items-start mb-2">
-                                <span className="text-[10px] font-black opacity-40 uppercase tracking-tighter bg-black/5 px-2 py-0.5 rounded text-blue-600">
-                                    {item.time}
-                                </span>
-                                <div className="flex gap-2">
-                                    {totalItemCost > 0 && (
-                                        <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                            ฿{totalItemCost.toLocaleString()}
-                                        </span>
-                                    )}
-                                    {item.isOpen ? <Icons.ChevronUp size={16} className="opacity-40"/> : <Icons.ChevronDown size={16} className="opacity-40"/>}
+                                <span className="text-[10px] font-black opacity-40 uppercase tracking-tighter bg-black/5 px-2 py-0.5 rounded text-blue-600">{item.time}</span>
+                                <div className="flex gap-2 items-center">
+                                    {totalItemCost > 0 && <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">฿{totalItemCost.toLocaleString()}</span>}
+                                    <div className={`transition-transform duration-300 opacity-40 ${item.isOpen ? 'rotate-180' : ''}`}><Icons.ChevronDown size={16} /></div>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
-                                <div className="mt-1 opacity-80">{item.icon}</div>
+                                <div className="mt-1 opacity-80 min-w-[24px]">{item.icon}</div>
                                 <div>
-                                    <h3 className="font-bold leading-tight text-[#4A4238]">{item.activity}</h3>
-                                    <p className="text-xs opacity-60 mt-0.5">{item.location}</p>
+                                    <h3 className="font-bold leading-tight text-[#4A4238] text-base">{item.activity}</h3>
+                                    <p className="text-xs opacity-60 mt-1">{item.location}</p>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Dropdown Details */}
                         {item.isOpen && (
-                            <div className="bg-white/50 border-t border-[#DED0B6]/30 p-4 animate-in slide-in-from-top-2 duration-200">
-                                
-                                {/* Links/Actions */}
-                                {item.link && (
-                                    <a href={item.link} target="_blank" className="flex items-center gap-2 text-xs font-bold text-blue-600 mb-4 bg-blue-50 p-2 rounded-lg w-fit">
-                                        <Icons.Navigation size={14}/> นำทางด้วย Google Maps
-                                    </a>
-                                )}
-
-                                {/* Expenses Section */}
-                                <div className="space-y-3">
-                                    <p className="text-xs font-bold uppercase opacity-40 flex items-center gap-1">
-                                        <Icons.Coins size={12}/> บันทึกค่าใช้จ่ายจุดนี้
-                                    </p>
-                                    
-                                    {/* List Expenses */}
+                            <div className="bg-white/50 border-t border-[#DED0B6]/30 p-4 animate-in slide-in-from-top-1 fade-in duration-200">
+                                {item.link && <a href={item.link} target="_blank" className="inline-flex items-center gap-2 text-xs font-bold text-blue-600 mb-4 bg-blue-50 px-3 py-2 rounded-lg w-full justify-center"><Icons.Navigation size={14}/> นำทางด้วย Google Maps</a>}
+                                <div className="space-y-3 bg-white/60 p-3 rounded-xl border border-[#DED0B6]/20">
+                                    <p className="text-xs font-bold uppercase opacity-40 flex items-center gap-1 mb-2 border-b border-black/5 pb-1"><Icons.Coins size={12}/> บันทึกค่าใช้จ่าย</p>
                                     {item.expenses && item.expenses.length > 0 && (
-                                        <ul className="space-y-1 mb-2">
+                                        <ul className="space-y-2 mb-3">
                                             {item.expenses.map((ex, idx) => (
-                                                <li key={idx} className="flex justify-between text-sm items-center group/ex">
-                                                    <span className="opacity-80">- {ex.note}</span>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-mono font-bold">฿{ex.amount.toLocaleString()}</span>
-                                                        <button onClick={() => onDeleteExpense(dayIndex, itemIndex, idx)} className="opacity-20 hover:opacity-100 hover:text-red-500"><Icons.Trash2 size={12}/></button>
+                                                <li key={idx} className="flex justify-between text-sm items-center bg-white p-2 rounded border border-transparent hover:border-red-100">
+                                                    <span className="opacity-80 text-xs">{ex.note}</span>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="font-mono font-bold text-xs">฿{ex.amount.toLocaleString()}</span>
+                                                        <button onClick={(e) => { e.stopPropagation(); onDeleteExpense(dayIndex, itemIndex, idx); }} className="text-red-300 hover:text-red-500"><Icons.Trash2 size={14}/></button>
                                                     </div>
                                                 </li>
                                             ))}
                                         </ul>
                                     )}
-
-                                    {/* Add Expense Form */}
-                                    <div className="flex gap-2">
-                                        <input 
-                                            type="text" 
-                                            placeholder="รายการ" 
-                                            className="flex-1 p-2 rounded-lg bg-white border border-[#DED0B6] text-sm outline-none focus:ring-1 focus:ring-blue-400"
-                                            value={expenseNote}
-                                            onChange={e => setExpenseNote(e.target.value)}
-                                        />
-                                        <input 
-                                            type="number" 
-                                            placeholder="บาท" 
-                                            className="w-20 p-2 rounded-lg bg-white border border-[#DED0B6] text-sm text-right outline-none focus:ring-1 focus:ring-blue-400"
-                                            value={expenseAmount}
-                                            onChange={e => setExpenseAmount(e.target.value)}
-                                        />
-                                        <button onClick={handleAdd} className="bg-blue-500 text-white p-2 rounded-lg shadow-sm active:scale-95">
-                                            <Icons.Plus size={16}/>
-                                        </button>
+                                    <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
+                                        <input type="text" placeholder="ค่าอะไร..." className="flex-1 p-2 rounded-lg bg-white border border-[#DED0B6] text-sm outline-none focus:ring-1 focus:ring-blue-400 min-w-0" value={expenseNote} onChange={e => setExpenseNote(e.target.value)} />
+                                        <input type="number" placeholder="บาท" className="w-16 p-2 rounded-lg bg-white border border-[#DED0B6] text-sm text-right outline-none focus:ring-1 focus:ring-blue-400" value={expenseAmount} onChange={e => setExpenseAmount(e.target.value)} />
+                                        <button onClick={handleAdd} className="bg-blue-500 text-white p-2 rounded-lg shadow-sm active:scale-95 shrink-0"><Icons.Plus size={16}/></button>
                                     </div>
                                 </div>
                             </div>
@@ -177,15 +128,15 @@
             );
         };
 
-
         // --- MAIN APP ---
         const App = () => {
-            const [theme, setTheme] = useState('muji');
+            const [view, setView] = useState('trip'); // 'trip' or 'expenses'
+            const [activeDateTab, setActiveDateTab] = useState(0); // 0, 1, 2 for indices
             
-            // Initial Data Structure with Expenses array
             const [itineraryData, setItineraryData] = useState([
                 {
-                    date: '4 Feb 2026',
+                    dateShort: '4 ก.พ.',
+                    dateFull: '4 กุมภาพันธ์ 2026',
                     title: 'Day 1: มุ่งสู่ม่อนแจ่ม',
                     items: [
                         { time: '11:10', activity: 'ถึงสนามบินเชียงใหม่ (CNX)', iconType: 'Plane', iconColor: 'text-blue-500', location: 'Terminal 1', link: 'https://maps.google.com/?q=Chiang+Mai+International+Airport', isOpen: false, expenses: [] },
@@ -196,6 +147,30 @@
                         { time: '16:30', activity: 'ชมวิวพระอาทิตย์ตก', iconType: 'Camera', iconColor: 'text-purple-500', location: 'ยิ่งยงสวนดอกไม้', link: 'https://maps.google.com/?q=ยิ่งยงสวนดอกไม้', isOpen: false, expenses: [] },
                         { time: '18:30', activity: 'มื้อค่ำ: หมูกระทะ', iconType: 'Utensils', iconColor: 'text-red-500', location: 'หน้าห้องพัก (ม่อนลมหนาว)', link: '', isOpen: false, expenses: [] },
                     ]
+                },
+                {
+                    dateShort: '5 ก.พ.',
+                    dateFull: '5 กุมภาพันธ์ 2026',
+                    title: 'Day 2: ชมหมอก & เข้าเมือง',
+                    items: [
+                        { time: '06:00', activity: 'ตื่นเช้าชมทะเลหมอก', iconType: 'Camera', iconColor: 'text-blue-400', location: 'ระเบียงที่พัก', link: '', isOpen: false, expenses: [] },
+                        { time: '08:00', activity: 'ทานอาหารเช้า', iconType: 'Utensils', iconColor: 'text-orange-500', location: 'ที่พัก', link: '', isOpen: false, expenses: [] },
+                        { time: '10:00', activity: 'แวะสวนพฤกษศาสตร์ฯ', iconType: 'Leaf', iconColor: 'text-green-600', location: 'Queen Sirikit Botanic Garden', link: 'https://maps.google.com/?q=Queen+Sirikit+Botanic+Garden', isOpen: false, expenses: [] },
+                        { time: '12:00', activity: 'มื้อเที่ยง: ข้าวซอย', iconType: 'Utensils', iconColor: 'text-yellow-600', location: 'ข้าวซอยแม่สาย', link: 'https://maps.google.com/?q=Khao+Soi+Mae+Sai', isOpen: false, expenses: [] },
+                        { time: '14:00', activity: 'เช็คอินโรงแรมในเมือง', iconType: 'Home', iconColor: 'text-indigo-500', location: 'Nimman Area', link: '', isOpen: false, expenses: [] },
+                        { time: '18:00', activity: 'เดินเล่น One Nimman', iconType: 'Coffee', iconColor: 'text-red-400', location: 'One Nimman', link: 'https://maps.google.com/?q=One+Nimman', isOpen: false, expenses: [] }
+                    ]
+                },
+                {
+                    dateShort: '6 ก.พ.',
+                    dateFull: '6 กุมภาพันธ์ 2026',
+                    title: 'Day 3: ไหว้พระ & กลับบ้าน',
+                    items: [
+                        { time: '09:00', activity: 'ไหว้พระดอยสุเทพ', iconType: 'MapPin', iconColor: 'text-yellow-500', location: 'Wat Phra That Doi Suthep', link: 'https://maps.google.com/?q=Wat+Phra+That+Doi+Suthep', isOpen: false, expenses: [] },
+                        { time: '12:00', activity: 'ซื้อของฝาก', iconType: 'Coins', iconColor: 'text-pink-500', location: 'ตลาดวโรรส (กาดหลวง)', link: 'https://maps.google.com/?q=Warorot+Market', isOpen: false, expenses: [] },
+                        { time: '14:00', activity: 'คืนรถเช่า', iconType: 'Car', iconColor: 'text-slate-500', location: 'สนามบินเชียงใหม่', link: '', isOpen: false, expenses: [] },
+                        { time: '15:30', activity: 'เช็คอินกลับ กทม.', iconType: 'Plane', iconColor: 'text-blue-500', location: 'CNX Airport', link: '', isOpen: false, expenses: [] }
+                    ]
                 }
             ]);
 
@@ -205,29 +180,48 @@
             const [flightCost, setFlightCost] = useState(0);
             const [isEditingFlight, setIsEditingFlight] = useState(false);
 
-            // Helpers to render icons dynamically
+            // -- HELPERS --
             const renderIcon = (type, color) => {
                 const IconComp = Icons[type] || Icons.MapPin;
                 return <IconComp className={color} />;
             };
 
-            // Handlers
             const handleToggleItem = (dayIdx, itemIdx) => {
-                const newData = [...itineraryData];
-                newData[dayIdx].items[itemIdx].isOpen = !newData[dayIdx].items[itemIdx].isOpen;
-                setItineraryData(newData);
+                setItineraryData(prev => {
+                    const newData = [...prev];
+                    const newDay = { ...newData[dayIdx] };
+                    newDay.items = [...newDay.items];
+                    newDay.items[itemIdx] = { ...newDay.items[itemIdx], isOpen: !newDay.items[itemIdx].isOpen };
+                    newData[dayIdx] = newDay;
+                    return newData;
+                });
             };
 
             const handleAddExpense = (dayIdx, itemIdx, note, amount) => {
-                const newData = [...itineraryData];
-                newData[dayIdx].items[itemIdx].expenses.push({ note, amount });
-                setItineraryData(newData);
+                setItineraryData(prev => {
+                    const newData = [...prev];
+                    const newDay = { ...newData[dayIdx] };
+                    newDay.items = [...newDay.items];
+                    const newItem = { ...newDay.items[itemIdx] };
+                    newItem.expenses = newItem.expenses ? [...newItem.expenses, { note, amount }] : [{ note, amount }];
+                    newDay.items[itemIdx] = newItem;
+                    newData[dayIdx] = newDay;
+                    return newData;
+                });
             };
 
             const handleDeleteExpense = (dayIdx, itemIdx, expenseIdx) => {
-                const newData = [...itineraryData];
-                newData[dayIdx].items[itemIdx].expenses.splice(expenseIdx, 1);
-                setItineraryData(newData);
+                setItineraryData(prev => {
+                    const newData = [...prev];
+                    const newDay = { ...newData[dayIdx] };
+                    newDay.items = [...newDay.items];
+                    const newItem = { ...newDay.items[itemIdx] };
+                    newItem.expenses = [...newItem.expenses];
+                    newItem.expenses.splice(expenseIdx, 1);
+                    newDay.items[itemIdx] = newItem;
+                    newData[dayIdx] = newDay;
+                    return newData;
+                });
             };
 
             const handleAddGas = () => {
@@ -238,14 +232,12 @@
                 }
             };
 
-            // Calculations
+            // Calculate Totals
             const totalActivityExpenses = useMemo(() => {
                 let sum = 0;
                 itineraryData.forEach(day => {
                     day.items.forEach(item => {
-                        if(item.expenses) {
-                            item.expenses.forEach(ex => sum += ex.amount);
-                        }
+                        if(item.expenses) item.expenses.forEach(ex => sum += ex.amount);
                     });
                 });
                 return sum;
@@ -253,118 +245,198 @@
 
             const grandTotal = gasTotal + flightCost + totalActivityExpenses;
 
-            return (
-                <div className="min-h-[100dvh] bg-[#F4EBE1] text-[#4A4238] font-sans pb-32">
-                    {/* Header */}
-                    <div className="max-w-md mx-auto p-6 pt-2 flex justify-between items-center sticky top-0 z-20 backdrop-blur-md bg-[#F4EBE1]/90 safe-top">
-                        <div>
-                            <h1 className="text-2xl font-black tracking-tight">CNX 2026</h1>
-                            <p className="text-xs font-bold opacity-50 uppercase tracking-widest">Version Pro</p>
-                        </div>
-                        <div className="flex bg-white/40 p-1 rounded-full border border-white/50">
-                            <button className="p-2 rounded-full bg-[#DED0B6] text-[#4A4238] shadow"><Icons.Leaf size={16}/></button>
+            // --- VIEW: TRIP (ITINERARY) ---
+            const renderTripView = () => (
+                <div className="animate-in fade-in duration-300">
+                    {/* Date Tabs */}
+                    <div className="sticky top-0 bg-[#F4EBE1]/95 backdrop-blur z-20 pt-2 pb-4 border-b border-[#DED0B6]/30 overflow-x-auto no-scrollbar">
+                        <div className="flex justify-center gap-3 px-4">
+                            {itineraryData.map((day, idx) => {
+                                const isActive = activeDateTab === idx;
+                                return (
+                                    <button 
+                                        key={idx}
+                                        onClick={() => setActiveDateTab(idx)}
+                                        className={`
+                                            relative px-4 py-2 rounded-2xl text-sm font-bold transition-all duration-300 min-w-[80px]
+                                            ${isActive 
+                                                ? 'bg-[#4A4238] text-[#F4EBE1] shadow-lg scale-105' 
+                                                : 'bg-white/50 text-[#4A4238]/60 hover:bg-white'
+                                            }
+                                        `}
+                                    >
+                                        {day.dateShort}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
-                    <div className="max-w-md mx-auto px-6 space-y-6">
-                        
-                        {/* Alert */}
-                        <div className="bg-orange-500 text-white p-4 rounded-3xl shadow-lg shadow-orange-500/20 flex items-center gap-4">
-                            <div className="bg-white/20 p-2 rounded-2xl">
-                                <Icons.Plane className="animate-pulse" size={24} />
-                            </div>
-                            <div className="text-sm">
-                                <p className="font-bold">Flight Recovery</p>
-                                <p className="opacity-90">เริ่มใหม่ 11:10 น.</p>
-                            </div>
+                    {/* Timeline Content */}
+                    <div className="mt-4 px-4 pb-24">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-black text-[#4A4238] flex items-center gap-2">
+                                {itineraryData[activeDateTab].title}
+                            </h2>
                         </div>
-
-                        {/* Itinerary List */}
-                        <div className="space-y-8">
-                            {itineraryData.map((day, dayIdx) => (
-                                <div key={dayIdx} className="space-y-4">
-                                    <div className="flex items-center justify-between sticky top-20 z-10 py-2 bg-[#F4EBE1]/95 backdrop-blur">
-                                        <h2 className="text-xl font-black flex items-center gap-2 text-[#4A4238]">
-                                            <Icons.MapPin size={22} className="text-red-500"/> {day.title}
-                                        </h2>
-                                        <span className="text-xs font-bold px-3 py-1 bg-black/5 rounded-full opacity-60">{day.date}</span>
-                                    </div>
-                                    
-                                    <div className="relative ml-4 space-y-4 border-l-2 border-dashed border-[#DED0B6] pl-8 pb-2">
-                                        {day.items.map((item, itemIdx) => (
-                                            <ItineraryItem 
-                                                key={itemIdx}
-                                                item={{...item, icon: renderIcon(item.iconType, item.iconColor)}}
-                                                dayIndex={dayIdx}
-                                                itemIndex={itemIdx}
-                                                onToggle={handleToggleItem}
-                                                onAddExpense={handleAddExpense}
-                                                onDeleteExpense={handleDeleteExpense}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
+                        
+                        <div className="relative ml-2 space-y-2 border-l-2 border-dashed border-[#DED0B6] pl-6 pb-2">
+                            {itineraryData[activeDateTab].items.map((item, idx) => (
+                                <ItineraryItem 
+                                    key={idx} 
+                                    item={{...item, icon: renderIcon(item.iconType, item.iconColor)}} 
+                                    dayIndex={activeDateTab} 
+                                    itemIndex={idx} 
+                                    onToggle={handleToggleItem} 
+                                    onAddExpense={handleAddExpense} 
+                                    onDeleteExpense={handleDeleteExpense} 
+                                />
                             ))}
                         </div>
+                    </div>
+                </div>
+            );
 
-                        {/* Summary Widget */}
-                        <div className="bg-[#FFF9F3] border border-[#DED0B6] p-6 rounded-[2.5rem] shadow-xl relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16"></div>
-                            <h3 className="font-black text-lg mb-4 flex items-center gap-2">
-                                สรุปค่าใช้จ่ายทั้งหมด
-                            </h3>
-                            
-                            <div className="space-y-3">
-                                {/* Flight */}
-                                <div className="flex justify-between items-center text-sm p-3 bg-red-500/5 rounded-2xl text-red-600 border border-red-500/10">
-                                    <span className="flex items-center gap-2 font-bold"><Icons.Plane size={16}/> ตั๋วเครื่องบิน</span>
-                                    {isEditingFlight ? (
-                                        <input 
-                                            type="number" className="w-20 p-1 bg-transparent border-b border-red-500 text-right font-mono outline-none"
-                                            onChange={(e) => setFlightCost(parseFloat(e.target.value) || 0)}
-                                            onBlur={() => setIsEditingFlight(false)} autoFocus
-                                        />
-                                    ) : (
-                                        <span onClick={() => setIsEditingFlight(true)} className="font-mono font-bold">฿{flightCost.toLocaleString()}</span>
-                                    )}
-                                </div>
-                                
-                                {/* Gas */}
-                                <div className="flex justify-between items-center text-sm p-3 bg-blue-500/5 rounded-2xl text-blue-600 border border-blue-500/10">
-                                    <span className="flex items-center gap-2 font-bold"><Icons.Fuel size={16}/> ค่าน้ำมันรวม</span>
-                                    {!showGasInput ? (
-                                        <div className="flex items-center gap-2" onClick={() => setShowGasInput(true)}>
-                                            <span className="font-mono font-bold">฿{gasTotal.toLocaleString()}</span>
-                                            <Icons.Plus size={14} className="opacity-50"/>
-                                        </div>
-                                    ) : (
-                                        <div className="flex gap-1">
-                                            <input type="number" className="w-16 p-1 bg-white border rounded text-right text-xs" autoFocus
-                                                onChange={e => setTempGas(e.target.value)} placeholder="0"
-                                            />
-                                            <button onClick={handleAddGas} className="bg-blue-500 text-white rounded px-2"><Icons.Save size={12}/></button>
-                                        </div>
-                                    )}
-                                </div>
+            // --- VIEW: EXPENSES (SUMMARY) ---
+            const renderExpensesView = () => (
+                <div className="px-4 py-6 animate-in slide-in-from-bottom-4 duration-300 pb-24">
+                    <h2 className="text-2xl font-black text-[#4A4238] mb-6 pl-2 border-l-4 border-[#4A4238]">Wallet & Expenses</h2>
+                    
+                    {/* Grand Total Card */}
+                    <div className="bg-[#4A4238] text-[#F4EBE1] p-6 rounded-[2.5rem] shadow-xl mb-6 relative overflow-hidden">
+                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
+                        <p className="text-sm font-bold opacity-60 uppercase tracking-widest mb-1">Total Spent</p>
+                        <p className="text-4xl font-black">฿{grandTotal.toLocaleString()}</p>
+                        <div className="mt-4 flex gap-2">
+                            <span className="text-[10px] bg-white/20 px-3 py-1 rounded-full">Updated just now</span>
+                        </div>
+                    </div>
 
-                                {/* Activity Expenses */}
-                                <div className="flex justify-between items-center text-sm p-3 bg-green-500/5 rounded-2xl text-green-700 border border-green-500/10">
-                                    <span className="flex items-center gap-2 font-bold"><Icons.Coins size={16}/> ค่ากิน/เที่ยว/อื่นๆ</span>
-                                    <span className="font-mono font-bold">฿{totalActivityExpenses.toLocaleString()}</span>
+                    {/* Breakdown List */}
+                    <div className="space-y-4">
+                        
+                        {/* Flight */}
+                        <div className="bg-white p-4 rounded-2xl border border-[#DED0B6] shadow-sm flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-red-100 text-red-500 rounded-xl"><Icons.Plane size={20}/></div>
+                                <div>
+                                    <p className="font-bold text-[#4A4238]">ตั๋วเครื่องบิน</p>
+                                    <p className="text-xs opacity-50">Flight Cost</p>
                                 </div>
                             </div>
+                            {isEditingFlight ? (
+                                <input 
+                                    type="number" className="w-24 p-2 bg-slate-50 border rounded text-right font-mono outline-none"
+                                    value={flightCost === 0 ? '' : flightCost} placeholder="0"
+                                    onChange={(e) => setFlightCost(parseFloat(e.target.value) || 0)}
+                                    onBlur={() => setIsEditingFlight(false)} autoFocus
+                                />
+                            ) : (
+                                <div onClick={() => setIsEditingFlight(true)} className="cursor-pointer font-mono font-bold text-lg">
+                                    {flightCost === 0 ? <span className="text-xs text-red-400 bg-red-50 px-2 py-1 rounded">ระบุราคา</span> : `฿${flightCost.toLocaleString()}`}
+                                </div>
+                            )}
+                        </div>
 
-                            <div className="mt-6 pt-4 border-t border-black/5 flex justify-between items-end">
+                        {/* Gas */}
+                        <div className="bg-white p-4 rounded-2xl border border-[#DED0B6] shadow-sm">
+                            <div className="flex justify-between items-center mb-2">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-3 bg-blue-100 text-blue-500 rounded-xl"><Icons.Fuel size={20}/></div>
+                                    <div>
+                                        <p className="font-bold text-[#4A4238]">น้ำมัน</p>
+                                        <p className="text-xs opacity-50">Fuel Total</p>
+                                    </div>
+                                </div>
+                                <span className="font-mono font-bold text-lg">฿{gasTotal.toLocaleString()}</span>
+                            </div>
+                            
+                            {!showGasInput ? (
+                                <button onClick={() => setShowGasInput(true)} className="w-full py-2 text-xs font-bold text-blue-500 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">+ เพิ่มรายการ</button>
+                            ) : (
+                                <div className="flex gap-2 mt-2">
+                                    <input type="number" className="flex-1 p-2 bg-slate-50 border rounded text-sm" autoFocus onChange={e => setTempGas(e.target.value)} placeholder="ระบุยอด..." />
+                                    <button onClick={handleAddGas} className="bg-blue-500 text-white rounded-lg px-4 font-bold shadow-sm">บันทึก</button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Daily Activities Summary */}
+                        <div className="bg-white p-4 rounded-2xl border border-[#DED0B6] shadow-sm">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-3 bg-green-100 text-green-600 rounded-xl"><Icons.Coins size={20}/></div>
                                 <div>
-                                    <p className="text-[10px] font-bold opacity-40 uppercase">Grand Total</p>
-                                    <p className="text-2xl font-black text-[#4A4238]">฿{grandTotal.toLocaleString()}</p>
+                                    <p className="font-bold text-[#4A4238]">กิน / เที่ยว / อื่นๆ</p>
+                                    <p className="text-xs opacity-50">Activity Cost Breakdown</p>
                                 </div>
-                                <div className="text-[10px] bg-green-500 text-white px-3 py-1 rounded-full font-bold uppercase animate-pulse">
-                                    Live
-                                </div>
+                            </div>
+                            
+                            <div className="space-y-3">
+                                {itineraryData.map((day, idx) => {
+                                    const dayTotal = day.items.reduce((sum, item) => sum + (item.expenses ? item.expenses.reduce((s, e) => s + e.amount, 0) : 0), 0);
+                                    if(dayTotal === 0) return null;
+                                    return (
+                                        <div key={idx} className="flex justify-between items-center text-sm border-b border-dashed border-gray-100 pb-2 last:border-0 last:pb-0">
+                                            <span className="opacity-60">{day.dateShort}</span>
+                                            <span className="font-mono font-bold">฿{dayTotal.toLocaleString()}</span>
+                                        </div>
+                                    );
+                                })}
+                                {totalActivityExpenses === 0 && <p className="text-center text-xs opacity-30 py-2">ยังไม่มีรายการค่าใช้จ่าย</p>}
+                            </div>
+                            <div className="mt-4 pt-3 border-t flex justify-between items-center">
+                                <span className="text-xs font-bold uppercase opacity-50">Subtotal</span>
+                                <span className="font-mono font-bold text-green-600">฿{totalActivityExpenses.toLocaleString()}</span>
                             </div>
                         </div>
 
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-[100dvh] bg-[#F4EBE1] text-[#4A4238] font-sans relative">
+                    {/* Header (Sticky) */}
+                    <div className="bg-[#F4EBE1] safe-top">
+                        <div className="max-w-lg mx-auto p-4 flex justify-between items-center">
+                            <div>
+                                <h1 className="text-xl font-black tracking-tight">CNX 2026</h1>
+                                <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Chiang Mai Trip</p>
+                            </div>
+                            <div className="bg-[#DED0B6] p-2 rounded-full shadow-inner opacity-50">
+                                <Icons.Leaf size={16} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Content Area */}
+                    <div className="max-w-lg mx-auto min-h-screen">
+                        {view === 'trip' ? renderTripView() : renderExpensesView()}
+                    </div>
+
+                    {/* Bottom Navigation Bar */}
+                    <div className="fixed bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-[#DED0B6]/50 safe-bottom z-50">
+                        <div className="max-w-lg mx-auto flex justify-around items-center p-2">
+                            <button 
+                                onClick={() => setView('trip')}
+                                className={`flex flex-col items-center p-2 rounded-xl transition-all w-20 ${view === 'trip' ? 'text-[#4A4238] scale-105' : 'text-gray-400'}`}
+                            >
+                                <div className={`p-1 rounded-full mb-1 ${view === 'trip' ? 'bg-[#F4EBE1]' : ''}`}>
+                                    <Icons.Map size={24} />
+                                </div>
+                                <span className="text-[10px] font-bold uppercase">Trip</span>
+                            </button>
+                            
+                            <button 
+                                onClick={() => setView('expenses')}
+                                className={`flex flex-col items-center p-2 rounded-xl transition-all w-20 ${view === 'expenses' ? 'text-[#4A4238] scale-105' : 'text-gray-400'}`}
+                            >
+                                <div className={`p-1 rounded-full mb-1 ${view === 'expenses' ? 'bg-[#F4EBE1]' : ''}`}>
+                                    <Icons.Wallet size={24} />
+                                </div>
+                                <span className="text-[10px] font-bold uppercase">Wallet</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             );
