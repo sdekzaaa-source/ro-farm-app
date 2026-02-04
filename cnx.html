@@ -22,6 +22,7 @@
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        input, textarea { font-family: 'Noto Sans Thai', sans-serif; }
     </style>
 </head>
 <body>
@@ -50,17 +51,26 @@
             Save: (p) => <Icon {...p}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></Icon>,
             Navigation: (p) => <Icon {...p}><polygon points="3 11 22 2 13 21 11 13 3 11"/></Icon>,
             ChevronDown: (p) => <Icon {...p}><path d="m6 9 6 6 6-6"/></Icon>,
+            ChevronRight: (p) => <Icon {...p}><path d="m9 18 6-6-6-6"/></Icon>,
             Coins: (p) => <Icon {...p}><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></Icon>,
             Edit: (p) => <Icon {...p}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></Icon>,
             Wallet: (p) => <Icon {...p}><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></Icon>,
-            Map: (p) => <Icon {...p}><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></Icon>
+            Map: (p) => <Icon {...p}><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></Icon>,
+            X: (p) => <Icon {...p}><path d="M18 6 6 18"/><path d="m6 6 18 18"/></Icon>,
+            Compass: (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></Icon>
         };
 
-        const ItineraryItem = ({ item, dayIndex, itemIndex, onToggle, onAddExpense, onDeleteExpense }) => {
+        const ItineraryItem = ({ item, dayIndex, itemIndex, onToggle, onAddExpense, onDeleteExpense, onUpdateItem, onDeleteItem }) => {
             const [expenseNote, setExpenseNote] = useState('');
             const [expenseAmount, setExpenseAmount] = useState('');
+            const [isEditing, setIsEditing] = useState(item.isNew || false);
+            
+            const [editTime, setEditTime] = useState(item.time);
+            const [editActivity, setEditActivity] = useState(item.activity);
+            const [editLocation, setEditLocation] = useState(item.location);
+            const [editLink, setEditLink] = useState(item.link || '');
 
-            const handleAdd = (e) => {
+            const handleAddExpenseLocal = (e) => {
                 e.stopPropagation();
                 if (expenseNote && expenseAmount) {
                     onAddExpense(dayIndex, itemIndex, expenseNote, parseFloat(expenseAmount));
@@ -69,7 +79,61 @@
                 }
             };
 
+            const handleSaveEdit = (e) => {
+                e.stopPropagation();
+                onUpdateItem(dayIndex, itemIndex, {
+                    time: editTime,
+                    activity: editActivity,
+                    location: editLocation,
+                    link: editLink,
+                    isNew: false
+                });
+                setIsEditing(false);
+            };
+
+            const handleDeleteItemLocal = (e) => {
+                e.stopPropagation();
+                if(confirm('ยืนยันที่จะลบรายการนี้?')) {
+                    onDeleteItem(dayIndex, itemIndex);
+                }
+            };
+
             const totalItemCost = item.expenses ? item.expenses.reduce((sum, ex) => sum + ex.amount, 0) : 0;
+
+            if (isEditing) {
+                return (
+                    <div className="relative pl-6 mb-4">
+                         <div className="absolute left-0 top-6 w-4 h-4 -ml-[9px] rounded-full border-4 border-blue-200 bg-blue-500 z-10"></div>
+                         <div className="bg-white border border-blue-200 rounded-2xl shadow-md p-4 space-y-3">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-bold text-blue-500 uppercase">แก้ไขรายการ</span>
+                                <button onClick={(e) => { e.stopPropagation(); if(item.isNew) onDeleteItem(dayIndex, itemIndex); else setIsEditing(false); }} className="text-gray-400"><Icons.X size={16}/></button>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <div className="col-span-1">
+                                    <label className="text-[10px] font-bold opacity-50 block mb-1">เวลา</label>
+                                    <input type="text" value={editTime} onChange={e => setEditTime(e.target.value)} className="w-full p-2 bg-gray-50 rounded border text-sm font-bold" placeholder="12:00" />
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="text-[10px] font-bold opacity-50 block mb-1">กิจกรรม</label>
+                                    <input type="text" value={editActivity} onChange={e => setEditActivity(e.target.value)} className="w-full p-2 bg-gray-50 rounded border text-sm font-bold" placeholder="ชื่อกิจกรรม..." />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold opacity-50 block mb-1">สถานที่</label>
+                                <input type="text" value={editLocation} onChange={e => setEditLocation(e.target.value)} className="w-full p-2 bg-gray-50 rounded border text-sm" placeholder="ระบุสถานที่..." />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold opacity-50 block mb-1">Link แผนที่ (Google Maps)</label>
+                                <input type="text" value={editLink} onChange={e => setEditLink(e.target.value)} className="w-full p-2 bg-gray-50 rounded border text-sm" placeholder="https://..." />
+                            </div>
+                            <div className="pt-2 flex gap-2">
+                                <button onClick={handleSaveEdit} className="flex-1 bg-blue-500 text-white py-2 rounded-xl font-bold text-sm shadow-md active:scale-95">บันทึก</button>
+                            </div>
+                         </div>
+                    </div>
+                );
+            }
 
             return (
                 <div className="relative pl-6">
@@ -91,9 +155,20 @@
                                 </div>
                             </div>
                         </div>
+                        
                         {item.isOpen && (
                             <div className="bg-white/50 border-t border-[#DED0B6]/30 p-4 animate-in slide-in-from-top-1 fade-in duration-200">
+                                <div className="flex justify-end gap-2 mb-4">
+                                    <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="flex items-center gap-1 text-[10px] bg-white border border-gray-200 px-2 py-1 rounded shadow-sm text-gray-600 hover:text-blue-500">
+                                        <Icons.Edit size={12}/> แก้ไข
+                                    </button>
+                                    <button onClick={handleDeleteItemLocal} className="flex items-center gap-1 text-[10px] bg-white border border-gray-200 px-2 py-1 rounded shadow-sm text-gray-600 hover:text-red-500">
+                                        <Icons.Trash2 size={12}/> ลบ
+                                    </button>
+                                </div>
+
                                 {item.link && <a href={item.link} target="_blank" className="inline-flex items-center gap-2 text-xs font-bold text-blue-600 mb-4 bg-blue-50 px-3 py-2 rounded-lg w-full justify-center"><Icons.Navigation size={14}/> นำทางด้วย Google Maps</a>}
+                                
                                 <div className="space-y-3 bg-white/60 p-3 rounded-xl border border-[#DED0B6]/20">
                                     <p className="text-xs font-bold uppercase opacity-40 flex items-center gap-1 mb-2 border-b border-black/5 pb-1"><Icons.Coins size={12}/> บันทึกค่าใช้จ่าย</p>
                                     {item.expenses && item.expenses.length > 0 && (
@@ -112,7 +187,7 @@
                                     <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
                                         <input type="text" placeholder="ค่าอะไร..." className="flex-1 p-2 rounded-lg bg-white border border-[#DED0B6] text-sm outline-none focus:ring-1 focus:ring-blue-400 min-w-0" value={expenseNote} onChange={e => setExpenseNote(e.target.value)} />
                                         <input type="number" placeholder="บาท" className="w-16 p-2 rounded-lg bg-white border border-[#DED0B6] text-sm text-right outline-none focus:ring-1 focus:ring-blue-400" value={expenseAmount} onChange={e => setExpenseAmount(e.target.value)} />
-                                        <button onClick={handleAdd} className="bg-blue-500 text-white p-2 rounded-lg shadow-sm active:scale-95 shrink-0"><Icons.Plus size={16}/></button>
+                                        <button onClick={handleAddExpenseLocal} className="bg-blue-500 text-white p-2 rounded-lg shadow-sm active:scale-95 shrink-0"><Icons.Plus size={16}/></button>
                                     </div>
                                 </div>
                             </div>
@@ -126,11 +201,9 @@
             const [view, setView] = useState('trip'); 
             const [activeDateTab, setActiveDateTab] = useState(0); 
             
-            // --- UPDATED ITINERARY DATA ---
             const [itineraryData, setItineraryData] = useState([
                 {
                     dateShort: '4 ก.พ.',
-                    dateFull: '4 กุมภาพันธ์ 2569',
                     title: 'Day 1: ขุนเขาแม่ริม',
                     items: [
                         { time: '11:10', activity: 'ถึงสนามบินเชียงใหม่', iconType: 'Plane', iconColor: 'text-blue-500', location: 'แลนดิ้ง & รับรถเช่า', link: 'https://maps.google.com/?q=Chiang+Mai+International+Airport', isOpen: false, expenses: [] },
@@ -142,7 +215,6 @@
                 },
                 {
                     dateShort: '5 ก.พ.',
-                    dateFull: '5 กุมภาพันธ์ 2569',
                     title: 'Day 2: สถาปัตยกรรม & ในเมือง',
                     items: [
                         { time: '09:30', activity: 'Skywalk ม่อนแจ่ม', iconType: 'Camera', iconColor: 'text-blue-400', location: 'ถ่ายรูปสวนดอกไม้', link: 'https://maps.google.com/?q=Mon+Jam+Skywalk', isOpen: false, expenses: [] },
@@ -155,7 +227,6 @@
                 },
                 {
                     dateShort: '6 ก.พ.',
-                    dateFull: '6 กุมภาพันธ์ 2569',
                     title: 'Day 3: ตลาดเช้า & มัทฉะ',
                     items: [
                         { time: '09:00', activity: 'จริงใจมาร์เก็ต (JJ)', iconType: 'Leaf', iconColor: 'text-green-500', location: 'งานคราฟต์ & กาแฟ', link: 'https://maps.google.com/?q=Jing+Jai+Market', isOpen: false, expenses: [] },
@@ -184,6 +255,52 @@
                     const newDay = { ...newData[dayIdx] };
                     newDay.items = [...newDay.items];
                     newDay.items[itemIdx] = { ...newDay.items[itemIdx], isOpen: !newDay.items[itemIdx].isOpen };
+                    newData[dayIdx] = newDay;
+                    return newData;
+                });
+            };
+
+            const handleAddItem = (dayIdx) => {
+                setItineraryData(prev => {
+                    const newData = [...prev];
+                    const newDay = { ...newData[dayIdx] };
+                    newDay.items = [...newDay.items, {
+                        time: '??:??',
+                        activity: '',
+                        iconType: 'MapPin',
+                        iconColor: 'text-gray-500',
+                        location: '',
+                        link: '',
+                        isOpen: true,
+                        isNew: true,
+                        expenses: []
+                    }];
+                    newData[dayIdx] = newDay;
+                    return newData;
+                });
+                
+                setTimeout(() => {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 100);
+            };
+
+            const handleUpdateItem = (dayIdx, itemIdx, updatedData) => {
+                setItineraryData(prev => {
+                    const newData = [...prev];
+                    const newDay = { ...newData[dayIdx] };
+                    newDay.items = [...newDay.items];
+                    newDay.items[itemIdx] = { ...newDay.items[itemIdx], ...updatedData };
+                    newData[dayIdx] = newDay;
+                    return newData;
+                });
+            };
+
+            const handleDeleteItem = (dayIdx, itemIdx) => {
+                setItineraryData(prev => {
+                    const newData = [...prev];
+                    const newDay = { ...newData[dayIdx] };
+                    newDay.items = [...newDay.items];
+                    newDay.items.splice(itemIdx, 1);
                     newData[dayIdx] = newDay;
                     return newData;
                 });
@@ -260,9 +377,26 @@
                         </div>
                         <div className="relative ml-2 space-y-2 border-l-2 border-dashed border-[#DED0B6] pl-6 pb-2">
                             {itineraryData[activeDateTab].items.map((item, idx) => (
-                                <ItineraryItem key={idx} item={{...item, icon: renderIcon(item.iconType, item.iconColor)}} dayIndex={activeDateTab} itemIndex={idx} onToggle={handleToggleItem} onAddExpense={handleAddExpense} onDeleteExpense={handleDeleteExpense} />
+                                <ItineraryItem 
+                                    key={idx} 
+                                    item={{...item, icon: renderIcon(item.iconType, item.iconColor)}} 
+                                    dayIndex={activeDateTab} 
+                                    itemIndex={idx} 
+                                    onToggle={handleToggleItem} 
+                                    onAddExpense={handleAddExpense} 
+                                    onDeleteExpense={handleDeleteExpense} 
+                                    onUpdateItem={handleUpdateItem}
+                                    onDeleteItem={handleDeleteItem}
+                                />
                             ))}
                         </div>
+                        
+                        <button 
+                            onClick={() => handleAddItem(activeDateTab)}
+                            className="mt-4 w-full py-4 border-2 border-dashed border-[#DED0B6] rounded-2xl text-[#4A4238]/50 font-bold flex items-center justify-center gap-2 hover:bg-white/50 hover:text-[#4A4238] transition-all active:scale-95"
+                        >
+                            <Icons.Plus size={20} /> เพิ่มกิจกรรม
+                        </button>
                     </div>
                 </div>
             );
@@ -331,6 +465,29 @@
                 </div>
             );
 
+            const renderExploreView = () => (
+                <div className="px-4 py-6 animate-in slide-in-from-bottom-4 duration-300 pb-24">
+                    <h2 className="text-2xl font-black text-[#4A4238] mb-6 pl-2 border-l-4 border-[#4A4238]">Explore Nearby</h2>
+                    <div className="grid grid-cols-1 gap-4">
+                        <button onClick={() => window.open('https://www.google.com/maps/search/restaurant/')} className="bg-white p-6 rounded-2xl border border-[#DED0B6] shadow-sm flex items-center gap-4 hover:bg-orange-50 transition-colors group">
+                            <div className="p-4 bg-orange-100 text-orange-500 rounded-2xl group-hover:scale-110 transition-transform"><Icons.Utensils size={32} /></div>
+                            <div className="text-left"><h3 className="text-lg font-black text-[#4A4238]">ร้านอาหาร</h3><p className="text-xs opacity-60">Restaurants Near Me</p></div>
+                            <Icons.ChevronRight className="ml-auto opacity-30" />
+                        </button>
+                        <button onClick={() => window.open('https://www.google.com/maps/search/tourist+attraction/')} className="bg-white p-6 rounded-2xl border border-[#DED0B6] shadow-sm flex items-center gap-4 hover:bg-green-50 transition-colors group">
+                            <div className="p-4 bg-green-100 text-green-500 rounded-2xl group-hover:scale-110 transition-transform"><Icons.Camera size={32} /></div>
+                            <div className="text-left"><h3 className="text-lg font-black text-[#4A4238]">สถานที่ท่องเที่ยว</h3><p className="text-xs opacity-60">Attractions Near Me</p></div>
+                            <Icons.ChevronRight className="ml-auto opacity-30" />
+                        </button>
+                        <button onClick={() => window.open('https://www.google.com/maps/search/gas+station/')} className="bg-white p-6 rounded-2xl border border-[#DED0B6] shadow-sm flex items-center gap-4 hover:bg-blue-50 transition-colors group">
+                            <div className="p-4 bg-blue-100 text-blue-500 rounded-2xl group-hover:scale-110 transition-transform"><Icons.Fuel size={32} /></div>
+                            <div className="text-left"><h3 className="text-lg font-black text-[#4A4238]">ปั๊มน้ำมัน</h3><p className="text-xs opacity-60">Gas Stations Near Me</p></div>
+                            <Icons.ChevronRight className="ml-auto opacity-30" />
+                        </button>
+                    </div>
+                </div>
+            );
+
             return (
                 <div className="min-h-[100dvh] bg-[#F4EBE1] text-[#4A4238] font-sans relative">
                     <div className="bg-[#F4EBE1] safe-top">
@@ -344,18 +501,24 @@
                         <div className="px-4 pb-2">
                              <div className="bg-orange-500 text-white p-3 rounded-2xl shadow-lg shadow-orange-500/20 flex items-center gap-3 text-xs">
                                 <div className="bg-white/20 p-2 rounded-xl"><Icons.Plane className="animate-pulse" size={16} /></div>
-                                <div><p className="font-bold">Late Arrival 11:10</p><p className="opacity-90">แผนปรับใหม่แล้วครับ</p></div>
+                                <div><p className="font-bold">Late Arrival 11:10</p><p className="opacity-90">แผนปรับใหม่ (Edit Mode)</p></div>
                             </div>
                         </div>
                     </div>
                     <div className="max-w-lg mx-auto min-h-screen">
-                        {view === 'trip' ? renderTripView() : renderExpensesView()}
+                        {view === 'trip' && renderTripView()}
+                        {view === 'expenses' && renderExpensesView()}
+                        {view === 'explore' && renderExploreView()}
                     </div>
                     <div className="fixed bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-[#DED0B6]/50 safe-bottom z-50">
                         <div className="max-w-lg mx-auto flex justify-around items-center p-2">
                             <button onClick={() => setView('trip')} className={`flex flex-col items-center p-2 rounded-xl transition-all w-20 ${view === 'trip' ? 'text-[#4A4238] scale-105' : 'text-gray-400'}`}>
                                 <div className={`p-1 rounded-full mb-1 ${view === 'trip' ? 'bg-[#F4EBE1]' : ''}`}><Icons.Map size={24} /></div>
                                 <span className="text-[10px] font-bold uppercase">Trip</span>
+                            </button>
+                            <button onClick={() => setView('explore')} className={`flex flex-col items-center p-2 rounded-xl transition-all w-20 ${view === 'explore' ? 'text-[#4A4238] scale-105' : 'text-gray-400'}`}>
+                                <div className={`p-1 rounded-full mb-1 ${view === 'explore' ? 'bg-[#F4EBE1]' : ''}`}><Icons.Compass size={24} /></div>
+                                <span className="text-[10px] font-bold uppercase">Explore</span>
                             </button>
                             <button onClick={() => setView('expenses')} className={`flex flex-col items-center p-2 rounded-xl transition-all w-20 ${view === 'expenses' ? 'text-[#4A4238] scale-105' : 'text-gray-400'}`}>
                                 <div className={`p-1 rounded-full mb-1 ${view === 'expenses' ? 'bg-[#F4EBE1]' : ''}`}><Icons.Wallet size={24} /></div>
