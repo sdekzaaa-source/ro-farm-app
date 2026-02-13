@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OGHza Tracker V6.0.1</title>
+    <title>OGHza Tracker V6.0.3</title>
     
     <!-- App Icon -->
     <link rel="icon" href="icon.png" type="image/png">
@@ -227,7 +227,7 @@
 
         const { useState, useEffect, useMemo, useRef, memo } = React;
 
-        const APP_VERSION = "Ver.6.0.1";
+        const APP_VERSION = "Ver.6.0.3";
         
         const MANUAL_FIREBASE_CONFIG = { apiKey: "AIzaSyAbWzr8o_OhkjGbEetBYq_nzYmVZ2fTf40", authDomain: "rocogh-88a38.firebaseapp.com", projectId: "rocogh-88a38", storageBucket: "rocogh-88a38.firebasestorage.app", messagingSenderId: "1025971309206", appId: "1:1025971309206:web:d4f9e0ab6bb016dde590b7" };
         const INITIAL_STATS = { baseLv: 1, baseExp: 0, jobLv: 1, jobExp: 0, jobClass: 'Novice', coins: 0, zeny: 0, unlockedTitles: ['Novice'], savingsGoal: 0, wishlist: null };
@@ -266,12 +266,7 @@
         };
 
         const getRankInfo = (profit, averageProfit) => { if (profit < 0) return { rank: 'F', css: 'rank-f', text: 'LOSS' }; if (!averageProfit || averageProfit === 0) return { rank: 'B', css: 'rank-b', text: 'NORMAL' }; const diff = (profit - averageProfit) / averageProfit; if (diff >= 0.5) return { rank: 'S', css: 'rank-s', text: 'LUCKY' }; if (diff >= 0.3) return { rank: 'A', css: 'rank-a', text: 'GOOD' }; if (diff >= -0.1) return { rank: 'B', css: 'rank-b', text: 'NORMAL' }; if (diff >= -0.3) return { rank: 'C', css: 'rank-c', text: 'BAD' }; if (diff >= -0.5) return { rank: 'D', css: 'rank-d', text: 'POOR' }; return { rank: 'E', css: 'rank-e', text: 'AWFUL' }; };
-        const SmartIcon = ({ name, className }) => { const [error, setError] = useState(false); const BASE_URL = "https://sdekza.github.io/OGHza/"; const imgMap = { 'Spell': 'Coagulated Spell.png', 'Magic': 'Contaminated Magic.png', 'Gum': 'Bubble Gum.png', 'HeGum': 'HE Bubble Gum.png', 'Silvervine': 'Silvervine Fruit.png', 'GumBox': 'Bubble Gum Box.png', 'HeGumBox': 'HE Bubble Gum Box.png', 'SilvervineBox': 'Silvervine Box.png', 'Premium': 'Premium Box.png', 'Kafra': 'Kafra Buff.png', 'PremiumStaff': 'Premium Service Staff.png', 'Elunium': 'Elunium.png', 'Oridecon': 'Oridecon.png', 'Card': 'Card.png', 'Zeny': 'Zeny.png', 'DEK': 'DEK.png', 'OGH_BOSS': 'OGH BOSS.png', 'AOGH_BOSS': 'AOGH BOSS.png', 'Calendar': 'Calendar.png', 'Graph': 'Graph.png' }; const finalName = imgMap[name] ? name : (Object.keys(imgMap).find(k => k.toLowerCase() === name?.toLowerCase()) || 'Box'); 
-        if (finalName === 'GumBox') return (<div className={`relative ${className}`}><img crossOrigin="anonymous" src={`${BASE_URL}Bubble Gum Box.png`} className="w-full h-full object-contain" /><img crossOrigin="anonymous" src={`${BASE_URL}Bubble Gum.png`} className="absolute bottom-0 right-0 w-1/2 h-1/2 object-contain filter drop-shadow-md" /></div>); 
-        if (finalName === 'HeGumBox') return (<div className={`relative ${className}`}><img crossOrigin="anonymous" src={`${BASE_URL}Bubble Gum Box.png`} className="w-full h-full object-contain filter hue-rotate-15" /><img crossOrigin="anonymous" src={`${BASE_URL}HE Bubble Gum.png`} className="absolute bottom-0 right-0 w-1/2 h-1/2 object-contain filter drop-shadow-md" /></div>); 
-        if (!error && imgMap[finalName]) return <img crossOrigin="anonymous" src={`${BASE_URL}${imgMap[finalName]}`} className={`object-contain ${className}`} onError={() => setError(true)} />; 
-        return <div className={`w-full h-full bg-zinc-700 rounded-md flex items-center justify-center ${className}`}><span className="text-[8px] text-zinc-500">?</span></div>; };
-
+        
         // Utility: Get current date relative to game reset (4 AM)
         const getGameDate = () => {
             const now = new Date();
@@ -299,14 +294,16 @@
 
             switch (name) {
                 case 'Home': viewBox="0 0 48 48"; stroke="none"; content=(<><path fill="#c8d3de" d="M42,39H6v2c0,1.1,0.9,2,2,2h32c1.1,0,2-0.9,2-2V39z"/><path fill="#e8e8e8" d="M42,39H6V20L24,3l18,17V39z"/><path fill="#de490d" d="M13,25h10c0.6,0,1,0.4,1,1v17H12V26C12,25.4,12.4,25,13,25z"/><path fill="#b9360c" d="M44.5,19.5L25.3,2.5C24.9,2.2,24.5,2,24,2s-0.9,0.2-1.3,0.5L3.5,19.5c-0.4,0.4-0.4,1-0.1,1.4l1.6,1.7c0.4,0.4,1,0.4,1.4,0.1L24,7.4l17.5,15.3c0.4,0.4,1,0.3,1.4-0.1l1.6-1.7C44.9,20.5,44.9,19.9,44.5,19.5z"/><path fill="#0a85d9" d="M29,25h6c0.6,0,1,0.4,1,1v6c0,0.6-0.4,1-1,1h-6c-0.6,0-1-0.4-1-1v-6C28,25.4,28.4,25,29,25z"/></>); break;
-                case 'Inventory': viewBox="0 0 50 50"; stroke="none"; content=(<><polygon fill="#e68f3a" points="43,14.6 43,33.08 23,44.63 23,44.62 7,35.39 7,16.91 27,5.36"/><polygon fill="#ff9f40" points="23,26.149 23,44.624 7,35.389 7,16.904"/><polygon fill="#b3702d" points="43,33.083 23,44.63 23,26.149 43,14.602"/></>); break;
-                case 'Shop': viewBox="0 0 128 128"; stroke="none"; content=(<><path d="M93.46 39.45c6.71-1.49 15.45-8.15 16.78-11.43c.78-1.92-3.11-4.92-4.15-6.13c-2.38-2.76-1.42-4.12-.5-7.41c1.05-3.74-1.44-7.87-4.97-9.49s-7.75-1.11-11.3.47c-3.55 1.58-6.58 4.12-9.55 6.62c-2.17-1.37-5.63-7.42-11.23-3.49c-3.87 2.71-4.22 8.61-3.72 13.32c1.17 10.87 3.85 16.51 8.9 18.03c6.38 1.92 13.44.91 19.74-.49z" fill="#FFCA28"/><path d="M61.96 38.16S30.77 41.53 16.7 68.61c-14.07 27.08-2.11 43.5 10.55 49.48c12.66 5.98 44.56 8.09 65.31 3.17s25.94-15.12 24.97-24.97c-1.41-14.38-14.77-23.22-14.77-23.22s.53-17.76-13.25-29.29c-12.23-10.24-27.55-5.62-27.55-5.62z" fill="#FFCA28"/><path d="M74.76 83.73c-6.69-8.44-14.59-9.57-17.12-12.6c-1.38-1.65-2.19-3.32-1.88-5.39c.33-2.2 2.88-3.72 4.86-4.09c2.31-.44 7.82-.21 12.45 4.2c1.1 1.04.7 2.66.67 4.11c-.08 3.11 4.37 6.13 7.97 3.53c3.61-2.61.84-8.42-1.49-11.24c-1.76-2.13-8.14-6.82-16.07-7.56c-2.23-.21-11.2-1.54-16.38 8.31c-1.49 2.83-2.04 9.67 5.76 15.45c1.63 1.21 10.09 5.51 12.44 8.3c4.07 4.83 1.28 9.08-1.9 9.64c-8.67 1.52-13.58-3.17-14.49-5.74c-.65-1.83.03-3.81-.81-5.53c-.86-1.77-2.62-2.47-4.48-1.88c-6.1 1.94-4.16 8.61-1.46 12.28c2.89 3.93 6.44 6.3 10.43 7.6c14.89 4.85 22.05-2.81 23.3-8.42c.92-4.11.82-7.67-1.8-10.97z" fill="#6B4B46"/></>); break;
-                case 'Dungeon': viewBox="0 0 504 504"; stroke="none"; content=(<><path fill="#FFD0A1" d="M95 448l66-65-42-42L52 406 38 391c-3-3-8-3-12 0l-19 19c-3 3-3 8 0 12l72 72c3 3 8 3 12 0l19-19c3-3 3-9-1-13l-14 16z"/><path fill="#ECF4F7" d="M357 297l-30 30L3 3l76 17 171 171 30 30 30 30 47-47z"/><path fill="#AE938D" d="M203 357l30 30c-22 22-45 23-68 0l-4-4-42-42-4-4c-22-22-23-45 0-68l30 30 30 30L203 357z"/><path fill="#51565F" d="M418 503c-3 0-6-1-9-3l-19-19c-5-5-5-12 0-18l12-12-60-60-1 1c-24 24-50 24-74 0-1-1-1-4 0-6l118-118c1-1 4-1 6 0 12 12 18 24 18 36 0 13-6 25-18 37l-1 1 60 60 10-10c7-7 15-7 20-2l19 19c2 2 3 6 3 9 0 3-1 6-3 9l-72 72c-2 2-6 3-9 3z"/></>); break;
-                case 'History': viewBox="0 0 1024 1024"; stroke="none"; content=(<path d="M903 183l-57 0c0 0-91-5-128-11-79-13-142-12-209 35-68-47-114-50-204-35-7 1-14 2-21 4-26 5-104 8-104 8H120c-13 0-23 10-23 23v599c0 13 10 23 23 23h292c0 2-1 4-1 6 0 12 10 22 23 22h146c13 0 23-10 23-22 0-2 0-4-1-6h299c13 0 23-10 23-23V207c0-13-10-23-23-23z" fill="#27323A"/>); break;
+                case 'Inventory': viewBox="0 0 50 50"; stroke="none"; content=(<><polygon fill="#e68f3a" points="43,14.6 43,33.08 23,44.63 23,44.62 7,35.39 7,16.91 27,5.36"/><polygon fill="#ff9f40" points="23,26.149 23,44.624 7,35.389 7,16.904"/><polygon fill="#b3702d" points="43,33.083 23,44.63 23,26.149 43,14.602"/><polygon fill="#d98836" points="12,24.423 12,26.732 18,30.196 18,27.887"/><polygon fill="#b3702d" points="12,24.423 12,26.732 14,25.577"/></>); break;
+                case 'Shop': viewBox="0 0 128 128"; stroke="none"; content=(<><path d="M93.46 39.45c6.71-1.49 15.45-8.15 16.78-11.43c.78-1.92-3.11-4.92-4.15-6.13c-2.38-2.76-1.42-4.12-.5-7.41c1.05-3.74-1.44-7.87-4.97-9.49s-7.75-1.11-11.3.47c-3.55 1.58-6.58 4.12-9.55 6.62c-2.17-1.37-5.63-7.42-11.23-3.49c-3.87 2.71-4.22 8.61-3.72 13.32c1.17 10.87 3.85 16.51 8.9 18.03c6.38 1.92 13.44.91 19.74-.49z" fill="#FFCA28"/><path d="M104.36 8.18c-.85 14.65-15.14 24.37-21.92 28.65l4.4 3.78s2.79.06 6.61-1.16c6.55-2.08 16.12-7.96 16.78-11.43c.97-5.05-4.21-3.95-5.38-7.94c-.61-2.11 2.97-6.1-.49-11.9zm-24.58 3.91s-2.55-2.61-4.44-3.8c-.94 1.77-1.61 3.69-1.94 5.67c-.59 3.48 0 8.42 1.39 12.1c.22.57 1.04.48 1.13-.12c1.2-7.91 3.86-13.85 3.86-13.85z" fill="#E2A610"/><path d="M61.96 38.16S30.77 41.53 16.7 68.61c-14.07 27.08-2.11 43.5 10.55 49.48c12.66 5.98 44.56 8.09 65.31 3.17s25.94-15.12 24.97-24.97c-1.41-14.38-14.77-23.22-14.77-23.22s.53-17.76-13.25-29.29c-12.23-10.24-27.55-5.62-27.55-5.62z" fill="#FFCA28"/><path d="M74.76 83.73c-6.69-8.44-14.59-9.57-17.12-12.6c-1.38-1.65-2.19-3.32-1.88-5.39c.33-2.2 2.88-3.72 4.86-4.09c2.31-.44 7.82-.21 12.45 4.2c1.1 1.04.7 2.66.67 4.11c-.08 3.11 4.37 6.13 7.97 3.53c3.61-2.61.84-8.42-1.49-11.24c-1.76-2.13-8.14-6.82-16.07-7.56c-2.23-.21-11.2-1.54-16.38 8.31c-1.49 2.83-2.04 9.67 5.76 15.45c1.63 1.21 10.09 5.51 12.44 8.3c4.07 4.83 1.28 9.08-1.9 9.64c-8.67 1.52-13.58-3.17-14.49-5.74c-.65-1.83.03-3.81-.81-5.53c-.86-1.77-2.62-2.47-4.48-1.88c-6.1 1.94-4.16 8.61-1.46 12.28c2.89 3.93 6.44 6.3 10.43 7.6c14.89 4.85 22.05-2.81 23.3-8.42c.92-4.11.82-7.67-1.8-10.97z" fill="#6B4B46"/></>); break;
+                case 'Dungeon': viewBox="0 0 504.32 504.32"; stroke="none"; content=(<><path style={{fill:"#FFD0A1"}} d="M95.427,448.707L161.133,383l-42.667-42.667L52.76,406.04l-14.507-14.507c-3.413-3.413-8.533-3.413-11.947,0L6.68,411.16c-3.413,3.413-3.413,8.533,0,11.947l72.533,72.533c3.413,3.413,8.533,3.413,11.947,0l19.627-19.627c3.413-3.413,3.413-9.387-1.707-13.653L95.427,448.707L95.427,448.707z M74.093,427.374L52.76,406.04l0,0l0,0L74.093,427.374z"/><path style={{fill:"#ECF4F7"}} d="M173.933,327.533L173.933,327.533L203.8,357.4l0,0l46.933-46.933L220.867,280.6L173.933,327.533L173.933,327.533L173.933,327.533l46.933-46.933L191,250.733l-46.933,46.933l0,0L173.933,327.533L173.933,327.533z M498.2,3.267l-17.067,76.8L310.467,250.733L280.6,220.867L498.2,3.267z M498.2,3.267l-217.6,217.6L250.733,191L421.4,20.333L498.2,3.267z"/><path style={{fill:"#ECF4F7"}} d="M357.4,297.667l-29.867,29.867L3.267,3.267l76.8,17.067L250.733,191l29.867,29.867l29.867,29.867L357.4,297.667z M327.533,327.533L297.667,357.4l-46.933-46.933L220.867,280.6L191,250.733L20.333,80.067L3.267,3.267L327.533,327.533z"/><path style={{fill:"#AE938D"}} d="M203.8,357.4l29.867,29.867c-22.187,22.187-45.227,23.04-68.267,0L161.133,383l0,0l-42.667-42.667l-4.267-4.267c-22.187-22.187-23.04-45.227,0-68.267l29.867,29.867l29.867,29.867L203.8,357.4z M357.4,297.667l29.867-29.867c23.04,22.187,23.04,45.227,0,68.267L383,340.333l0,0L340.333,383l-4.267,4.267c-22.187-22.187-45.227,23.04-68.267,0l29.867-29.867l29.867-29.867L357.4,297.667z"/><path style={{fill:"#FFD0A1"}} d="M406.893,448.707l41.813-41.813L383,341.187l0,0l-42.667,42.667L406.893,448.707L406.893,448.707l-15.36,15.36c-3.413,3.413-3.413,8.533,0,11.947l19.627,19.627c3.413,3.413,8.533,3.413,11.947,0l72.533-72.533c3.413,3.413,3.413-8.533,0-11.947l-19.627-19.627c-3.413-3.413-9.387-3.413-13.653,1.707l-12.8,12.8C448.707,406.04,406.893,448.707,406.893,448.707z"/><path style={{fill:"#51565F"}} d="M418.133,503.467c-3.413,0-6.827-1.707-9.387-3.413l-19.627-19.627c-5.12-5.12-5.12-12.8,0-17.92l11.947-11.947l-59.733-59.733l-0.853,0.853c-23.893,23.893-50.347,23.893-74.24,0c-1.707-1.707-1.707-4.267,0-5.973L385.707,266.24c1.707-1.707,4.267-1.707,5.973,0c11.947,11.947,17.92,24.747,17.92,36.693c0,12.8-5.973,24.747-17.92,37.547l-0.853,0.853l59.733,59.733l10.24-10.24c6.827-6.827,15.36-6.827,20.48-1.707l19.627,19.627c2.56,2.56,3.413,5.973,3.413,9.387c0,3.413-1.707,6.827-3.413,9.387l-72.533,72.533C424.96,501.76,421.547,503.467,418.133,503.467z"/></>); break;
+                case 'History': viewBox = "0 0 1024 1024"; stroke = "none"; content = (<><path d="M903.73,183.71l-57.87-0.55c-0.73,0-91.94-5.44-128.64-11.87c-79.15-13.82-142.53-12.6-209.45,35.23c-68.57-47.29-114.94-50.22-204.13-35.05c-7.52,1.28-14.74,2.63-21.9,3.98c-26.79,5.14-104.05,8.26-104.05,8.26H120c-12.97,0-23.49,10.52-23.49,23.49v599.17c0,12.97,10.52,23.49,23.49,23.49h292.83c-0.67,2.08-1.35,4.16-1.35,6.48c0,12.6,10.64,22.82,23.92,22.82h146.14c13.27,0,23.98-10.22,23.98-22.82c0-2.32-0.67-4.4-1.41-6.48h299.62c13.03,0,23.55-10.52,23.55-23.49V207.2c0-12.97-10.52-23.49-23.55-23.49z" fill="#27323A"/><path d="M143.55,230.75h30.71v552.13H143.55z" fill="#FFFFFF"/><path d="M206.62,230.94c33.95-0.18,59.58-4.71,83.87-9.3a825.05,825.05,0,0,1,21.04-3.86c88.09-14.92,119.77-8.93,178.5,33.77c0.37,0.24,0.74,0.37,1.1,0.55v497.93c-76.1-66.74-144.49-40.25-230.31-6.48l-54.2,22.63c-0.12-92.31-0.12-431.2-0.001-535.25z" fill="#79CCBF"/><path d="M272.56,772.3c88.51-34.81,141.92-55.73,208.47,10.52c0,0,0.06,0.06,0.12,0.06H247.18l25.39-10.58z" fill="#F4CE73"/><path d="M534.75,782.89c0.3-0.24,0.73-0.43,1.04-0.73c61.41-66.92,119.47-45.02,215.32-8.93l23.61,9.67H534.75z" fill="#F4CE73"/><path d="M814.85,765.88l-52.36-21.53c-93.16-35.11-167.49-62.88-240.03,7.28v-498.3c1.41-0.67,2.88-1.22,4.16-2.2c57.56-45.02,108.58-46.49,182.54-33.52c29.06,5.08,80.2,9.48,105.7,11.44c0.24,103.32,0.24,445.7,0,536.84z" fill="#79CCBF"/><path d="M846.11,230.75h34.13v552.13h-34.13z" fill="#FFFFFF"/></>); break;
                 case 'Chart': content=<><rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M8 17V11M12 17V7M16 17V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></>; break;
                 case 'Calendar': content=<><rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" fill="none"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="2"/></>; break;
                 case 'Target': content=<><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="2" fill="none"/><circle cx="12" cy="12" r="2" fill="currentColor"/></>; break;
                 case 'Tag': content=<><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" fill="none" stroke="currentColor" strokeWidth="2"/><line x1="7" y1="7" x2="7.01" y2="7" stroke="currentColor" strokeWidth="2"/></>; break;
+                case 'Shield': content = <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>; break;
+                case 'Sword': content = <><path d="M14.5 4l-8.5 8.5a2.121 2.121 0 0 0 3 3l8.5-8.5-3-3zM2 18l3 3 2.5-2.5-3-3L2 18zM15 3.5l5.5 5.5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></>; break;
                 // Reuse existing icons...
                 case 'Settings': content = <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>; break;
                 case 'Trash': content = <><polyline points="3 6 5 6 21 6" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none" stroke="currentColor" strokeWidth="2"/><line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" strokeWidth="2"/><line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" strokeWidth="2"/></>; break;
@@ -343,6 +340,13 @@
                 </svg>
             );
         };
+
+        const SmartIcon = ({ name, className }) => { const [error, setError] = useState(false); const BASE_URL = "https://sdekza.github.io/OGHza/"; const imgMap = { 'Spell': 'Coagulated Spell.png', 'Magic': 'Contaminated Magic.png', 'Gum': 'Bubble Gum.png', 'HeGum': 'HE Bubble Gum.png', 'Silvervine': 'Silvervine Fruit.png', 'GumBox': 'Bubble Gum Box.png', 'HeGumBox': 'HE Bubble Gum Box.png', 'SilvervineBox': 'Silvervine Box.png', 'Premium': 'Premium Box.png', 'Kafra': 'Kafra Buff.png', 'PremiumStaff': 'Premium Service Staff.png', 'Elunium': 'Elunium.png', 'Oridecon': 'Oridecon.png', 'Card': 'Card.png', 'Zeny': 'Zeny.png', 'DEK': 'DEK.png', 'OGH_BOSS': 'OGH BOSS.png', 'AOGH_BOSS': 'AOGH BOSS.png', 'Calendar': 'Calendar.png', 'Graph': 'Graph.png' }; const finalName = imgMap[name] ? name : (Object.keys(imgMap).find(k => k.toLowerCase() === name?.toLowerCase()) || 'Box'); 
+        if (['Sword', 'Shield', 'Box'].includes(name)) { return <div className={className}><Icon name={name} size="100%" /></div>; }
+        if (finalName === 'GumBox') return (<div className={`relative ${className}`}><img crossOrigin="anonymous" src={`${BASE_URL}Bubble Gum Box.png`} className="w-full h-full object-contain" /><img crossOrigin="anonymous" src={`${BASE_URL}Bubble Gum.png`} className="absolute bottom-0 right-0 w-1/2 h-1/2 object-contain filter drop-shadow-md" /></div>); 
+        if (finalName === 'HeGumBox') return (<div className={`relative ${className}`}><img crossOrigin="anonymous" src={`${BASE_URL}Bubble Gum Box.png`} className="w-full h-full object-contain filter hue-rotate-15" /><img crossOrigin="anonymous" src={`${BASE_URL}HE Bubble Gum.png`} className="absolute bottom-0 right-0 w-1/2 h-1/2 object-contain filter drop-shadow-md" /></div>); 
+        if (!error && imgMap[finalName]) return <img crossOrigin="anonymous" src={`${BASE_URL}${imgMap[finalName]}`} className={`object-contain ${className}`} onError={() => setError(true)} />; 
+        return <div className={`w-full h-full bg-zinc-700 rounded-md flex items-center justify-center ${className}`}><span className="text-[8px] text-zinc-500">?</span></div>; };
 
         // --- SUB-COMPONENTS ---
         const BuffIcon = ({ buff }) => {
@@ -815,160 +819,6 @@
             );
         }
 
-        function InventoryView({ db, uid, showToast, records, stock, stats, selectedCharId }) {
-            const [items, setItems] = useState([]);
-            const [activeBuffs, setActiveBuffs] = useState([]);
-            const [selectedBox, setSelectedBox] = useState(null);
-            const [svUseConfirm, setSvUseConfirm] = useState(null);
-            const [viewItem, setViewItem] = useState(null); 
-            const [activeTab, setActiveTab] = useState('All');
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'oghza-tracker';
-            
-            const safeRecords = records || [];
-            
-            const totalSpellsDropped = useMemo(() => safeRecords.filter(r => !r.isSaleRecord).reduce((acc, r) => acc + (parseInt(r.purpleStoneCount) || 0), 0), [safeRecords]);
-            const totalMagicsDropped = useMemo(() => safeRecords.filter(r => !r.isSaleRecord).reduce((acc, r) => acc + (parseInt(r.contMagicCount) || 0), 0), [safeRecords]);
-            const totalSpellsSold = useMemo(() => safeRecords.filter(r => r.isSaleRecord && r.itemId === 'spell').reduce((acc, r) => acc + r.qty, 0), [safeRecords]);
-            const totalMagicsSold = useMemo(() => safeRecords.filter(r => r.isSaleRecord && r.itemId === 'magic').reduce((acc, r) => acc + r.qty, 0), [safeRecords]);
-            const currentSpells = Math.max(0, totalSpellsDropped - totalSpellsSold);
-            const currentMagics = Math.max(0, totalMagicsDropped - totalMagicsSold);
-            
-            const drops = useMemo(() => { 
-                const c = {}; 
-                safeRecords.forEach(r => { 
-                    if (r.drops && !r.isSaleRecord) {
-                        r.drops.forEach(d => c[d.id] = (c[d.id] || 0) + d.qty); 
-                    }
-                }); 
-                return c; 
-            }, [safeRecords]);
-
-            useEffect(() => {
-                if (!db || !uid) return;
-                const q = query(collection(db, 'artifacts', appId, 'users', uid, 'inventory'), orderBy('timestamp', 'desc'));
-                const unsub = onSnapshot(q, (snap) => {
-                    setItems(snap.docs.map(d => ({ ...d.data(), uid: d.id })).filter(i => i.status === 'unused'));
-                    const buffs = snap.docs.map(d => d.data()).filter(i => i.status === 'active').map(b => {
-                        const endDate = new Date(b.activatedAt);
-                        if(b.duration === 30) endDate.setDate(endDate.getDate() + 30);
-                        else if(b.duration === 7) endDate.setDate(endDate.getDate() + 7);
-                        else if(b.duration === 1) endDate.setTime(endDate.getTime() + (24*60*60*1000));
-                        return { ...b, endDate };
-                    });
-                    setActiveBuffs(buffs);
-                });
-                return () => unsub();
-            }, [db, uid, appId]);
-
-            const handleUseBox = async (item) => {
-                // Logic for premium/kafra checks
-                if (item.itemId === 'premium_box' || item.itemId === 'kafra_box') {
-                    const isActive = activeBuffs.some(b => {
-                        const isTimeValid = new Date(b.endDate) > new Date();
-                        if (!isTimeValid) return false;
-                        if (item.itemId === 'premium_box') return b.itemId === 'premium_box'; 
-                        if (item.itemId === 'kafra_box') return b.itemId === 'kafra_box' && b.characterId === selectedCharId;
-                        return false;
-                    });
-                    if (isActive) { showToast("Buff is already active!"); return; }
-                }
-
-                if (item.type === 'buff_box') {
-                    const buffData = { ...item, status: 'active', activatedAt: new Date().toISOString(), characterId: selectedCharId };
-                    if (item.itemId === 'premium_box') buffData.isAccountWide = true; 
-                    await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'inventory', item.uid), buffData);
-                    showToast(`${item.name} Activated!`);
-                } else if (item.type === 'consumable_box') {
-                    const currentQty = stock[item.subType]?.qty || 0;
-                    const currentCost = stock[item.subType]?.totalCost || 0;
-                    const newQty = currentQty + item.qty;
-                    const newTotalCost = currentCost + item.buyPrice;
-                    await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'config', 'stock'), { ...stock, [item.subType]: { qty: newQty, totalCost: newTotalCost, avgCost: newTotalCost / newQty } });
-                    await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'inventory', item.uid), { ...item, status: 'consumed' });
-                    showToast(`Added ${item.qty} to Stock`);
-                }
-                setSelectedBox(null);
-             };
-
-            const handleSellAction = async (item, qtyStr, priceStr) => { 
-                const qty = parseInt(qtyStr); const price = parseInt(priceStr);
-                if (!qty || !price || qty > item.count) { showToast("Invalid Amount"); return; }
-                const profit = qty * price;
-                const earnedDek = Math.floor(profit / 1000);
-                const record = { isSaleRecord: true, itemId: item.id, itemName: item.name, qty: qty, pricePerUnit: price, profit, date: getGameDate(), timestamp: Date.now() };
-                await addDoc(collection(db, 'artifacts', appId, 'users', uid, 'records'), record);
-                const newStats = { ...stats };
-                newStats.coins = (newStats.coins || 0) + earnedDek;
-                newStats.zeny = (newStats.zeny || 0) + profit;
-                await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'gamification', 'stats'), newStats);
-                showToast(`Sold! +${earnedDek} DEK`); setViewItem(null);
-            };
-
-            const handleUseSilvervineFromStock = async () => { 
-                const isActive = activeBuffs.some(b => b.itemId === 'silvervine_24h' && new Date(b.endDate) > new Date());
-                if (isActive) { alert("Active!"); setSvUseConfirm(null); return; }
-                if ((stock.silvervine?.qty || 0) < 2) { alert("Need 2 Silvervine!"); setSvUseConfirm(null); return; }
-                const newStock = { ...stock, silvervine: { ...stock.silvervine, qty: stock.silvervine.qty - 2 } };
-                await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'config', 'stock'), newStock);
-                const buffData = { itemId: 'silvervine_24h', name: 'Silvervine Buff (24h)', type: 'buff_box', duration: 1, buyPrice: (stock.silvervine?.avgCost || 0) * 2, timestamp: Date.now(), activatedAt: new Date().toISOString(), status: 'active', isAccountWide: true };
-                await addDoc(collection(db, 'artifacts', appId, 'users', uid, 'inventory'), buffData);
-                showToast("Activated!"); setSvUseConfirm(null);
-            };
-
-            const allItems = [
-                { id: 'spell', category: 'Etc', iconComp: <SmartIcon name="Spell" className="w-full h-full"/>, count: Math.max(0, currentSpells), name: 'Purple Stone', isSellable: true },
-                { id: 'magic', category: 'Etc', iconComp: <SmartIcon name="Magic" className="w-full h-full"/>, count: Math.max(0, currentMagics), name: 'Red Stone', isSellable: true },
-                { id: 'gum', category: 'Consumable', iconComp: <SmartIcon name="Gum" className="w-full h-full"/>, count: stock.gum?.qty || 0, name: 'Gum (Stock)' },
-                { id: 'he_gum', category: 'Consumable', iconComp: <SmartIcon name="HeGum" className="w-full h-full"/>, count: stock.he_gum?.qty || 0, name: 'HE (Stock)' },
-                { id: 'silvervine', category: 'Etc', iconComp: <SmartIcon name="Silvervine" className="w-full h-full"/>, count: stock.silvervine?.qty || 0, name: 'SV (Stock)', isStockAction: true },
-            ];
-            
-            const hasPremium = activeBuffs.some(b => b.itemId === 'premium_box' && new Date(b.endDate) > new Date());
-            if (hasPremium) { allItems.push({ id: 'premium_staff', category: 'Consumable', iconComp: <SmartIcon name="PremiumStaff" className="w-full h-full"/>, count: 1, name: 'Staff' }); }
-            
-            items.forEach(i => { 
-                if(!i.itemId) return;
-                let cat = i.category || 'Consumable'; 
-                if (i.itemId.includes('card')) cat = 'Rare'; 
-                const shopItem = SHOP_ITEMS.find(s=>s.id===i.itemId);
-                const iconName = shopItem ? shopItem.icon : 'Box';
-                allItems.push({ id: i.uid, category: cat, iconComp: <SmartIcon name={iconName} className="w-full h-full" />, count: 1, isBox: true, data: i, name: i.name, itemId: i.itemId }); 
-            });
-            
-            Object.keys(drops).forEach(key => { 
-                const def = DROP_TABLE.find(d => d.id === key); 
-                if (def) allItems.push({ id: key, category: def.category, iconComp: <SmartIcon name={def.icon} className="w-full h-full" />, count: drops[key], name: def.name }); 
-            });
-            
-            const filteredItems = activeTab === 'All' ? allItems : allItems.filter(i => i.category === activeTab);
-            const groupedDisplayItems = useMemo(() => { 
-                const map = new Map(); 
-                filteredItems.forEach(item => { 
-                    const key = item.itemId || item.id; 
-                    if(map.has(key)) { const ex = map.get(key); ex.count += (item.count || 1); } 
-                    else { map.set(key, { ...item, count: item.count !== undefined ? item.count : 0 }); } 
-                }); 
-                return Array.from(map.values()); 
-            }, [filteredItems]);
-            
-            const onItemClick = (item) => { 
-                if(item.isBox) { setSelectedBox(item.data); return; } 
-                if(item.id === 'premium_staff') { setSvUseConfirm(true); return; } 
-                setViewItem(item); 
-            };
-
-            return (
-                <div className="p-6 animate-fade-in view-content space-y-6">
-                    <div className="flex items-center justify-between"><h2 className="text-2xl font-black tracking-tighter text-zinc-700 flex items-center gap-2"><Icon name="Inventory" size={24}/> Item</h2><div className="text-[10px] text-zinc-500 font-mono">{groupedDisplayItems.length} Items</div></div>
-                    <div className="bg-zinc-100 p-1 rounded-2xl flex gap-1 border border-zinc-200">{['All', 'Consumable', 'Etc', 'Rare'].map(t => { let label = t; let iconName = 'LayoutGrid'; if (t === 'Consumable') { label = 'Use'; iconName = 'Flask'; } if (t === 'Etc') { label = 'Etc'; iconName = 'Layers'; } if (t === 'Rare') { label = 'Rare'; iconName = 'Diamond'; } return <TabButton key={t} label={label} icon={iconName} active={activeTab === t} onClick={() => setActiveTab(t)} />; })}</div>
-                    <div className="bg-white p-5 rounded-[2.5rem] border border-zinc-200 max-h-[420px] overflow-y-auto scrollbar-hide"><div className="grid grid-cols-4 gap-4 pb-10">{groupedDisplayItems.map((item, index) => (<div key={index} onClick={() => onItemClick(item)} className="aspect-square rounded-2xl sunken-slot relative flex items-center justify-center cursor-pointer overflow-hidden group"><div className="w-10 h-10 pointer-events-none group-active:scale-90 transition-transform">{item.iconComp}</div><span className="item-badge absolute bottom-1 right-1.5 text-[8px] font-black px-1.5 rounded-md pointer-events-none backdrop-blur-sm border border-zinc-200/50">{item.count}</span></div>))}{Array.from({ length: Math.max(0, 16 - groupedDisplayItems.length) }).map((_, i) => (<div key={`e-${i}`} className="aspect-square rounded-2xl sunken-slot opacity-30"></div>))}</div></div>
-                    {viewItem && <ItemDetailModal item={viewItem} onClose={() => setViewItem(null)} onSell={handleSellAction} />}
-                    {selectedBox && <Modal onClose={() => setSelectedBox(null)}><div className="text-center"><div className="w-20 h-20 mx-auto bg-zinc-100 rounded-3xl flex items-center justify-center mb-4 border border-zinc-200"><SmartIcon name={SHOP_ITEMS.find(s=>s.id===selectedBox.itemId)?.icon} className="w-12 h-12" /></div><h3 className="text-lg font-black text-zinc-800 mb-1">{selectedBox.name}</h3><p className="text-xs text-zinc-500 mb-4 italic">"{getItemInfo(selectedBox.itemId).desc}"</p><div className="flex gap-2 mt-4"><button onClick={() => setSelectedBox(null)} className="flex-1 py-3 bg-zinc-200 rounded-xl font-bold text-xs text-zinc-600">Cancel</button><button onClick={() => handleUseBox(selectedBox)} className="flex-1 py-3 bg-emerald-600 rounded-xl font-bold text-xs text-white">Use</button></div></div></Modal>}
-                    {svUseConfirm && <Modal onClose={() => setSvUseConfirm(null)}><div className="text-center"><div className="w-20 h-20 mx-auto bg-zinc-100 rounded-3xl flex items-center justify-center mb-4 border border-zinc-200"><SmartIcon name="Silvervine" className="w-12 h-12"/></div><h3 className="text-lg font-black text-zinc-800 mb-2">Activate Buff?</h3><div className="flex gap-2"><button onClick={() => setSvUseConfirm(null)} className="flex-1 py-3 bg-zinc-200 rounded-xl font-bold text-xs text-zinc-600">Cancel</button><button onClick={handleUseSilvervineFromStock} className="flex-1 py-3 bg-emerald-600 rounded-xl font-bold text-xs text-white">Use (2 ea)</button></div></div></Modal>}
-                </div>
-            );
-        }
-
         function DungeonView({ db, uid, stock, activeBuffs, onSuccess, records, prices, stats, selectedCharId, setSelectedCharId, characters, goToTab }) {
             const [form, setForm] = useState({ runMode: 'ogh', normalGumUsed: 0, heGumUsed: 0, useSilvervine: false, purpleStoneCount: 0, contMagicCount: 0, trashAmount: '', minutesUsed: 60, otherCosts: [], notes: '' });
             const [rewardData, setRewardData] = useState(null);
@@ -1067,20 +917,6 @@
                     <button disabled={!isFormValid} onClick={handleSave} className="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-[1.5rem] font-black text-lg shadow-lg shadow-emerald-500/20 active:scale-95 transition-transform text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale"><Icon name="Save" size={20}/> COMPLETE RUN</button>
                     {rewardData && <RewardPopup data={rewardData} onClose={closeReward} onShare={() => setShareData({...rewardData, runMode: form.runMode === 'aogh' ? 'AOGH' : 'OGH', rank: getRankInfo(rewardData.profit, 0).rank, rankCss: getRankInfo(rewardData.profit, 0).css})} />}
                     {shareData && <ShareModal data={shareData} onClose={() => setShareData(null)} />}
-                </div>
-            );
-        }
-
-        function ShopView({ db, uid, showToast }) {
-            const [selectedItem, setSelectedItem] = useState(null); const [price, setPrice] = useState(''); const [qty, setQty] = useState('1');
-            const handleItemClick = (item) => { setSelectedItem(item); setPrice(''); setQty('1'); };
-            const handleBuy = async () => { if (!price || !selectedItem) return; const buyPrice = parseInt(price); const quantity = parseInt(qty) || 1; const appId = typeof __app_id !== 'undefined' ? __app_id : 'oghza-tracker'; const promises = []; for(let i=0; i<quantity; i++) { promises.push(addDoc(collection(db, 'artifacts', appId, 'users', uid, 'inventory'), { itemId: selectedItem.id, name: selectedItem.name, type: selectedItem.type, subType: selectedItem.subType || null, duration: selectedItem.duration || null, qty: selectedItem.qty || 1, buyPrice: buyPrice, timestamp: Date.now() + i, status: 'unused', category: selectedItem.category || 'Consumable' })); } await Promise.all(promises); showToast(`Bought ${quantity} ${selectedItem.name}`); setSelectedItem(null); setPrice(''); setQty('1'); };
-            return (
-                <div className="p-6 animate-fade-in view-content space-y-6">
-                    <h2 className="text-2xl font-black tracking-tighter text-zinc-700 flex items-center gap-2"><Icon name="Shop" size={24}/> Cash Shop</h2>
-                    <div className="bg-white p-4 rounded-[2rem] border border-zinc-200 min-h-[200px]"><p className="text-[10px] font-bold opacity-30 uppercase tracking-widest mb-4 text-zinc-500">Shelves</p><div className="grid grid-cols-4 gap-3">{SHOP_ITEMS.map(item => (<div key={item.id} onClick={() => handleItemClick(item)} className={`aspect-square rounded-2xl flex items-center justify-center transition-all relative cursor-pointer ${selectedItem?.id === item.id ? 'bg-zinc-100 ring-2 ring-emerald-500 scale-105 z-10' : 'bg-white border border-zinc-200 active:scale-95 hover:bg-zinc-50 shadow-sm'}`}><SmartIcon name={item.icon} className="w-8 h-8" /></div>))}</div></div>
-                    <div className="glass-panel p-6 rounded-[2.5rem] relative overflow-hidden border-zinc-200"><div className="flex gap-4"><div className={`w-24 h-24 rounded-3xl flex-shrink-0 flex items-center justify-center border-2 transition-all ${selectedItem ? 'bg-white border-emerald-200 shadow-xl' : 'bg-zinc-50 border-dashed border-zinc-300'}`}>{selectedItem ? <div className="flex flex-col items-center animate-pop-in"><SmartIcon name={selectedItem.icon} className="w-10 h-10 mb-1" /></div> : <span className="text-[8px] opacity-20 font-black uppercase text-center text-zinc-400">Select<br/>Item</span>}</div><div className="flex-1 space-y-2"><div><div className="flex justify-between items-baseline mb-1"><label className="text-[8px] font-bold opacity-40 uppercase ml-1 flex items-center gap-1"><Icon name="Box" size={10}/> Item Name</label>{selectedItem && <span className="text-[10px] font-bold text-emerald-600 truncate">{selectedItem.name}</span>}</div><input type="text" inputMode="numeric" disabled={!selectedItem} value={price} onChange={e => setPrice(e.target.value.replace(/\D/g, ''))} className="slate-input shop-input w-full p-2 rounded-xl text-sm font-bold placeholder-zinc-400 text-zinc-800" placeholder="Price / Unit"/></div><div><label className="text-[8px] font-bold opacity-40 uppercase ml-1">Quantity</label><div className="flex items-center gap-2"><button disabled={!selectedItem} onClick={() => setQty(Math.max(1, parseInt(qty||0)-1).toString())} className="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center hover:bg-zinc-200 disabled:opacity-30 text-zinc-500">-</button><input type="text" inputMode="numeric" disabled={!selectedItem} value={qty} onChange={e => setQty(e.target.value.replace(/\D/g, ''))} className="w-full bg-transparent text-center text-sm font-black outline-none text-zinc-800"/><button disabled={!selectedItem} onClick={() => setQty((parseInt(qty||0)+1).toString())} className="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center hover:bg-zinc-200 disabled:opacity-30 text-zinc-500">+</button></div></div></div></div><div className="mt-4 pt-4 border-t border-zinc-100 flex justify-between items-center"><div><p className="text-[9px] opacity-40 font-bold uppercase flex items-center gap-1"><SmartIcon name="Zeny" className="w-3 h-3"/> Total Cost</p><p className="text-xl font-black text-zinc-200">{formatMoney((parseInt(price) || 0) * (parseInt(qty) || 0))} z</p></div><button onClick={handleBuy} disabled={!selectedItem || !price} className="px-6 py-3 bg-zinc-800 text-white rounded-xl text-xs font-black uppercase shadow-lg hover:bg-zinc-700 active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all flex items-center gap-2"><Icon name="ShoppingCart" size={14}/> Buy Now</button></div></div>
-                    {selectedItem && <div className="mt-4 p-3 bg-zinc-50 rounded-xl border border-zinc-200"><p className="text-xs text-zinc-500 italic text-center">"{getItemInfo(selectedItem.id).desc}"</p></div>}
                 </div>
             );
         }
